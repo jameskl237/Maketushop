@@ -20,10 +20,10 @@ const emit = defineEmits(['navigate', 'create-shop']);
 const page = usePage();
 
 const navigationItems = [
-    { key: 'dashboard', label: 'Tableau de bord', icon: BarChart3, route: 'backoffice.supplier.dashboard', disabled: false },
-    { key: 'shops', label: 'Mes boutiques', icon: Store, route: 'backoffice.supplier.shops.index', disabled: false },
-    { key: 'orders', label: 'Commandes', icon: ShoppingCart, route: 'backoffice.supplier.orders.index', disabled: false },
-    { key: 'products', label: 'Produits', icon: Package, route: 'backoffice.supplier.products.index', disabled: false },
+    { key: 'dashboard', labelKey: 'common.dashboard', icon: BarChart3, route: 'backoffice.supplier.dashboard', disabled: false },
+    { key: 'shops', labelKey: 'supplier.shops', icon: Store, route: 'backoffice.supplier.shops.index', disabled: false },
+    { key: 'orders', labelKey: 'supplier.orders', icon: ShoppingCart, route: 'backoffice.supplier.orders.index', disabled: false },
+    { key: 'products', labelKey: 'supplier.products', icon: Package, route: 'backoffice.supplier.products.index', disabled: false },
 ];
 
 const onNavigate = () => emit('navigate');
@@ -42,7 +42,7 @@ const onNavigate = () => emit('navigate');
                         <p class="truncate text-sm font-semibold text-foreground">{{ page.props.auth.user.name }}</p>
                         <Badge variant="secondary" class="mt-1">
                             <Sparkles class="mr-1 h-3 w-3" />
-                            Supplier
+                            {{ $t('supplier.role') }}
                         </Badge>
                     </div>
                 </div>
@@ -51,7 +51,7 @@ const onNavigate = () => emit('navigate');
 
         <Card class="border-border/60">
             <CardContent class="p-3">
-                <nav class="space-y-1" aria-label="Navigation fournisseur">
+                <nav class="space-y-1" :aria-label="$t('supplier.navigation')">
                     <template v-for="item in navigationItems" :key="item.key">
                         <Link
                             v-if="item.route"
@@ -63,7 +63,7 @@ const onNavigate = () => emit('navigate');
                             @click="onNavigate"
                         >
                             <component :is="item.icon" class="h-4 w-4" />
-                            <span>{{ item.label }}</span>
+                            <span>{{ $t(item.labelKey) }}</span>
                         </Link>
 
                         <button
@@ -74,7 +74,7 @@ const onNavigate = () => emit('navigate');
                             disabled
                         >
                             <component :is="item.icon" class="h-4 w-4" />
-                            <span>{{ item.label }}</span>
+                            <span>{{ $t(item.labelKey) }}</span>
                         </button>
                     </template>
                 </nav>
@@ -82,7 +82,7 @@ const onNavigate = () => emit('navigate');
         </Card>
 
         <Button v-if="canCreateShop" class="w-full" @click="$emit('create-shop')">
-            Creer ma boutique
+            {{ $t('supplier.createShop') }}
         </Button>
     </div>
 </template>

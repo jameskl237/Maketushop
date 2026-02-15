@@ -6,6 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { initTheme } from '@/composables/useTheme';
+import { i18n, getI18nLocale, setI18nLocale } from '@/i18n';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 initTheme();
@@ -18,10 +19,16 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
+        const app = createApp({ render: () => h(App, props) })
             .use(plugin)
+            .use(i18n)
             .use(ZiggyVue)
-            .mount(el);
+            ;
+
+        setI18nLocale(getI18nLocale());
+        app.config.globalProperties.$setLocale = setI18nLocale;
+
+        return app.mount(el);
     },
     progress: {
         color: '#4B5563',

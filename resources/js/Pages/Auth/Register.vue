@@ -42,17 +42,16 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Inscription Supplier" />
+        <Head :title="$t('auth.supplierSignUp')" />
 
         <Card class="w-full border-border/70 bg-card/95 shadow-xl backdrop-blur">
             <CardHeader class="space-y-3">
                 <div class="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <CardTitle class="text-xl sm:text-2xl">Creer un compte supplier</CardTitle>
-                    <Badge variant="secondary">Supplier only</Badge>
+                    <CardTitle class="text-xl sm:text-2xl">{{ $t('auth.createSupplierAccount') }}</CardTitle>
+                    <Badge variant="secondary">{{ $t('auth.supplierOnly') }}</Badge>
                 </div>
                 <p class="text-sm text-muted-foreground">
-                    Remplissez toutes les
-                    informations pour activer ton espace fournisseur.
+                    {{ $t('auth.supplierRegisterHelp') }}
                 </p>
             </CardHeader>
 
@@ -60,7 +59,7 @@ const submit = () => {
                 <form class="space-y-5" @submit.prevent="submit">
                     <div class="grid gap-5 md:grid-cols-2">
                         <div class="space-y-2">
-                            <Label for="name">Nom complet</Label>
+                            <Label for="name">{{ $t('auth.fullName') }}</Label>
                             <Input
                                 id="name"
                                 v-model="form.name"
@@ -68,20 +67,20 @@ const submit = () => {
                                 required
                                 autofocus
                                 autocomplete="name"
-                                placeholder="Ex: Jean Dupont"
+                                :placeholder="$t('auth.exampleFullName')"
                             />
                             <InputError :message="form.errors.name" />
                         </div>
 
                         <div class="space-y-2">
-                            <Label for="username">Username</Label>
+                            <Label for="username">{{ $t('auth.username') }}</Label>
                             <Input
                                 id="username"
                                 v-model="form.username"
                                 type="text"
                                 required
                                 autocomplete="username"
-                                placeholder="Ex: jean_supplier"
+                                :placeholder="$t('auth.exampleUsername')"
                             />
                             <InputError :message="form.errors.username" />
                         </div>
@@ -89,20 +88,20 @@ const submit = () => {
 
                     <div class="grid gap-5 md:grid-cols-2">
                         <div class="space-y-2">
-                            <Label for="email">Email</Label>
+                            <Label for="email">{{ $t('auth.email') }}</Label>
                             <Input
                                 id="email"
                                 v-model="form.email"
                                 type="email"
                                 required
                                 autocomplete="email"
-                                placeholder="Ex: supplier@example.com"
+                                :placeholder="$t('auth.exampleEmail')"
                             />
                             <InputError :message="form.errors.email" />
                         </div>
 
                         <div class="space-y-2">
-                            <Label for="phone">Telephone</Label>
+                            <Label for="phone">{{ $t('auth.phone') }}</Label>
                             <div class="grid grid-cols-[130px_1fr] gap-2">
                                 <select
                                     id="phone_country_code"
@@ -126,7 +125,7 @@ const submit = () => {
                                     required
                                     autocomplete="tel-national"
                                     inputmode="numeric"
-                                    placeholder="695988879"
+                                    :placeholder="$t('auth.examplePhone')"
                                 />
                             </div>
                             <InputError :message="form.errors.phone_country_code" />
@@ -135,20 +134,20 @@ const submit = () => {
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="address">Adresse</Label>
+                        <Label for="address">{{ $t('auth.address') }}</Label>
                         <Textarea
                             id="address"
                             v-model="form.address"
                             required
                             rows="3"
-                            placeholder="Ville, quartier, repere..."
+                            :placeholder="$t('auth.exampleAddress')"
                         />
                         <InputError :message="form.errors.address" />
                     </div>
 
                     <div class="grid gap-5 md:grid-cols-2">
                         <div class="space-y-2">
-                            <Label for="password">Mot de passe</Label>
+                            <Label for="password">{{ $t('auth.password') }}</Label>
                             <Input
                                 id="password"
                                 v-model="form.password"
@@ -160,7 +159,7 @@ const submit = () => {
                         </div>
 
                         <div class="space-y-2">
-                            <Label for="password_confirmation">Confirmer le mot de passe</Label>
+                            <Label for="password_confirmation">{{ $t('auth.confirmPasswordLabel') }}</Label>
                             <Input
                                 id="password_confirmation"
                                 v-model="form.password_confirmation"
@@ -177,11 +176,11 @@ const submit = () => {
                             :href="route('login')"
                             class="text-sm text-muted-foreground underline underline-offset-4 transition hover:text-primary"
                         >
-                            Deja inscrit ? Se connecter
+                            {{ $t('auth.alreadyRegisteredLogin') }}
                         </Link>
 
                         <Button :disabled="form.processing" class="w-full sm:w-auto">
-                            Creer mon compte supplier
+                            {{ $t('auth.createSupplierAccountButton') }}
                         </Button>
                     </div>
                 </form>

@@ -13,13 +13,13 @@ import {
 </script>
 
 <template>
-    <Head title="Dashboard Admin" />
+    <Head :title="$t('admin.dashboardTitle')" />
 
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center gap-3">
                 <h2 class="text-xl font-semibold leading-tight">Backoffice Admin</h2>
-                <Badge>Admin</Badge>
+                <Badge>{{ $t('admin.role') }}</Badge>
             </div>
         </template>
 
@@ -27,29 +27,29 @@ import {
             <div class="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:px-8 md:grid-cols-2">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Gestion des utilisateurs</CardTitle>
+                        <CardTitle>{{ $t('admin.userManagementTitle') }}</CardTitle>
                         <CardDescription>
-                            Supervise les comptes et les permissions de la plateforme.
+                            {{ $t('admin.userManagementDescription') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent class="space-y-3">
                         <p class="text-sm text-muted-foreground">
-                            Ton dashboard admin est maintenant isolé et protégé par rôle.
+                            {{ $t('admin.userManagementHint') }}
                         </p>
-                        <Button>Configurer le module</Button>
+                        <Button>{{ $t('admin.configureModule') }}</Button>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Suivi global</CardTitle>
+                        <CardTitle>{{ $t('admin.globalTrackingTitle') }}</CardTitle>
                         <CardDescription>
-                            Vue d'ensemble des activités vendeurs et commandes.
+                            {{ $t('admin.globalTrackingDescription') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <p class="text-sm text-muted-foreground">
-                            Ajoute ici tes KPI (nb utilisateurs, commandes, revenus...).
+                            {{ $t('admin.globalTrackingHint') }}
                         </p>
                     </CardContent>
                 </Card>

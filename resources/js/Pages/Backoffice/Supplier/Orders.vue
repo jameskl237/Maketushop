@@ -15,22 +15,22 @@ const formatDate = (value) => new Date(value).toLocaleDateString('fr-FR');
 </script>
 
 <template>
-    <Head title="Commandes" />
+    <Head :title="$t('supplier.orders')" />
 
     <SupplierLayout
-        title="Commandes"
-        subtitle="Historique des commandes contenant tes produits"
+        :title="$t('supplier.orders')"
+        :subtitle="$t('supplier.ordersSubtitle')"
         active-route="backoffice.supplier.orders.index"
         :can-create-shop="false"
     >
         <template #content>
             <Card>
                 <CardHeader>
-                    <CardTitle>Commandes reçues</CardTitle>
+                    <CardTitle>{{ $t('supplier.receivedOrders') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="space-y-4">
                     <div v-if="orders.length === 0" class="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-                        Aucune commande pour l'instant.
+                        {{ $t('supplier.noOrders') }}
                     </div>
 
                     <div v-else class="space-y-3">
@@ -41,25 +41,25 @@ const formatDate = (value) => new Date(value).toLocaleDateString('fr-FR');
                         >
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <p class="font-semibold">{{ order.order_number }}</p>
-                                <Badge variant="secondary">{{ order.supplier_items_count }} article(s) fournisseur</Badge>
+                                <Badge variant="secondary">{{ order.supplier_items_count }} {{ $t('supplier.supplierItems') }}</Badge>
                             </div>
 
                             <p class="mt-1 text-sm text-muted-foreground">
-                                Client: {{ order.customer_name || 'Inconnu' }} ({{ order.customer_email || 'email indisponible' }})
+                                {{ $t('supplier.customer') }}: {{ order.customer_name || $t('supplier.unknown') }} ({{ order.customer_email || $t('supplier.emailUnavailable') }})
                             </p>
                             <p class="text-sm text-muted-foreground">
-                                Date: {{ formatDate(order.created_at) }} - Total commande: {{ order.total_price }} FCFA
+                                {{ $t('supplier.date') }}: {{ formatDate(order.created_at) }} - {{ $t('supplier.orderTotal') }}: {{ order.total_price }} FCFA
                             </p>
 
                             <div class="mt-3 space-y-1 text-sm">
-                                <p class="font-medium">Articles de tes boutiques :</p>
+                                <p class="font-medium">{{ $t('supplier.itemsFromYourShops') }}</p>
                                 <div
                                     v-for="item in order.items"
                                     :key="`${order.id}-${item.id}`"
                                     class="flex flex-wrap items-center justify-between gap-2 rounded border border-border/70 px-3 py-2"
                                 >
-                                    <span>{{ item.name }} ({{ item.shop_name || 'Boutique' }})</span>
-                                    <span class="text-muted-foreground">Qté: {{ item.quantity }} - {{ item.price }} FCFA</span>
+                                    <span>{{ item.name }} ({{ item.shop_name || $t('supplier.shop') }})</span>
+                                    <span class="text-muted-foreground">{{ $t('supplier.quantity') }}: {{ item.quantity }} - {{ item.price }} FCFA</span>
                                 </div>
                             </div>
                         </div>

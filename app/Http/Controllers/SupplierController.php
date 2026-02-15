@@ -20,13 +20,22 @@ class SupplierController extends Controller
 {
     public function dashboard(): Response
     {
+        $supplierId = request()->user()->id;
+
         $shops = request()->user()
             ->shops()
             ->latest()
             ->get(['id', 'name', 'description', 'city', 'district', 'created_at']);
 
+        $publishedProductsCount = Product::query()
+            ->whereHas('shop', function ($query) use ($supplierId) {
+                $query->where('user_id', $supplierId);
+            })
+            ->count();
+
         return Inertia::render('Backoffice/Supplier/Dashboard', [
             'shops' => $shops,
+            'publishedProductsCount' => $publishedProductsCount,
         ]);
     }
 

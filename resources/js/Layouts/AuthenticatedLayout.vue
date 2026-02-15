@@ -5,6 +5,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Link } from '@inertiajs/vue3';
 
@@ -24,7 +25,6 @@ const showingNavigationDropdown = ref(false);
 
 <template>
     <div>
-        <ThemeToggle />
         <div class="min-h-screen bg-background text-foreground">
             <nav
                 class="border-b border-border bg-card/80 backdrop-blur"
@@ -50,12 +50,15 @@ const showingNavigationDropdown = ref(false);
                                     :href="route('dashboard')"
                                     :active="route().current('dashboard')"
                                 >
-                                    Dashboard
+                                    {{ $t('common.dashboard') }}
                                 </NavLink>
                             </div>
                         </div>
 
-                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
+                        <div class="hidden sm:ms-6 sm:flex sm:items-center gap-2">
+                            <LanguageSwitcher :floating="false" />
+                            <ThemeToggle :floating="false" />
+
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
@@ -87,14 +90,14 @@ const showingNavigationDropdown = ref(false);
                                         <DropdownLink
                                             :href="route('profile.edit')"
                                         >
-                                            Profile
+                                            {{ $t('common.profile') }}
                                         </DropdownLink>
                                         <DropdownLink
                                             :href="route('logout')"
                                             method="post"
                                             as="button"
                                         >
-                                            Log Out
+                                            {{ $t('auth.logout') }}
                                         </DropdownLink>
                                     </template>
                                 </Dropdown>
@@ -102,7 +105,9 @@ const showingNavigationDropdown = ref(false);
                         </div>
 
                         <!-- Hamburger -->
-                        <div v-if="showMobileUserMenu" class="-me-2 mr-12 flex items-center sm:hidden">
+                        <div v-if="showMobileUserMenu" class="-me-2 flex items-center sm:hidden gap-2">
+                            <LanguageSwitcher :floating="false" />
+                            <ThemeToggle :floating="false" />
                             <button
                                 @click="
                                     showingNavigationDropdown =
@@ -158,7 +163,7 @@ const showingNavigationDropdown = ref(false);
                             :href="route('dashboard')"
                             :active="route().current('dashboard')"
                         >
-                            Dashboard
+                            {{ $t('common.dashboard') }}
                         </ResponsiveNavLink>
                     </div>
 
@@ -179,14 +184,14 @@ const showingNavigationDropdown = ref(false);
 
                         <div class="mt-3 space-y-1">
                             <ResponsiveNavLink :href="route('profile.edit')">
-                                Profile
+                                {{ $t('common.profile') }}
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 :href="route('logout')"
                                 method="post"
                                 as="button"
                             >
-                                Log Out
+                                {{ $t('auth.logout') }}
                             </ResponsiveNavLink>
                         </div>
                     </div>

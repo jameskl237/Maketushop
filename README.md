@@ -57,3 +57,31 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Landing Page MaketuShop
+
+La landing page moderne est implémentée avec Vue 3 + Inertia + Shadcn/UI.
+
+### Structure principale
+
+- `resources/js/Pages/Welcome.vue`
+- `resources/js/components/landing/layout/`
+- `resources/js/components/landing/sections/`
+- `resources/js/components/landing/utils/`
+
+### Lancer en local
+
+```bash
+npm install
+npm run dev
+php artisan serve
+```
+
+### Points techniques inclus
+
+- Header sticky avec transition transparent -> solide au scroll.
+- Sections modulaires (Hero, Features, Categories, Testimonials, FAQ, Newsletter, Footer).
+- Animations scroll reveal (IntersectionObserver).
+- Compteurs animés et logos partenaires défilants.
+- Code splitting sur les sections de la landing via `defineAsyncComponent`.
+- Accessibilité de base (aria labels, focus visibles, alt images, navigation clavier).

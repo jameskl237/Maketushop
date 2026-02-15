@@ -15,19 +15,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { Package, ShoppingCart, Store, TrendingUp } from 'lucide-vue-next';
+import { Package, ShoppingCart, Store } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     shops: {
         type: Array,
         default: () => [],
     },
+    publishedProductsCount: {
+        type: Number,
+        default: 0,
+    },
 });
 
 const createShopDialogOpen = ref(false);
 const loading = ref(false);
 const canCreateShop = computed(() => props.shops.length === 0);
+const { t } = useI18n();
 
 const form = useForm({
     name: '',
@@ -36,36 +42,35 @@ const form = useForm({
     district: '',
 });
 
-// Mock data for dashboard metrics while business endpoints are in progress.
 const stats = computed(() => [
     {
-        title: 'Boutiques actives',
+        title: t('supplier.stats.activeShops'),
         value: props.shops.length,
-        hint: props.shops.length > 0 ? 'Suivi en temps réel' : 'Aucune boutique créée',
+        hint: props.shops.length > 0 ? t('supplier.stats.liveTracking') : t('supplier.stats.noShop'),
         icon: Store,
         trendType: props.shops.length > 0 ? 'positive' : 'neutral',
     },
     {
-        title: 'Produits publiés',
-        value: 24,
-        hint: '+4 cette semaine',
+        title: t('supplier.stats.publishedProducts'),
+        value: props.publishedProductsCount,
+        hint: props.publishedProductsCount > 0 ? t('supplier.stats.linkedProducts') : t('supplier.stats.noProduct'),
         icon: Package,
-        trendType: 'positive',
+        trendType: props.publishedProductsCount > 0 ? 'positive' : 'neutral',
     },
     {
-        title: 'Commandes',
-        value: 8,
-        hint: '3 en attente',
+        title: t('supplier.stats.orders'),
+        value: '-',
+        hint: t('supplier.stats.pendingZero'),
         icon: ShoppingCart,
         trendType: 'neutral',
     },
-    {
-        title: 'Revenus',
-        value: '45 230 FCFA',
-        hint: '+18% ce mois',
-        icon: TrendingUp,
-        trendType: 'positive',
-    },
+    // {
+    //     title: 'Revenus',
+    //     value: '45 230 FCFA',
+    //     hint: '+18% ce mois',
+    //     icon: TrendingUp,
+    //     trendType: 'positive',
+    // },
 ]);
 
 const openCreateDialog = () => {
@@ -90,11 +95,11 @@ const goToShopProducts = (shop) => {
 
 <template>
     <!-- Exemple: page Inertia principale du dashboard supplier -->
-    <Head title="Dashboard Supplier" />
+    <Head :title="$t('supplier.dashboardTitle')" />
 
     <SupplierLayout
-        title="Espace Fournisseur"
-        subtitle="Gérez vos boutiques, commandes et performances"
+        :title="$t('supplier.spaceTitle')"
+        :subtitle="$t('supplier.spaceSubtitle')"
         active-route="backoffice.supplier.dashboard"
         :can-create-shop="canCreateShop"
         @create-shop="openCreateDialog"
@@ -115,45 +120,45 @@ const goToShopProducts = (shop) => {
     <Dialog :open="createShopDialogOpen" @update:open="createShopDialogOpen = $event">
         <DialogContent class="sm:max-w-lg">
             <DialogHeader>
-                <DialogTitle>Créer une boutique</DialogTitle>
+                <DialogTitle>{{ $t('supplier.createShopTitle') }}</DialogTitle>
                 <DialogDescription>
-                    Complète les informations principales pour publier ta boutique.
+                    {{ $t('supplier.createShopDescription') }}
                 </DialogDescription>
             </DialogHeader>
 
             <form class="space-y-4" @submit.prevent="submitShop">
                 <div class="space-y-2">
-                    <Label for="shop-name">Nom de la boutique</Label>
+                    <Label for="shop-name">{{ $t('supplier.shopName') }}</Label>
                     <Input id="shop-name" v-model="form.name" type="text" required />
                     <p v-if="form.errors.name" class="text-sm text-destructive">{{ form.errors.name }}</p>
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="space-y-2">
-                        <Label for="shop-city">Ville</Label>
+                        <Label for="shop-city">{{ $t('supplier.city') }}</Label>
                         <Input id="shop-city" v-model="form.city" type="text" required />
                         <p v-if="form.errors.city" class="text-sm text-destructive">{{ form.errors.city }}</p>
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="shop-district">Quartier</Label>
+                        <Label for="shop-district">{{ $t('supplier.district') }}</Label>
                         <Input id="shop-district" v-model="form.district" type="text" required />
                         <p v-if="form.errors.district" class="text-sm text-destructive">{{ form.errors.district }}</p>
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="shop-description">Description</Label>
+                    <Label for="shop-description">{{ $t('common.description') }}</Label>
                     <Textarea id="shop-description" v-model="form.description" rows="4" />
                     <p v-if="form.errors.description" class="text-sm text-destructive">{{ form.errors.description }}</p>
                 </div>
 
                 <DialogFooter class="gap-2 sm:gap-0">
                     <Button type="button" variant="outline" @click="createShopDialogOpen = false">
-                        Annuler
+                        {{ $t('common.cancel') }}
                     </Button>
                     <Button type="submit" :disabled="form.processing">
-                        {{ form.processing ? 'Enregistrement...' : 'Créer la boutique' }}
+                        {{ form.processing ? $t('common.saving') : $t('supplier.createShop') }}
                     </Button>
                 </DialogFooter>
             </form>

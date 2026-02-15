@@ -1,5 +1,6 @@
 <script setup>
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Link } from '@inertiajs/vue3';
 </script>
@@ -8,6 +9,7 @@ import { Link } from '@inertiajs/vue3';
     <div
         class="flex min-h-screen flex-col items-center bg-gradient-to-b from-background via-primary/5 to-accent/30 px-4 pb-6 pt-16 sm:justify-center sm:py-0"
     >
+        <LanguageSwitcher />
         <ThemeToggle />
         <div class="mb-2">
             <Link href="/">

@@ -13,22 +13,22 @@ defineProps({
 </script>
 
 <template>
-    <Head title="Mes boutiques" />
+    <Head :title="$t('supplier.shops')" />
 
     <SupplierLayout
-        title="Mes boutiques"
-        subtitle="Retrouve la liste de toutes tes boutiques"
+        :title="$t('supplier.shops')"
+        :subtitle="$t('supplier.shopsSubtitle')"
         active-route="backoffice.supplier.shops.index"
         :can-create-shop="false"
     >
         <template #content>
             <Card>
                 <CardHeader>
-                    <CardTitle>Liste des boutiques</CardTitle>
+                    <CardTitle>{{ $t('supplier.shopsList') }}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div v-if="shops.length === 0" class="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-                        Aucune boutique disponible pour le moment.
+                        {{ $t('supplier.noShops') }}
                     </div>
 
                     <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -39,10 +39,10 @@ defineProps({
                         >
                             <div class="mb-3 flex items-center justify-between gap-3">
                                 <h3 class="line-clamp-1 text-base font-semibold">{{ shop.name }}</h3>
-                                <Badge variant="secondary">{{ shop.products_count }} produits</Badge>
+                                <Badge variant="secondary">{{ shop.products_count }} {{ $t('supplier.products') }}</Badge>
                             </div>
                             <p class="line-clamp-2 text-sm text-muted-foreground">
-                                {{ shop.description || 'Aucune description.' }}
+                                {{ shop.description || $t('supplier.noDescription') }}
                             </p>
                             <p class="mt-2 text-xs text-muted-foreground">{{ shop.city }} - {{ shop.district }}</p>
 
@@ -50,7 +50,7 @@ defineProps({
                                 :href="route('backoffice.supplier.shops.show', { shop: shop.id })"
                                 class="mt-4 inline-block text-sm font-medium text-primary hover:underline"
                             >
-                                Voir les produits
+                                {{ $t('supplier.viewProducts') }}
                             </Link>
                         </div>
                     </div>

@@ -71,7 +71,7 @@ const toggleMobileSidebar = () => {
                             aria-controls="supplier-mobile-sidebar"
                             @click="toggleMobileSidebar"
                         >
-                            <span>Menu fournisseur</span>
+                            <span>{{ $t('supplier.menu') }}</span>
                             <ChevronUp v-if="mobileSidebarVisible" class="h-4 w-4" />
                             <ChevronDown v-else class="h-4 w-4" />
                         </button>
@@ -90,7 +90,7 @@ const toggleMobileSidebar = () => {
                                 @click="mobileSidebarVisible = false"
                             >
                                 <Store class="h-4 w-4" />
-                                Dashboard
+                                {{ $t('common.dashboard') }}
                             </Link>
                             <Link
                                 :href="route('backoffice.supplier.shops.index')"
@@ -101,7 +101,7 @@ const toggleMobileSidebar = () => {
                                 @click="mobileSidebarVisible = false"
                             >
                                 <Store class="h-4 w-4" />
-                                Boutiques
+                                {{ $t('supplier.shops') }}
                             </Link>
                             <Link
                                 :href="route('backoffice.supplier.orders.index')"
@@ -112,7 +112,7 @@ const toggleMobileSidebar = () => {
                                 @click="mobileSidebarVisible = false"
                             >
                                 <ShoppingCart class="h-4 w-4" />
-                                Commandes
+                                {{ $t('supplier.orders') }}
                             </Link>
                             <Link
                                 :href="route('backoffice.supplier.products.index')"
@@ -123,7 +123,7 @@ const toggleMobileSidebar = () => {
                                 @click="mobileSidebarVisible = false"
                             >
                                 <Package class="h-4 w-4" />
-                                Produits
+                                {{ $t('supplier.products') }}
                             </Link>
                             <Button
                                 v-if="canCreateShop"
@@ -133,7 +133,7 @@ const toggleMobileSidebar = () => {
                                     openCreateShop();
                                 "
                             >
-                                Creer ma boutique
+                                {{ $t('supplier.createShop') }}
                             </Button>
                         </div>
                     </div>
