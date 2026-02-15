@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 221 55% 18%;
+    --card: 0 0% 100%;
+    --card-foreground: 221 55% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 221 55% 18%;
+    --primary: 214 90% 54%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214 100% 96%;
+    --secondary-foreground: 221 55% 20%;
+    --muted: 220 60% 97%;
+    --muted-foreground: 222 24% 42%;
+    --accent: 329 100% 96%;
+    --accent-foreground: 332 70% 30%;
+    --destructive: 0 78% 58%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 66% 89%;
+    --input: 217 66% 89%;
+    --ring: 214 90% 54%;
+    --chart-1: 214 90% 54%;
+    --chart-2: 332 78% 63%;
+    --chart-3: 197 81% 53%;
+    --chart-4: 268 83% 66%;
+    --chart-5: 352 83% 66%;
+    --radius: 0.5rem
+  }
+  .dark {
+    --background: 218 38% 6%;
+    --foreground: 42 100% 90%;
+    --card: 220 34% 8%;
+    --card-foreground: 42 100% 92%;
+    --popover: 220 34% 8%;
+    --popover-foreground: 42 100% 92%;
+    --primary: 28 96% 56%;
+    --primary-foreground: 220 40% 10%;
+    --secondary: 48 97% 45%;
+    --secondary-foreground: 223 47% 11%;
+    --muted: 218 26% 16%;
+    --muted-foreground: 42 50% 76%;
+    --accent: 42 92% 50%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 68% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 28 70% 34%;
+    --input: 220 28% 14%;
+    --ring: 42 92% 50%;
+    --chart-1: 28 96% 56%;
+    --chart-2: 42 92% 50%;
+    --chart-3: 15 90% 58%;
+    --chart-4: 55 96% 58%;
+    --chart-5: 36 96% 62%
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Keep browser autofill fields consistent with light/dark theme */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    caret-color: hsl(var(--foreground));
+    transition: background-color 9999s ease-in-out 0s;
+  }
+}
