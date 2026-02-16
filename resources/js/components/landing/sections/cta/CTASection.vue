@@ -30,7 +30,7 @@ import { Link } from '@inertiajs/vue3';
                             </div>
                         </div>
                         <img
-                            src="/images/mascot/hero.webp"
+                            src="/images/Maketu_phone.png"
                             alt="Mascotte de la plateforme"
                             loading="lazy"
                             class="mx-auto h-44 w-auto object-contain"

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,23 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+
+Route::get('/about', function () {
+    return Inertia::render('About');
+})->name('about');
+
+Route::get('/contact', function () {
+    return Inertia::render('Contact');
+})->name('contact');
+
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/products/{product}/buy', [ProductController::class, 'buy'])->name('products.buy');
+Route::get('/payments/unavailable', [ProductController::class, 'paymentUnavailable'])->name('payments.unavailable');
+Route::get('/shops', [ProductController::class, 'shops'])->name('shops.index');
+Route::get('/shops/{shop}', [ProductController::class, 'shopShow'])->name('shops.show');
+Route::get('/cart', [ProductController::class, 'cart'])->name('cart.index');
+Route::get('/cart/metadata', [ProductController::class, 'cartMetadata'])->name('cart.metadata');
 
 Route::get('/dashboard', function () {
     $user = request()->user();
@@ -38,6 +56,7 @@ Route::middleware(['auth', 'role:supplier'])->prefix('backoffice/supplier')->gro
     Route::get('/orders', [SupplierController::class, 'orders'])->name('backoffice.supplier.orders.index');
     Route::get('/categories', [SupplierController::class, 'categories'])->name('backoffice.supplier.categories.index');
     Route::post('/shops', [SupplierController::class, 'storeShop'])->name('backoffice.supplier.shops.store');
+    Route::put('/shops/{shop}', [SupplierController::class, 'updateShop'])->name('backoffice.supplier.shops.update');
     Route::get('/shops/{shop}', [SupplierController::class, 'showShop'])->name('backoffice.supplier.shops.show');
     Route::post('/shops/{shop}/products', [SupplierController::class, 'storeProduct'])->name('backoffice.supplier.shops.products.store');
     Route::get('/shops/{shop}/products/{product}', [SupplierController::class, 'showProduct'])->name('backoffice.supplier.shops.products.show');

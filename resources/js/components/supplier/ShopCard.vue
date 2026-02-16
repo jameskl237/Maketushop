@@ -11,7 +11,7 @@ const props = defineProps({
     },
 });
 
-defineEmits(['view']);
+defineEmits(['view', 'edit']);
 
 const formatDate = (value) => {
     if (!value) return '-';
@@ -41,9 +41,14 @@ const formatDate = (value) => {
                 <Calendar class="h-3.5 w-3.5" />
                 <span>Créée le {{ formatDate(props.shop.created_at) }}</span>
             </div>
-            <Button class="w-full" variant="outline" aria-label="Voir la boutique" @click="$emit('view', props.shop)">
-                Voir la boutique
-            </Button>
+            <div class="grid grid-cols-2 gap-2">
+                <Button class="w-full" variant="outline" aria-label="Voir la boutique" @click="$emit('view', props.shop)">
+                    Voir
+                </Button>
+                <Button class="w-full" variant="secondary" aria-label="Modifier la boutique" @click="$emit('edit', props.shop)">
+                    Modifier
+                </Button>
+            </div>
         </CardContent>
     </Card>
 </template>

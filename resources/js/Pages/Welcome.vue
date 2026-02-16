@@ -13,12 +13,12 @@ import {
 import { defineAsyncComponent } from 'vue';
 
 const HeroSection = defineAsyncComponent(() => import('@/components/landing/sections/hero/HeroSection.vue'));
-const PartnersSection = defineAsyncComponent(() => import('@/components/landing/sections/partners/PartnersSection.vue'));
+// const PartnersSection = defineAsyncComponent(() => import('@/components/landing/sections/partners/PartnersSection.vue'));
 const FeaturesSection = defineAsyncComponent(() => import('@/components/landing/sections/features/FeaturesSection.vue'));
 const HowItWorksSection = defineAsyncComponent(() => import('@/components/landing/sections/how-it-works/HowItWorksSection.vue'));
 const CategoriesSection = defineAsyncComponent(() => import('@/components/landing/sections/categories/CategoriesSection.vue'));
 const CTASplit = defineAsyncComponent(() => import('@/components/landing/sections/cta/CTASplit.vue'));
-const TestimonialsSection = defineAsyncComponent(() => import('@/components/landing/sections/testimonials/TestimonialsSection.vue'));
+// const TestimonialsSection = defineAsyncComponent(() => import('@/components/landing/sections/testimonials/TestimonialsSection.vue'));
 const FAQSection = defineAsyncComponent(() => import('@/components/landing/sections/faq/FAQSection.vue'));
 const CTASection = defineAsyncComponent(() => import('@/components/landing/sections/cta/CTASection.vue'));
 const NewsletterSection = defineAsyncComponent(() => import('@/components/landing/sections/newsletter/NewsletterSection.vue'));
@@ -32,14 +32,14 @@ const navItems = [
     { label: 'Fonctionnalités', href: '#features' },
     { label: 'Comment ça marche', href: '#how-it-works' },
     { label: 'Catégories', href: '#categories' },
-    { label: 'Avis', href: '#testimonials' },
+    // { label: 'Avis', href: '#testimonials' },
     { label: 'FAQ', href: '#faq' },
 ];
 
 const heroStats = [
-    { value: 500, suffix: '+', label: 'Artisans' },
-    { value: 10000, suffix: '+', label: 'Produits' },
-    { value: 50000, suffix: '+', label: 'Clients' },
+    { value: 50, suffix: '+', label: 'Artisans' },
+    { value: 800, suffix: '+', label: 'Produits' },
+    { value: 500, suffix: '+', label: 'Clients' },
 ];
 
 const features = [
@@ -58,14 +58,14 @@ const steps = [
 ];
 
 const categories = [
-    { id: 1, name: 'Artisanat', count: 1234, image: '/images/Maketa.png' },
-    { id: 2, name: 'Maison', count: 842, image: '/images/Maketu_logo.png' },
-    { id: 3, name: 'Mode', count: 1640, image: '/images/Maketu_coeur.png' },
-    { id: 4, name: 'Beauté', count: 920, image: '/images/Maketu_panier.png' },
-    { id: 5, name: 'Électronique', count: 630, image: '/images/Maketu_ordi.png' },
-    { id: 6, name: 'Alimentation', count: 1150, image: '/images/Maketa.png' },
-    { id: 7, name: 'Sport', count: 455, image: '/images/Maketu_phone.png' },
-    { id: 8, name: 'Accessoires', count: 780, image: '/images/Maketu_logo.png' },
+    { id: 1, name: 'Artisanat', count: 1234, image: '/images/artisanat.png' },
+    { id: 2, name: 'Maison', count: 842, image: '/images/maison.png' },
+    { id: 3, name: 'Mode', count: 1640, image: '/images/mode.png' },
+    { id: 4, name: 'Beauté', count: 920, image: '/images/beaute.png' },
+    { id: 5, name: 'Électronique', count: 630, image: '/images/electronique.png' },
+    { id: 6, name: 'Alimentation', count: 1150, image: '/images/alimentation.png' },
+    { id: 7, name: 'Sport', count: 455, image: '/images/sport.png' },
+    { id: 8, name: 'Accessoires', count: 780, image: '/images/accessoire.png' },
 ];
 
 const testimonials = [
@@ -86,13 +86,13 @@ const faqs = [
     { question: 'Le support est-il disponible ?', answer: 'Oui, notre équipe support est disponible pour vous accompagner.' },
 ];
 
-const partnerLogos = [
-    { name: 'Partner One', src: '/images/Maketu1.png' },
-    { name: 'Partner Two', src: '/images/Maketu1.png' },
-    { name: 'Partner Three', src: '/images/Maketu1.png' },
-    { name: 'Partner Four', src: '/images/Maketu1.png' },
-    { name: 'Partner Five', src: '/images/Maketu1.png' },
-];
+// const partnerLogos = [
+//     { name: 'Partner One', src: '/images/Maketu1.png' },
+//     { name: 'Partner Two', src: '/images/Maketu1.png' },
+//     { name: 'Partner Three', src: '/images/Maketu1.png' },
+//     { name: 'Partner Four', src: '/images/Maketu1.png' },
+//     { name: 'Partner Five', src: '/images/Maketu1.png' },
+// ];
 </script>
 
 <template>
@@ -103,12 +103,12 @@ const partnerLogos = [
 
         <main>
             <HeroSection :stats="heroStats" />
-            <PartnersSection :logos="partnerLogos" />
+            <!-- <PartnersSection :logos="partnerLogos" /> -->
             <FeaturesSection :features="features" />
             <HowItWorksSection :steps="steps" />
             <CategoriesSection :categories="categories" />
             <CTASplit />
-            <TestimonialsSection :testimonials="testimonials" />
+            <!-- <TestimonialsSection :testimonials="testimonials" /> -->
             <FAQSection :faqs="faqs" />
             <CTASection />
             <NewsletterSection />

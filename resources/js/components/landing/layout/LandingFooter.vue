@@ -7,19 +7,39 @@
 const columns = [
     {
         title: 'Produit',
-        links: ['Fonctionnalités', 'Catégories', 'Tarification', 'FAQ'],
+        links: [
+            { label: 'Fonctionnalités', href: '#features' },
+            { label: 'Catégories', href: '#categories' },
+            { label: 'Tarification', href: '#' },
+            { label: 'FAQ', href: '#faq' },
+        ],
     },
     {
         title: 'Entreprise',
-        links: ['À propos', 'Carrières', 'Partenaires', 'Contact'],
+        links: [
+            { label: 'À propos', href: '/about' },
+            { label: 'Carrières', href: '#' },
+            { label: 'Partenaires', href: '#' },
+            { label: 'Contact', href: '/contact' },
+        ],
     },
     {
         title: 'Ressources',
-        links: ['Blog', 'Guide vendeur', 'Aide', 'Documentation'],
+        links: [
+            { label: 'Blog', href: '#' },
+            { label: 'Guide vendeur', href: '#' },
+            { label: 'Aide', href: '#' },
+            { label: 'Documentation', href: '#' },
+        ],
     },
     {
         title: 'Légal',
-        links: ['Confidentialité', 'Conditions', 'Cookies', 'Mentions légales'],
+        links: [
+            { label: 'Confidentialité', href: '#' },
+            { label: 'Conditions', href: '#' },
+            { label: 'Cookies', href: '#' },
+            { label: 'Mentions légales', href: '#' },
+        ],
     },
 ];
 </script>
@@ -47,10 +67,10 @@ const columns = [
                     <ul class="space-y-2">
                         <li
                             v-for="item in col.links"
-                            :key="item"
+                            :key="item.label"
                             class="text-sm text-muted-foreground transition-colors hover:text-foreground"
                         >
-                            <a href="#">{{ item }}</a>
+                            <a :href="item.href">{{ item.label }}</a>
                         </li>
                     </ul>
                 </div>

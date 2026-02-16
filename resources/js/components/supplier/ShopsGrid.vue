@@ -18,7 +18,7 @@ const props = defineProps({
     },
 });
 
-defineEmits(['create-shop', 'view-shop']);
+defineEmits(['create-shop', 'view-shop', 'edit-shop']);
 </script>
 
 <template>
@@ -53,7 +53,13 @@ defineEmits(['create-shop', 'view-shop']);
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                <ShopCard v-for="shop in props.shops" :key="shop.id" :shop="shop" @view="$emit('view-shop', $event)" />
+                <ShopCard
+                    v-for="shop in props.shops"
+                    :key="shop.id"
+                    :shop="shop"
+                    @view="$emit('view-shop', $event)"
+                    @edit="$emit('edit-shop', $event)"
+                />
             </div>
         </template>
     </section>

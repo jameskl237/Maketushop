@@ -42,6 +42,7 @@
         "supplierSignUp": "Supplier registration",
         "createSupplierAccount": "Create supplier account",
         "createSupplierAccountButton": "Create my supplier account",
+        "backToLanding": "Back to landing page",
         "supplierOnly": "Supplier only",
         "supplierRegisterHelp": "Fill in all required information to activate your supplier area.",
         "fullName": "Full name",

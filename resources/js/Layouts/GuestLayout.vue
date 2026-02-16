@@ -16,6 +16,12 @@ import { Link } from '@inertiajs/vue3';
                 <ApplicationLogo class="h-16 w-16 fill-current text-primary sm:h-20 sm:w-20" />
             </Link>
         </div>
+        <Link
+            href="/"
+            class="mb-4 inline-flex items-center rounded-md border border-border px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground"
+        >
+            {{ $t('auth.backToLanding') }}
+        </Link>
 
         <div
             class="mt-6 w-full max-w-xl overflow-hidden rounded-2xl border border-border/60 bg-card/90 px-4 py-4 shadow-2xl sm:max-w-2xl sm:px-6 sm:py-6"

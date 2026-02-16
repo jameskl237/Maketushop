@@ -25,7 +25,7 @@ class SupplierController extends Controller
         $shops = request()->user()
             ->shops()
             ->latest()
-            ->get(['id', 'name', 'description', 'city', 'district', 'created_at']);
+            ->get(['id', 'name', 'description', 'city', 'district', 'phone', 'logo', 'created_at']);
 
         $publishedProductsCount = Product::query()
             ->whereHas('shop', function ($query) use ($supplierId) {
@@ -45,7 +45,7 @@ class SupplierController extends Controller
             ->shops()
             ->withCount('products')
             ->latest()
-            ->get(['id', 'name', 'description', 'city', 'district', 'created_at']);
+            ->get(['id', 'name', 'description', 'city', 'district', 'phone', 'logo', 'created_at']);
 
         return Inertia::render('Backoffice/Supplier/Shops', [
             'shops' => $shops,
@@ -164,20 +164,67 @@ class SupplierController extends Controller
         ]);
     }
 
-    public function storeShop(): RedirectResponse
+    public function storeShop(Request $request): RedirectResponse
     {
-        $validated = request()->validate([
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1500'],
             'city' => ['required', 'string', 'max:255'],
             'district' => ['required', 'string', 'max:255'],
+            'logo' => ['nullable', 'image', 'max:5120'],
         ]);
 
-        request()->user()->shops()->create($validated);
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('shops', 'public');
+        }
+
+        $request->user()->shops()->create([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'city' => $validated['city'],
+            'district' => $validated['district'],
+            'logo' => $logoPath,
+        ]);
 
         return redirect()
             ->route('backoffice.supplier.dashboard')
             ->with('success', 'Boutique creee avec succes.');
+    }
+
+    public function updateShop(Request $request, Shop $shop): RedirectResponse
+    {
+        $this->ensureSupplierOwnsShop($shop);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1500'],
+            'city' => ['required', 'string', 'max:255'],
+            'district' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'logo' => ['nullable', 'image', 'max:5120'],
+        ]);
+
+        $shopData = [
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'city' => $validated['city'],
+            'district' => $validated['district'],
+            'phone' => filled($validated['phone'] ?? null) ? trim((string) $validated['phone']) : null,
+        ];
+
+        if ($request->hasFile('logo')) {
+            if ($shop->logo) {
+                Storage::disk('public')->delete($shop->logo);
+            }
+            $shopData['logo'] = $request->file('logo')->store('shops', 'public');
+        }
+
+        $shop->update($shopData);
+
+        return redirect()
+            ->route('backoffice.supplier.dashboard')
+            ->with('success', 'Boutique mise a jour avec succes.');
     }
 
     public function storeProduct(Request $request, Shop $shop): RedirectResponse

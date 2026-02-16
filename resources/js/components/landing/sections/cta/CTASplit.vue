@@ -19,7 +19,7 @@ import { Link } from '@inertiajs/vue3';
                     <CardContent class="space-y-4 p-8">
                         <h3 class="text-2xl font-bold">Vous cherchez des produits fiables ?</h3>
                         <p class="text-muted-foreground">Découvrez des vendeurs vérifiés et commandez en toute confiance.</p>
-                        <Link :href="route('register')"><Button size="lg">Je suis client</Button></Link>
+                        <Link :href="route('products.index')"><Button size="lg">Je suis client</Button></Link>
                     </CardContent>
                 </Card>
             </ScrollReveal>

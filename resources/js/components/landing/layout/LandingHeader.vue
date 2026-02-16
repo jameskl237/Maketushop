@@ -75,7 +75,7 @@ onUnmounted(() => {
                 <Link :href="route('login')">
                     <Button variant="ghost">Connexion</Button>
                 </Link>
-                <Link :href="route('register')">
+                <Link :href="route('products.index')">
                     <Button>Commencer</Button>
                 </Link>
             </div>
@@ -108,8 +108,8 @@ onUnmounted(() => {
                         <Link :href="route('login')" @click="open = false">
                             <Button variant="outline" class="w-full">Connexion</Button>
                         </Link>
-                        <Link :href="route('register')" @click="open = false">
-                            <Button class="w-full">Créer un compte</Button>
+                        <Link :href="route('products.index')" @click="open = false">
+                            <Button class="w-full">Commencer</Button>
                         </Link>
                         <div class="mt-2 flex gap-2">
                             <LanguageSwitcher :floating="false" />
