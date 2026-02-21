@@ -21,15 +21,29 @@ const form = useForm({
     password_confirmation: '',
 });
 
-const regionNames = new Intl.DisplayNames(['fr'], { type: 'region' });
+const buildPhoneCountryCodes = () => {
+    try {
+        const hasDisplayNames = typeof Intl !== 'undefined' && typeof Intl.DisplayNames === 'function';
+        const regionNames = hasDisplayNames ? new Intl.DisplayNames(['fr'], { type: 'region' }) : null;
 
-const phoneCountryCodes = getCountries()
-    .map((country) => ({
-        country,
-        name: regionNames.of(country) ?? country,
-        dialCode: getCountryCallingCode(country),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+        const items = getCountries()
+            .map((country) => ({
+                country,
+                name: regionNames?.of(country) ?? country,
+                dialCode: getCountryCallingCode(country),
+            }))
+            .filter((item) => item?.dialCode)
+            .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+
+        if (items.length) return items;
+    } catch {
+        // Fallback below keeps the form usable if locale/phone APIs fail in production.
+    }
+
+    return [{ country: 'CM', name: 'Cameroun', dialCode: '237' }];
+};
+
+const phoneCountryCodes = buildPhoneCountryCodes();
 
 const submit = () => {
     form.phone_number = form.phone_number.replace(/\D/g, '');
