@@ -14,6 +14,7 @@ import { useCart } from '@/composables/useCart';
 import { Head, Link } from '@inertiajs/vue3';
 import { ShieldCheck, Store, Truck } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     product: { type: Object, required: true },
@@ -23,13 +24,14 @@ const props = defineProps({
 const activeTab = ref('description');
 const quantity = ref(1);
 const { addToCart } = useCart();
+const { t } = useI18n();
 
 const canBuy = computed(() => props.product.stock > 0);
 
 const trustBadges = [
-    { icon: ShieldCheck, label: 'Paiement securise' },
-    { icon: Truck, label: 'Retours simplifies' },
-    { icon: Store, label: 'Support vendeur' },
+    { icon: ShieldCheck, label: t('productShow.trustPayment') },
+    { icon: Truck, label: t('productShow.trustReturns') },
+    { icon: Store, label: t('productShow.trustSupport') },
 ];
 
 const addProductToCart = () => {
@@ -45,9 +47,9 @@ const addProductToCart = () => {
         <ProductsNavbar />
         <div class="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 lg:px-8">
             <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <Link href="/" class="hover:text-foreground">Accueil</Link>
+                <Link href="/" class="hover:text-foreground">{{ t('productShow.breadcrumbHome') }}</Link>
                 <span>/</span>
-                <Link :href="route('products.index')" class="hover:text-foreground">Produits</Link>
+                <Link :href="route('products.index')" class="hover:text-foreground">{{ t('productShow.breadcrumbProducts') }}</Link>
                 <span>/</span>
                 <span class="text-foreground">{{ product.name }}</span>
             </div>
@@ -57,7 +59,7 @@ const addProductToCart = () => {
 
                 <div class="space-y-5">
                 <div class="flex items-center justify-between gap-3">
-                    <Badge variant="secondary">{{ product.category?.name || 'Sans categorie' }}</Badge>
+                    <Badge variant="secondary">{{ product.category?.name || t('productsPage.noCategory') }}</Badge>
                     <FavoriteButton :product-id="product.id" />
                 </div>
 
@@ -68,7 +70,7 @@ const addProductToCart = () => {
 
                 <div class="flex flex-wrap items-center gap-3">
                     <RatingStars :rating="product.average_rating" :reviews-count="product.reviews_count" />
-                    <span class="text-sm text-muted-foreground">{{ product.sold_count }} vendus</span>
+                    <span class="text-sm text-muted-foreground">{{ t('productShow.soldCount', { count: product.sold_count }) }}</span>
                 </div>
 
                 <PriceDisplay
@@ -83,7 +85,7 @@ const addProductToCart = () => {
                 <Card>
                     <CardContent class="space-y-4 p-4">
                         <div class="flex items-center gap-3">
-                            <span class="text-sm text-muted-foreground">Quantite</span>
+                            <span class="text-sm text-muted-foreground">{{ t('productShow.quantity') }}</span>
                             <QuantitySelector v-model="quantity" :max="product.stock || 1" />
                         </div>
 
@@ -96,11 +98,11 @@ const addProductToCart = () => {
                                 :disabled="!canBuy"
                                 @click="addProductToCart"
                             >
-                                Ajouter au panier
+                                {{ t('productShow.addToCart') }}
                             </Button>
                             <Link :href="route('products.buy', { product: product.id })">
                                 <Button type="button" size="lg" class="w-full" :disabled="!canBuy">
-                                    Acheter maintenant
+                                    {{ t('productShow.buyNow') }}
                                 </Button>
                             </Link>
                         </div>
@@ -120,12 +122,12 @@ const addProductToCart = () => {
 
                 <Card v-if="product.shop">
                     <CardHeader>
-                        <CardTitle class="text-base">Infos vendeur</CardTitle>
+                        <CardTitle class="text-base">{{ t('productShow.sellerInfo') }}</CardTitle>
                     </CardHeader>
                     <CardContent class="space-y-2 text-sm text-muted-foreground">
                         <p class="font-semibold text-foreground">{{ product.shop.name }}</p>
                         <p>{{ product.shop.city }}</p>
-                        <p>Note vendeur: {{ product.shop.rating }}</p>
+                        <p>{{ t('productShow.sellerRating') }}: {{ product.shop.rating }}</p>
                     </CardContent>
                 </Card>
                 </div>
@@ -134,19 +136,19 @@ const addProductToCart = () => {
             <div class="space-y-4">
             <div class="flex flex-wrap gap-2 border-b border-border pb-2">
                 <Button type="button" :variant="activeTab === 'description' ? 'default' : 'ghost'" @click="activeTab = 'description'">
-                    Description
+                    {{ t('productShow.tabDescription') }}
                 </Button>
                 <Button type="button" :variant="activeTab === 'specs' ? 'default' : 'ghost'" @click="activeTab = 'specs'">
-                    Caracteristiques
+                    {{ t('productShow.tabSpecs') }}
                 </Button>
                 <Button type="button" :variant="activeTab === 'reviews' ? 'default' : 'ghost'" @click="activeTab = 'reviews'">
-                    Avis
+                    {{ t('productShow.tabReviews') }}
                 </Button>
             </div>
 
             <Card v-if="activeTab === 'description'">
                 <CardContent class="prose max-w-none p-4 text-sm text-muted-foreground">
-                    <p>{{ product.description || product.short_description || 'Aucune description disponible.' }}</p>
+                    <p>{{ product.description || product.short_description || t('productShow.descriptionFallback') }}</p>
                 </CardContent>
             </Card>
 
@@ -167,13 +169,13 @@ const addProductToCart = () => {
 
             <Card v-else>
                 <CardContent class="p-4 text-sm text-muted-foreground">
-                    Les avis seront disponibles prochainement.
+                    {{ t('productShow.reviewsSoon') }}
                 </CardContent>
             </Card>
             </div>
 
             <section class="space-y-4">
-                <h2 class="text-xl font-semibold">Produits similaires</h2>
+                <h2 class="text-xl font-semibold">{{ t('productShow.relatedProducts') }}</h2>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <ProductCard v-for="related in relatedProducts" :key="related.id" :product="related" />
                 </div>

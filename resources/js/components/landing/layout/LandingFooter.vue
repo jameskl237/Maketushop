@@ -1,47 +1,52 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
+
 /**
  * @component LandingFooter
  * @description Footer complet avec colonnes de liens et infos marque.
  * @example <LandingFooter />
  */
-const columns = [
+const { t } = useI18n();
+
+const columns = computed(() => [
     {
-        title: 'Produit',
+        title: t('landing.footerColProduct'),
         links: [
-            { label: 'Fonctionnalités', href: '#features' },
-            { label: 'Catégories', href: '#categories' },
-            { label: 'Tarification', href: '#' },
-            { label: 'FAQ', href: '#faq' },
+            { label: t('landing.footerLinkFeatures'), href: '#features' },
+            { label: t('landing.footerLinkCategories'), href: '#categories' },
+            { label: t('landing.footerLinkPricing'), href: '#' },
+            { label: t('landing.footerLinkFaq'), href: '#faq' },
         ],
     },
     {
-        title: 'Entreprise',
+        title: t('landing.footerColCompany'),
         links: [
-            { label: 'À propos', href: '/about' },
-            { label: 'Carrières', href: '#' },
-            { label: 'Partenaires', href: '#' },
-            { label: 'Contact', href: '/contact' },
+            { label: t('landing.footerLinkAbout'), href: '/about' },
+            { label: t('landing.footerLinkCareers'), href: '#' },
+            { label: t('landing.footerLinkPartners'), href: '#' },
+            { label: t('landing.footerLinkContact'), href: '/contact' },
         ],
     },
     {
-        title: 'Ressources',
+        title: t('landing.footerColResources'),
         links: [
-            { label: 'Blog', href: '#' },
-            { label: 'Guide vendeur', href: '#' },
-            { label: 'Aide', href: '#' },
-            { label: 'Documentation', href: '#' },
+            { label: t('landing.footerLinkBlog'), href: '#' },
+            { label: t('landing.footerLinkSellerGuide'), href: '#' },
+            { label: t('landing.footerLinkHelp'), href: '#' },
+            { label: t('landing.footerLinkDocs'), href: '#' },
         ],
     },
     {
-        title: 'Légal',
+        title: t('landing.footerColLegal'),
         links: [
-            { label: 'Confidentialité', href: '#' },
-            { label: 'Conditions', href: '#' },
-            { label: 'Cookies', href: '#' },
-            { label: 'Mentions légales', href: '#' },
+            { label: t('landing.footerLinkPrivacy'), href: '#' },
+            { label: t('landing.footerLinkTerms'), href: '#' },
+            { label: t('landing.footerLinkCookies'), href: '#' },
+            { label: t('landing.footerLinkLegalNotice'), href: '#' },
         ],
     },
-];
+]);
 </script>
 
 <template>
@@ -53,9 +58,7 @@ const columns = [
                         <img src="/images/Maketu1.png" alt="Logo MaketuShop" class="h-9 w-auto" loading="lazy" />
                         <span class="text-base font-semibold">MaketuShop</span>
                     </div>
-                    <p class="mt-4 text-sm text-muted-foreground">
-                        La marketplace locale qui connecte clients et vendeurs avec confiance.
-                    </p>
+                    <p class="mt-4 text-sm text-muted-foreground">{{ t('landing.footerTagline') }}</p>
                 </div>
 
                 <div
@@ -76,7 +79,7 @@ const columns = [
                 </div>
             </div>
             <div class="mt-8 border-t border-border pt-6 text-xs text-muted-foreground">
-                © {{ new Date().getFullYear() }} MaketuShop. Tous droits réservés.
+                © {{ new Date().getFullYear() }} MaketuShop. {{ t('landing.footerRights') }}
             </div>
         </div>
     </footer>

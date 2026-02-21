@@ -3,12 +3,14 @@ import GradientBlob from '@/components/landing/utils/GradientBlob.vue';
 import ScrollReveal from '@/components/landing/utils/ScrollReveal.vue';
 import { Button } from '@/components/ui/button';
 import { Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 
 /**
  * @component CTASection
  * @description CTA final avec fond gradient.
  * @example <CTASection />
  */
+const { t } = useI18n();
 </script>
 
 <template>
@@ -20,13 +22,21 @@ import { Link } from '@inertiajs/vue3';
                     <GradientBlob class="-bottom-10 right-0 bg-accent/30" />
                     <div class="relative grid items-center gap-8 lg:grid-cols-[1fr_auto]">
                         <div class="space-y-4">
-                            <h2 class="text-3xl font-bold">Prêt à accélérer vos ventes ?</h2>
+                            <h2 class="text-3xl font-bold">{{ t('landing.ctaTitle') }}</h2>
                             <p class="max-w-2xl text-muted-foreground">
-                                Rejoignez une plateforme pensée pour convertir vos visiteurs en clients fidèles.
+                                {{ t('landing.ctaSubtitle') }}
                             </p>
                             <div class="flex flex-col gap-3 sm:flex-row">
-                                <Link :href="route('register')"><Button size="lg">Créer mon compte</Button></Link>
-                                <Link :href="route('login')"><Button size="lg" variant="outline">Accéder à mon espace</Button></Link>
+                                <Link :href="route('register')">
+                                    <Button size="lg" class="h-auto whitespace-normal break-words px-5 py-2 text-center">
+                                        {{ t('landing.ctaCreateAccount') }}
+                                    </Button>
+                                </Link>
+                                <Link :href="route('login')">
+                                    <Button size="lg" variant="outline" class="h-auto whitespace-normal break-words px-5 py-2 text-center">
+                                        {{ t('landing.ctaAccessSpace') }}
+                                    </Button>
+                                </Link>
                             </div>
                         </div>
                         <img

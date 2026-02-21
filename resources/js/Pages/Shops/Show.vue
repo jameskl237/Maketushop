@@ -26,6 +26,7 @@ import {
     Info,
 } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     shop: { type: Object, required: true },
@@ -37,6 +38,7 @@ const props = defineProps({
 const activeTab = ref('products');
 const loading = ref(false);
 const mobileFiltersOpen = ref(false);
+const { t } = useI18n();
 
 const state = reactive({
     search: props.filters.search || '',
@@ -124,10 +126,10 @@ const whatsappUrl = computed(() => {
 
         <div class="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
             <Link href="/">
-                <Button variant="outline">Retour à l'accueil</Button>
+                <Button variant="outline">{{ t('public.backHome') }}</Button>
             </Link>
             <Link :href="route('login')">
-                <Button variant="outline" size="icon" aria-label="Se connecter">
+                <Button variant="outline" size="icon" :aria-label="t('auth.login')">
                     <User class="h-4 w-4" />
                 </Button>
             </Link>
@@ -147,7 +149,7 @@ const whatsappUrl = computed(() => {
                 <div class="flex h-full flex-col items-center justify-center pb-8 text-center">
                     <Badge class="mb-4 bg-background/90 text-foreground backdrop-blur">
                         <Check class="mr-1 h-3 w-3 text-green-600" />
-                        Boutique certifiée
+                        {{ t('shopShow.verified') }}
                     </Badge>
                     <h1 class="max-w-4xl text-4xl font-bold text-white drop-shadow-lg md:text-6xl">{{ shop.name }}</h1>
                     <p v-if="shop.tagline" class="mt-3 max-w-2xl text-lg text-white/90 md:text-xl">{{ shop.tagline }}</p>
@@ -186,7 +188,7 @@ const whatsappUrl = computed(() => {
                                 <Package class="h-5 w-5 text-primary" />
                             </div>
                             <div>
-                                <div class="text-sm text-muted-foreground">Produits</div>
+                                <div class="text-sm text-muted-foreground">{{ t('shopShow.products') }}</div>
                                 <div class="text-lg font-bold">{{ shop.products_count }}</div>
                             </div>
                         </div>
@@ -195,7 +197,7 @@ const whatsappUrl = computed(() => {
                                 <Star class="h-5 w-5 text-yellow-500" />
                             </div>
                             <div>
-                                <div class="text-sm text-muted-foreground">Note</div>
+                                <div class="text-sm text-muted-foreground">{{ t('shopShow.rating') }}</div>
                                 <div class="text-lg font-bold">{{ shop.rating }}</div>
                             </div>
                         </div>
@@ -204,7 +206,7 @@ const whatsappUrl = computed(() => {
                                 <MapPin class="h-5 w-5 text-blue-500" />
                             </div>
                             <div>
-                                <div class="text-sm text-muted-foreground">Ville</div>
+                                <div class="text-sm text-muted-foreground">{{ t('shopShow.city') }}</div>
                                 <div class="text-lg font-bold">{{ shop.city }}</div>
                             </div>
                         </div>
@@ -213,7 +215,7 @@ const whatsappUrl = computed(() => {
                                 <Clock class="h-5 w-5 text-green-500" />
                             </div>
                             <div>
-                                <div class="text-sm text-muted-foreground">Répond en</div>
+                                <div class="text-sm text-muted-foreground">{{ t('shopShow.responseTime') }}</div>
                                 <div class="text-lg font-bold">{{ shop.response_time }}</div>
                             </div>
                         </div>
@@ -228,12 +230,12 @@ const whatsappUrl = computed(() => {
                         >
                             <Button>
                                 <MessageCircle class="mr-2 h-4 w-4" />
-                                Contacter
+                                {{ t('shopShow.contact') }}
                             </Button>
                         </a>
                         <Button v-else variant="outline" disabled>
                             <MessageCircle class="mr-2 h-4 w-4" />
-                            Contacter
+                            {{ t('shopShow.contact') }}
                         </Button>
                         <Button variant="outline" size="icon"><Heart class="h-4 w-4" /></Button>
                         <Button variant="outline" size="icon"><Share2 class="h-4 w-4" /></Button>
@@ -249,7 +251,7 @@ const whatsappUrl = computed(() => {
                         @click="activeTab = 'products'"
                     >
                         <Package class="mr-2 h-4 w-4" />
-                        Produits ({{ shop.products_count }})
+                        {{ t('shopShow.tabProducts', { count: shop.products_count }) }}
                     </Button>
                     <Button
                         type="button"
@@ -259,7 +261,7 @@ const whatsappUrl = computed(() => {
                         @click="activeTab = 'about'"
                     >
                         <Info class="mr-2 h-4 w-4" />
-                        À propos
+                        {{ t('shopShow.tabAbout') }}
                     </Button>
                     <Button
                         type="button"
@@ -269,7 +271,7 @@ const whatsappUrl = computed(() => {
                         @click="activeTab = 'reviews'"
                     >
                         <Star class="mr-2 h-4 w-4" />
-                        Avis ({{ shop.reviews_count }})
+                        {{ t('shopShow.tabReviews', { count: shop.reviews_count }) }}
                     </Button>
                 </div>
 
@@ -280,7 +282,7 @@ const whatsappUrl = computed(() => {
                             <Input
                                 v-model="state.search"
                                 type="search"
-                                placeholder="Rechercher dans cette boutique..."
+                                :placeholder="t('shopShow.searchPlaceholder')"
                                 class="h-12 pl-10 pr-12"
                             />
                             <Button
@@ -307,14 +309,14 @@ const whatsappUrl = computed(() => {
                                 @click="mobileFiltersOpen = !mobileFiltersOpen"
                             >
                                 <Filter class="h-4 w-4" />
-                                Filtres
+                                {{ t('shopShow.filters') }}
                             </Button>
 
                             <div
                                 v-if="mobileFiltersOpen"
                                 class="absolute left-0 top-12 z-30 w-full rounded-lg border border-border bg-background p-3 shadow-lg"
                             >
-                                <p class="mb-2 text-sm font-semibold">Catégories</p>
+                                <p class="mb-2 text-sm font-semibold">{{ t('shopShow.categories') }}</p>
                                 <div class="max-h-48 space-y-2 overflow-y-auto">
                                     <label
                                         v-for="cat in availableCategories"
@@ -333,19 +335,19 @@ const whatsappUrl = computed(() => {
                                 </div>
 
                                 <div class="mt-3 space-y-2 border-t border-border pt-3">
-                                    <p class="text-sm font-semibold">Prix</p>
+                                    <p class="text-sm font-semibold">{{ t('public.price') }}</p>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <Input v-model="state.price_min" type="number" min="0" placeholder="Min" />
-                                        <Input v-model="state.price_max" type="number" min="0" placeholder="Max" />
+                                        <Input v-model="state.price_min" type="number" min="0" :placeholder="t('public.min')" />
+                                        <Input v-model="state.price_max" type="number" min="0" :placeholder="t('public.max')" />
                                     </div>
                                 </div>
 
                                 <div class="mt-3 flex gap-2">
                                     <Button type="button" variant="outline" class="flex-1" @click="clearAllFilters">
-                                        Réinitialiser
+                                        {{ t('public.reset') }}
                                     </Button>
                                     <Button type="button" class="flex-1" @click="mobileFiltersOpen = false">
-                                        Fermer
+                                        {{ t('public.close') }}
                                     </Button>
                                 </div>
                             </div>
@@ -356,9 +358,9 @@ const whatsappUrl = computed(() => {
                         <aside class="hidden lg:block">
                             <div class="sticky top-24">
                                 <Card class="space-y-4 p-6">
-                                    <h3 class="font-semibold">Filtres</h3>
+                                    <h3 class="font-semibold">{{ t('shopShow.filters') }}</h3>
                                     <div class="space-y-3 border-t pt-4">
-                                        <h4 class="text-sm font-semibold">Catégories</h4>
+                                        <h4 class="text-sm font-semibold">{{ t('shopShow.categories') }}</h4>
                                         <div class="max-h-[250px] space-y-2 overflow-y-auto pr-1">
                                             <label
                                                 v-for="cat in availableCategories"
@@ -378,20 +380,20 @@ const whatsappUrl = computed(() => {
                                     </div>
 
                                     <div class="space-y-3 border-t pt-4">
-                                        <h4 class="text-sm font-semibold">Prix</h4>
+                                        <h4 class="text-sm font-semibold">{{ t('public.price') }}</h4>
                                         <div class="flex gap-2">
-                                            <Input v-model="state.price_min" type="number" min="0" placeholder="Min" />
-                                            <Input v-model="state.price_max" type="number" min="0" placeholder="Max" />
+                                            <Input v-model="state.price_min" type="number" min="0" :placeholder="t('public.min')" />
+                                            <Input v-model="state.price_max" type="number" min="0" :placeholder="t('public.max')" />
                                         </div>
                                     </div>
 
                                     <div class="flex items-center justify-between border-t pt-4 text-sm">
-                                        <span>En stock uniquement</span>
+                                        <span>{{ t('public.inStockOnly') }}</span>
                                         <input v-model="state.in_stock" type="checkbox" class="h-4 w-4 rounded border-input" />
                                     </div>
 
                                     <Button variant="outline" class="w-full" @click="clearAllFilters">
-                                        Réinitialiser
+                                        {{ t('public.reset') }}
                                     </Button>
                                 </Card>
                             </div>
@@ -410,7 +412,7 @@ const whatsappUrl = computed(() => {
                                 v-else
                                 class="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground"
                             >
-                                Aucun produit ne correspond aux filtres.
+                                {{ t('shopShow.emptyProducts') }}
                             </div>
 
                             <div v-if="products.links?.length > 3" class="flex flex-wrap items-center gap-2">
@@ -434,8 +436,8 @@ const whatsappUrl = computed(() => {
                 <div v-else-if="activeTab === 'about'" class="pb-8">
                     <Card>
                         <CardContent class="space-y-3 p-6 text-sm text-muted-foreground">
-                            <p>{{ shop.description || 'Cette boutique n’a pas encore ajouté de description détaillée.' }}</p>
-                            <p>Localisation : {{ shop.city }}, {{ shop.district }}</p>
+                            <p>{{ shop.description || t('shopShow.aboutFallback') }}</p>
+                            <p>{{ t('shopShow.location') }} : {{ shop.city }}, {{ shop.district }}</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -443,7 +445,7 @@ const whatsappUrl = computed(() => {
                 <div v-else class="pb-8">
                     <Card>
                         <CardContent class="p-6 text-sm text-muted-foreground">
-                            Les avis clients seront disponibles prochainement.
+                            {{ t('shopShow.reviewsSoon') }}
                         </CardContent>
                     </Card>
                 </div>

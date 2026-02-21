@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     product: { type: Object, required: true },
 });
+const { t } = useI18n();
 
 const sellerPhone = computed(() => props.product.shop?.owner_phone || '');
 
@@ -21,12 +23,12 @@ const whatsappPhone = computed(() => {
 
 const whatsappText = computed(() => {
     const lines = [
-        'Bonjour, je suis interesse par ce produit:',
-        `- Nom: ${props.product.name}`,
-        `- Prix: ${props.product.current_price} FCFA`,
-        `- Boutique: ${props.product.shop?.name || 'N/A'}`,
-        `- Lien image: ${props.product.main_image || ''}`,
-        `- Lien produit: ${window.location.origin}${route('products.show', { product: props.product.id })}`,
+        t('productBuy.waHello'),
+        `- ${t('productBuy.waName')}: ${props.product.name}`,
+        `- ${t('productBuy.waPrice')}: ${props.product.current_price} FCFA`,
+        `- ${t('productBuy.waShop')}: ${props.product.shop?.name || 'N/A'}`,
+        `- ${t('productBuy.waImage')}: ${props.product.main_image || ''}`,
+        `- ${t('productBuy.waLink')}: ${window.location.origin}${route('products.show', { product: props.product.id })}`,
     ];
 
     return encodeURIComponent(lines.join('\n'));
@@ -39,24 +41,24 @@ const whatsappUrl = computed(() => {
 </script>
 
 <template>
-    <Head :title="`Acheter - ${product.name}`" />
+    <Head :title="`${t('productsPage.buy')} - ${product.name}`" />
 
     <div>
         <ProductsNavbar />
         <div class="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
             <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <Link :href="route('products.index')" class="hover:text-foreground">Produits</Link>
+                <Link :href="route('products.index')" class="hover:text-foreground">{{ t('public.products') }}</Link>
                 <span>/</span>
                 <Link :href="route('products.show', { product: product.id })" class="hover:text-foreground">
                     {{ product.name }}
                 </Link>
                 <span>/</span>
-                <span class="text-foreground">Achat</span>
+                <span class="text-foreground">{{ t('productBuy.breadcrumbBuy') }}</span>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Choisissez votre mode d'achat</CardTitle>
+                    <CardTitle>{{ t('productBuy.title') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="space-y-5">
                     <div class="flex items-start gap-4">
@@ -80,19 +82,19 @@ const whatsappUrl = computed(() => {
                             class="block"
                         >
                             <Button class="w-full" :disabled="!whatsappPhone">
-                                Acheter sur WhatsApp
+                                {{ t('productBuy.whatsappBuy') }}
                             </Button>
                         </a>
 
                         <Link :href="route('payments.unavailable')">
                             <Button variant="outline" class="w-full">
-                                Acheter sur la plateforme
+                                {{ t('productBuy.platformBuy') }}
                             </Button>
                         </Link>
                     </div>
 
                     <p v-if="!whatsappPhone" class="text-sm text-destructive">
-                        Le numero WhatsApp du proprietaire de la boutique n'est pas disponible.
+                        {{ t('productBuy.phoneUnavailable') }}
                     </p>
                 </CardContent>
             </Card>

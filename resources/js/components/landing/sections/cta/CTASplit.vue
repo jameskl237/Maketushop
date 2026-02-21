@@ -3,12 +3,14 @@ import ScrollReveal from '@/components/landing/utils/ScrollReveal.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 
 /**
  * @component CTASplit
  * @description Double CTA acheteur/vendeur.
  * @example <CTASplit />
  */
+const { t } = useI18n();
 </script>
 
 <template>
@@ -17,18 +19,24 @@ import { Link } from '@inertiajs/vue3';
             <ScrollReveal>
                 <Card class="h-full border-border/70">
                     <CardContent class="space-y-4 p-8">
-                        <h3 class="text-2xl font-bold">Vous cherchez des produits fiables ?</h3>
-                        <p class="text-muted-foreground">Découvrez des vendeurs vérifiés et commandez en toute confiance.</p>
-                        <Link :href="route('products.index')"><Button size="lg">Je suis client</Button></Link>
+                        <h3 class="text-2xl font-bold">{{ t('landing.splitCustomerTitle') }}</h3>
+                        <p class="text-muted-foreground">{{ t('landing.splitCustomerText') }}</p>
+                        <Link :href="route('products.index')">
+                            <Button size="lg" class="h-auto whitespace-normal break-words px-5 py-2 text-center">{{ t('landing.splitCustomerButton') }}</Button>
+                        </Link>
                     </CardContent>
                 </Card>
             </ScrollReveal>
             <ScrollReveal :delay="120">
                 <Card class="h-full border-primary/40 bg-primary/5">
                     <CardContent class="space-y-4 p-8">
-                        <h3 class="text-2xl font-bold">Vous voulez vendre en ligne ?</h3>
-                        <p class="text-muted-foreground">Créez votre boutique, publiez vos produits et développez votre activité.</p>
-                        <Link :href="route('register')"><Button size="lg" variant="outline">Je suis vendeur</Button></Link>
+                        <h3 class="text-2xl font-bold">{{ t('landing.splitSellerTitle') }}</h3>
+                        <p class="text-muted-foreground">{{ t('landing.splitSellerText') }}</p>
+                        <Link :href="route('register')">
+                            <Button size="lg" variant="outline" class="h-auto whitespace-normal break-words px-5 py-2 text-center">
+                                {{ t('landing.splitSellerButton') }}
+                            </Button>
+                        </Link>
                     </CardContent>
                 </Card>
             </ScrollReveal>

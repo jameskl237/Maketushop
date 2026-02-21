@@ -1,5 +1,6 @@
 <script setup>
 import { Button } from '@/components/ui/button';
+import { useI18n } from 'vue-i18n';
 
 defineProps({
     filters: { type: Object, required: true },
@@ -7,6 +8,7 @@ defineProps({
 });
 
 const emit = defineEmits(['remove', 'reset']);
+const { t } = useI18n();
 </script>
 
 <template>
@@ -22,7 +24,7 @@ const emit = defineEmits(['remove', 'reset']);
             <span class="text-muted-foreground">x</span>
         </button>
         <Button type="button" variant="ghost" size="sm" class="h-8 px-3 text-xs" @click="emit('reset')">
-            Reinitialiser
+            {{ t('public.reset') }}
         </Button>
     </div>
 </template>

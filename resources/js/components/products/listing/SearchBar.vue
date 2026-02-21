@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Search, X } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 
 defineProps({
     modelValue: { type: String, default: '' },
@@ -9,6 +10,7 @@ defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'clear']);
+const { t } = useI18n();
 </script>
 
 <template>
@@ -17,7 +19,7 @@ const emit = defineEmits(['update:modelValue', 'clear']);
         <Input
             :model-value="modelValue"
             class="h-11 pl-9 pr-20"
-            placeholder="Rechercher un produit, une categorie..."
+            :placeholder="t('productsPage.searchPlaceholder')"
             @update:model-value="emit('update:modelValue', $event)"
         />
         <div class="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">

@@ -1,6 +1,7 @@
 <script setup>
 import FAQItem from '@/components/landing/sections/faq/FAQItem.vue';
 import ScrollReveal from '@/components/landing/utils/ScrollReveal.vue';
+import { useI18n } from 'vue-i18n';
 
 /**
  * @component FAQSection
@@ -10,6 +11,7 @@ import ScrollReveal from '@/components/landing/utils/ScrollReveal.vue';
 defineProps({
     faqs: { type: Array, default: () => [] },
 });
+const { t } = useI18n();
 </script>
 
 <template>
@@ -17,8 +19,8 @@ defineProps({
         <div class="mx-auto max-w-4xl space-y-8 px-4 sm:px-6 lg:px-8">
             <ScrollReveal>
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold">Questions fréquentes</h2>
-                    <p class="mt-3 text-muted-foreground">Tout ce qu’il faut savoir pour démarrer rapidement.</p>
+                    <h2 class="text-3xl font-bold">{{ t('landing.faqTitle') }}</h2>
+                    <p class="mt-3 text-muted-foreground">{{ t('landing.faqSubtitle') }}</p>
                 </div>
             </ScrollReveal>
 

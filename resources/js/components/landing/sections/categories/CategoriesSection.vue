@@ -1,6 +1,7 @@
 <script setup>
 import CategoryCard from '@/components/landing/sections/categories/CategoryCard.vue';
 import ScrollReveal from '@/components/landing/utils/ScrollReveal.vue';
+import { useI18n } from 'vue-i18n';
 
 /**
  * @component CategoriesSection
@@ -10,6 +11,7 @@ import ScrollReveal from '@/components/landing/utils/ScrollReveal.vue';
 defineProps({
     categories: { type: Array, default: () => [] },
 });
+const { t } = useI18n();
 </script>
 
 <template>
@@ -17,8 +19,8 @@ defineProps({
         <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
             <ScrollReveal>
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold">Catégories populaires</h2>
-                    <p class="mt-3 text-muted-foreground">Explorez rapidement ce que recherchent vos clients.</p>
+                    <h2 class="text-3xl font-bold">{{ t('landing.categoriesTitle') }}</h2>
+                    <p class="mt-3 text-muted-foreground">{{ t('landing.categoriesSubtitle') }}</p>
                 </div>
             </ScrollReveal>
 

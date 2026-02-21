@@ -2,6 +2,7 @@
 import LandingFooter from '@/components/landing/layout/LandingFooter.vue';
 import LandingHeader from '@/components/landing/layout/LandingHeader.vue';
 import { Head } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import {
     BadgeCheck,
     PackageSearch,
@@ -10,7 +11,7 @@ import {
     Store,
     Truck,
 } from 'lucide-vue-next';
-import { defineAsyncComponent } from 'vue';
+import { computed, defineAsyncComponent } from 'vue';
 
 const HeroSection = defineAsyncComponent(() => import('@/components/landing/sections/hero/HeroSection.vue'));
 // const PartnersSection = defineAsyncComponent(() => import('@/components/landing/sections/partners/PartnersSection.vue'));
@@ -28,36 +29,37 @@ defineProps({
     canRegister: { type: Boolean, default: true },
 });
 
-const navItems = [
-    { label: 'Fonctionnalités', href: '#features' },
-    { label: 'Comment ça marche', href: '#how-it-works' },
-    { label: 'Catégories', href: '#categories' },
-    // { label: 'Avis', href: '#testimonials' },
-    { label: 'FAQ', href: '#faq' },
-];
+const { t } = useI18n();
 
-const heroStats = [
-    { value: 50, suffix: '+', label: 'Artisans' },
-    { value: 800, suffix: '+', label: 'Produits' },
-    { value: 500, suffix: '+', label: 'Clients' },
-];
+const navItems = computed(() => [
+    { label: t('landing.navFeatures'), href: '#features' },
+    { label: t('landing.navHowItWorks'), href: '#how-it-works' },
+    { label: t('landing.navCategories'), href: '#categories' },
+    { label: t('landing.navFaq'), href: '#faq' },
+]);
 
-const features = [
-    { icon: ShoppingBag, title: 'Catalogue riche', description: 'Publiez et trouvez rapidement des milliers de produits.', color: 'blue' },
-    { icon: Truck, title: 'Livraison rapide', description: 'Suivi de commande clair et délai optimisé.', color: 'green' },
-    { icon: ShieldCheck, title: 'Paiement sécurisé', description: 'Transactions fiables avec protection acheteur-vendeur.', color: 'purple' },
-    { icon: Store, title: 'Boutiques personnalisées', description: 'Chaque vendeur valorise sa marque et ses offres.', color: 'orange' },
-    { icon: BadgeCheck, title: 'Vendeurs vérifiés', description: 'Confiance renforcée grâce à la vérification des profils.', color: 'teal' },
-    { icon: PackageSearch, title: 'Recherche intelligente', description: 'Filtres avancés pour retrouver vite le bon produit.', color: 'pink' },
-];
+const heroStats = computed(() => [
+    { value: 50, suffix: '+', label: t('landing.heroArtisans') },
+    { value: 800, suffix: '+', label: t('public.products') },
+    { value: 500, suffix: '+', label: t('landing.heroClients') },
+]);
 
-const steps = [
-    { title: 'Créez votre compte', description: 'Inscrivez-vous en quelques secondes comme acheteur ou vendeur.' },
-    { title: 'Explorez ou publiez', description: 'Parcourez les catégories ou mettez en ligne vos produits.' },
-    { title: 'Convertissez durablement', description: 'Profitez de la preuve sociale et des outils de suivi.' },
-];
+const features = computed(() => [
+    { icon: ShoppingBag, title: t('landing.feature1Title'), description: t('landing.feature1Description'), color: 'blue' },
+    { icon: Truck, title: t('landing.feature2Title'), description: t('landing.feature2Description'), color: 'green' },
+    { icon: ShieldCheck, title: t('landing.feature3Title'), description: t('landing.feature3Description'), color: 'purple' },
+    { icon: Store, title: t('landing.feature4Title'), description: t('landing.feature4Description'), color: 'orange' },
+    { icon: BadgeCheck, title: t('landing.feature5Title'), description: t('landing.feature5Description'), color: 'teal' },
+    { icon: PackageSearch, title: t('landing.feature6Title'), description: t('landing.feature6Description'), color: 'pink' },
+]);
 
-const categories = [
+const steps = computed(() => [
+    { title: t('landing.step1Title'), description: t('landing.step1Description') },
+    { title: t('landing.step2Title'), description: t('landing.step2Description') },
+    { title: t('landing.step3Title'), description: t('landing.step3Description') },
+]);
+
+const categories = computed(() => [
     { id: 1, name: 'Artisanat', count: 1234, image: '/images/artisanat.png' },
     { id: 2, name: 'Maison', count: 842, image: '/images/maison.png' },
     { id: 3, name: 'Mode', count: 1640, image: '/images/mode.png' },
@@ -66,7 +68,7 @@ const categories = [
     { id: 6, name: 'Alimentation', count: 1150, image: '/images/alimentation.png' },
     { id: 7, name: 'Sport', count: 455, image: '/images/sport.png' },
     { id: 8, name: 'Accessoires', count: 780, image: '/images/accessoire.png' },
-];
+]);
 
 const testimonials = [
     { name: 'Marie D.', role: 'Cliente', quote: "Super expérience d'achat, livraison rapide et service top.", avatar: '/images/Maketu_coeur.png' },
@@ -77,14 +79,14 @@ const testimonials = [
     { name: 'Franck E.', role: 'Vendeur', quote: 'Les outils marketing intégrés sont vraiment utiles.', avatar: '/images/Maketu_ordi.png' },
 ];
 
-const faqs = [
-    { question: 'Comment créer un compte ?', answer: 'Cliquez sur "Créer un compte", choisissez votre profil et complétez le formulaire.' },
-    { question: 'Comment devenir vendeur ?', answer: 'Après inscription, activez votre espace fournisseur et créez votre boutique.' },
-    { question: 'Les paiements sont-ils sécurisés ?', answer: 'Oui, la plateforme applique des standards de sécurité élevés.' },
-    { question: 'Puis-je suivre mes commandes ?', answer: 'Oui, chaque commande dispose d’un suivi clair depuis votre espace.' },
-    { question: 'Y a-t-il des frais cachés ?', answer: 'Non, les frais sont transparents et affichés avant validation.' },
-    { question: 'Le support est-il disponible ?', answer: 'Oui, notre équipe support est disponible pour vous accompagner.' },
-];
+const faqs = computed(() => [
+    { question: t('landing.faq1Question'), answer: t('landing.faq1Answer') },
+    { question: t('landing.faq2Question'), answer: t('landing.faq2Answer') },
+    { question: t('landing.faq3Question'), answer: t('landing.faq3Answer') },
+    { question: t('landing.faq4Question'), answer: t('landing.faq4Answer') },
+    { question: t('landing.faq5Question'), answer: t('landing.faq5Answer') },
+    { question: t('landing.faq6Question'), answer: t('landing.faq6Answer') },
+]);
 
 // const partnerLogos = [
 //     { name: 'Partner One', src: '/images/Maketu1.png' },
@@ -96,7 +98,7 @@ const faqs = [
 </script>
 
 <template>
-    <Head title="MaketuShop - Marketplace moderne pour acheter et vendre localement" />
+    <Head :title="t('landing.metaTitle')" />
 
     <div id="top" class="min-h-screen bg-background text-foreground">
         <LandingHeader :nav-items="navItems" />

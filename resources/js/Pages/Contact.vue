@@ -6,35 +6,38 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Head, Link } from '@inertiajs/vue3';
 import { Facebook, Mail, MessageCircle, Phone, Share2 } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const contacts = [
     {
-        label: 'WhatsApp',
-        value: 'Canal officiel Maketu',
+        label: t('contactPage.whatsappLabel'),
+        value: t('contactPage.whatsappValue'),
         href: 'https://whatsapp.com/channel/0029VbBpVyo545v2xLJpev2X',
         icon: MessageCircle,
     },
     {
-        label: 'Téléphone',
+        label: t('contactPage.phoneLabel'),
         value: '+237 695988879',
         href: 'tel:+237695988879',
         icon: Phone,
     },
     {
-        label: 'Email',
+        label: t('contactPage.emailLabel'),
         value: 'djielejames@gmail.com',
         href: 'mailto:djielejames@gmail.com',
         icon: Mail,
     },
     {
-        label: 'Facebook',
-        value: 'Page Facebook Maketu',
+        label: t('contactPage.facebookLabel'),
+        value: t('contactPage.facebookValue'),
         href: 'https://www.facebook.com/share/14ZUXMqhSuY/',
         icon: Facebook,
     },
     {
-        label: 'Réseaux',
-        value: 'Autres canaux officiels',
+        label: t('contactPage.networksLabel'),
+        value: t('contactPage.networksValue'),
         href: '#',
         icon: Share2,
     },
@@ -42,7 +45,7 @@ const contacts = [
 </script>
 
 <template>
-    <Head title="Contact MaketuShop" />
+    <Head :title="t('contactPage.headTitle')" />
 
     <div class="min-h-screen bg-background">
         <header class="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
@@ -50,12 +53,12 @@ const contacts = [
                 <Link href="/" class="text-base font-semibold">MaketuShop</Link>
                 <div class="flex items-center gap-2">
                     <Link href="/">
-                        <Button variant="outline">Accueil</Button>
+                        <Button variant="outline">{{ t('public.home') }}</Button>
                     </Link>
                     <LanguageSwitcher :floating="false" />
                     <ThemeToggle :floating="false" />
                     <Link :href="route('about')">
-                        <Button variant="outline">À propos</Button>
+                        <Button variant="outline">{{ t('public.about') }}</Button>
                     </Link>
                 </div>
             </div>
@@ -63,10 +66,10 @@ const contacts = [
 
         <main class="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
             <section class="rounded-2xl border border-border bg-card/70 p-6 sm:p-8">
-                <Badge class="mb-4">Contact</Badge>
-                <h1 class="text-3xl font-bold sm:text-4xl">Contactez MaketuShop</h1>
+                <Badge class="mb-4">{{ t('contactPage.badge') }}</Badge>
+                <h1 class="text-3xl font-bold sm:text-4xl">{{ t('contactPage.title') }}</h1>
                 <p class="mt-4 max-w-3xl text-muted-foreground">
-                    Retrouvez ici tous les moyens de communication officiels pour joindre l’équipe MaketuShop.
+                    {{ t('contactPage.intro') }}
                 </p>
             </section>
 

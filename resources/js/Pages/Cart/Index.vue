@@ -8,8 +8,10 @@ import { Head, Link } from '@inertiajs/vue3';
 import { MessageCircle, Store } from 'lucide-vue-next';
 import { computed, onMounted } from 'vue';
 import axios from 'axios';
+import { useI18n } from 'vue-i18n';
 
 const cartStore = useCartStore();
+const { t } = useI18n();
 
 const formatPrice = (value) =>
     new Intl.NumberFormat('fr-FR', {
@@ -26,7 +28,7 @@ const groupedByShop = computed(() => {
     cartStore.items.forEach((item) => {
         const shopId = item.shop?.id ?? `unknown-${item.id}`;
         const key = String(shopId);
-        const shopName = item.shop?.name || 'Boutique inconnue';
+        const shopName = item.shop?.name || t('cartPage.unknownShop');
         const shopLogo = item.shop?.logo || null;
         const ownerPhone = item.shop?.owner_phone || null;
 
@@ -60,23 +62,23 @@ const sanitizePhone = (value) => {
 
 const buildShopOrderMessage = (group) => {
     const lines = [
-        `Bonjour ${group.shop.name},`,
-        'Je souhaite commander les produits suivants :',
+        t('cartPage.waGreeting', { shop: group.shop.name }),
+        t('cartPage.waIntro'),
         '',
     ];
 
     group.items.forEach((item, index) => {
         lines.push(
             `${index + 1}. ${item.name}`,
-            `   - Quantite: ${item.quantity}`,
-            `   - Prix unitaire: ${formatPrice(item.price)}`,
-            `   - Sous-total: ${formatPrice((Number(item.price) || 0) * item.quantity)}`,
-            `   - Lien produit: ${window.location.origin}${route('products.show', { product: item.id })}`,
+            `   - ${t('cartPage.waQuantity')}: ${item.quantity}`,
+            `   - ${t('cartPage.waUnitPrice')}: ${formatPrice(item.price)}`,
+            `   - ${t('cartPage.waSubtotal')}: ${formatPrice((Number(item.price) || 0) * item.quantity)}`,
+            `   - ${t('cartPage.waProductLink')}: ${window.location.origin}${route('products.show', { product: item.id })}`,
             '',
         );
     });
 
-    lines.push(`Sous-total boutique: ${formatPrice(group.subtotal)}`);
+    lines.push(`${t('cartPage.waShopSubtotal')}: ${formatPrice(group.subtotal)}`);
     return encodeURIComponent(lines.join('\n'));
 };
 
@@ -139,22 +141,22 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="Panier" />
+    <Head :title="t('cartPage.headTitle')" />
 
     <div>
         <ProductsNavbar />
         <div class="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-bold">Mon panier</h1>
+                <h1 class="text-2xl font-bold">{{ t('cartPage.title') }}</h1>
                 <Link :href="route('products.index')" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
-                    Continuer mes achats
+                    {{ t('cartPage.continueShopping') }}
                 </Link>
             </div>
 
             <div v-if="!cartStore.items.length" class="rounded-xl border border-dashed border-border p-10 text-center">
-                <p class="text-muted-foreground">Votre panier est vide.</p>
+                <p class="text-muted-foreground">{{ t('cartPage.empty') }}</p>
                 <Link :href="route('products.index')">
-                    <Button class="mt-4">Voir les produits</Button>
+                    <Button class="mt-4">{{ t('cartPage.viewProducts') }}</Button>
                 </Link>
             </div>
 
@@ -162,10 +164,10 @@ onMounted(() => {
                 <div class="flex flex-col gap-2 sm:flex-row">
                     <Button class="sm:w-auto" @click="orderAllViaWhatsapp">
                         <MessageCircle class="mr-2 h-4 w-4" />
-                        Commander chez tous les vendeurs
+                        {{ t('cartPage.orderAll') }}
                     </Button>
                     <Button variant="outline" class="sm:w-auto" @click="cartStore.clear()">
-                        Vider le panier
+                        {{ t('cartPage.clearCart') }}
                     </Button>
                 </div>
 
@@ -184,8 +186,8 @@ onMounted(() => {
                             <CardTitle class="text-lg">{{ group.shop.name }}</CardTitle>
                         </div>
                         <div class="flex items-center gap-2">
-                            <Badge variant="secondary">{{ group.items.length }} produit(s)</Badge>
-                            <span class="text-sm text-muted-foreground">Sous-total: {{ formatPrice(group.subtotal) }}</span>
+                            <Badge variant="secondary">{{ t('shopsPage.productsCount', { count: group.items.length }) }}</Badge>
+                            <span class="text-sm text-muted-foreground">{{ t('cartPage.subtotal') }}: {{ formatPrice(group.subtotal) }}</span>
                         </div>
                     </CardHeader>
 
@@ -219,7 +221,7 @@ onMounted(() => {
                                         +
                                     </Button>
                                     <Button type="button" variant="ghost" class="text-destructive" @click="cartStore.removeItem(item.id)">
-                                        Supprimer
+                                        {{ t('cartPage.remove') }}
                                     </Button>
                                 </div>
                             </CardContent>
@@ -234,27 +236,27 @@ onMounted(() => {
                         >
                             <Button class="w-full">
                                 <MessageCircle class="mr-2 h-4 w-4" />
-                                Commander via WhatsApp ({{ group.shop.name }})
+                                {{ t('cartPage.whatsappOrder', { shop: group.shop.name }) }}
                             </Button>
                         </a>
                         <Button v-else variant="outline" disabled class="w-full">
-                            Numéro WhatsApp indisponible pour {{ group.shop.name }}
+                            {{ t('cartPage.whatsappUnavailable', { shop: group.shop.name }) }}
                         </Button>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Récapitulatif</CardTitle>
+                        <CardTitle>{{ t('cartPage.summary') }}</CardTitle>
                     </CardHeader>
                     <CardContent class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-muted-foreground">Total</span>
+                            <span class="text-muted-foreground">{{ t('cartPage.total') }}</span>
                             <span class="text-lg font-bold text-primary">{{ formatPrice(totalAmount) }}</span>
                         </div>
                         <Button class="w-full" @click="orderAllViaWhatsapp">
                             <MessageCircle class="mr-2 h-4 w-4" />
-                            Commander chez tous les vendeurs
+                            {{ t('cartPage.orderAll') }}
                         </Button>
                     </CardContent>
                 </Card>

@@ -2,11 +2,13 @@
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     images: { type: Array, default: () => [] },
     fallbackImage: { type: String, default: '/images/Maketu1.png' },
 });
+const { t } = useI18n();
 
 const activeIndex = ref(0);
 
@@ -36,7 +38,7 @@ const next = () => {
 <template>
     <div class="space-y-3">
         <div class="group relative aspect-square overflow-hidden rounded-xl border bg-muted">
-            <img :src="currentImage" alt="Apercu produit" class="h-full w-full object-cover" />
+            <img :src="currentImage" :alt="t('public.products')" class="h-full w-full object-cover" />
             <Button
                 type="button"
                 variant="secondary"
@@ -66,7 +68,7 @@ const next = () => {
                 :class="activeIndex === index ? 'border-primary' : 'border-border'"
                 @click="activeIndex = index"
             >
-                <img :src="image.url" :alt="image.alt || 'Miniature'" class="h-full w-full object-cover" />
+                <img :src="image.url" :alt="image.alt || t('public.products')" class="h-full w-full object-cover" />
             </button>
         </div>
     </div>

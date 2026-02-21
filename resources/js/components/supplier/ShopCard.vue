@@ -42,12 +42,12 @@ const formatDate = (value) => {
                 <span>Créée le {{ formatDate(props.shop.created_at) }}</span>
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <Button class="w-full" variant="outline" aria-label="Voir la boutique" @click="$emit('view', props.shop)">
+            <Button class="w-full" variant="outline" aria-label="Voir la boutique" @click="$emit('view', props.shop)">
                     Voir
                 </Button>
                 <Button class="w-full" variant="secondary" aria-label="Modifier la boutique" @click="$emit('edit', props.shop)">
                     Modifier
-                </Button>
+            </Button>
             </div>
         </CardContent>
     </Card>

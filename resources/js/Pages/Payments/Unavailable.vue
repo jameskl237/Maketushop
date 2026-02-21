@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Head, router } from '@inertiajs/vue3';
 import { AlertCircle } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const goBack = () => {
     if (window.history.length > 1) {
@@ -15,7 +18,7 @@ const goBack = () => {
 </script>
 
 <template>
-    <Head title="Paiement indisponible" />
+    <Head :title="t('payments.headTitle')" />
 
     <div>
         <ProductsNavbar />
@@ -25,17 +28,17 @@ const goBack = () => {
                     <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
                         <AlertCircle class="h-6 w-6 text-destructive" />
                     </div>
-                    <CardTitle>Service de paiement indisponible</CardTitle>
+                    <CardTitle>{{ t('payments.title') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="space-y-4 text-center">
                     <p class="text-sm text-muted-foreground">
-                        Le paiement via la plateforme (Orange Money, MTN MoMo, PayPal, etc.) n'est pas encore disponible.
+                        {{ t('payments.text1') }}
                     </p>
                     <p class="text-sm text-muted-foreground">
-                        Cette fonctionnalité sera activée dès l'intégration des APIs de paiement.
+                        {{ t('payments.text2') }}
                     </p>
                     <Button class="w-full sm:w-auto" @click="goBack">
-                        Revenir à la page précédente
+                        {{ t('payments.back') }}
                     </Button>
                 </CardContent>
             </Card>

@@ -5,6 +5,7 @@ import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Link } from '@inertiajs/vue3';
 import { Menu } from 'lucide-vue-next';
 import { onMounted, onUnmounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 /**
  * @component LandingHeader
@@ -14,6 +15,7 @@ import { onMounted, onUnmounted, ref } from 'vue';
 const props = defineProps({
     navItems: { type: Array, default: () => [] },
 });
+const { t } = useI18n();
 
 const scrolled = ref(false);
 const open = ref(false);
@@ -73,10 +75,10 @@ onUnmounted(() => {
                 <LanguageSwitcher :floating="false" />
                 <ThemeToggle :floating="false" />
                 <Link :href="route('login')">
-                    <Button variant="ghost">Connexion</Button>
+                    <Button variant="ghost" class="px-5">{{ t('landing.login') }}</Button>
                 </Link>
                 <Link :href="route('products.index')">
-                    <Button>Commencer</Button>
+                    <Button class="px-5">{{ t('landing.start') }}</Button>
                 </Link>
             </div>
 
@@ -84,13 +86,13 @@ onUnmounted(() => {
                 <Button
                     variant="outline"
                     size="icon"
-                    aria-label="Ouvrir le menu mobile"
+                    :aria-label="t('landing.openMobileMenu')"
                     :aria-expanded="open"
                     aria-haspopup="menu"
                     @click.stop="open = !open"
                 >
                         <Menu class="h-4 w-4" />
-                </Button>
+                    </Button>
                 <div
                     v-if="open"
                     class="absolute right-0 top-12 z-50 w-[88vw] max-w-sm rounded-lg border border-border bg-background p-3 shadow-lg"
@@ -106,10 +108,14 @@ onUnmounted(() => {
                             {{ item.label }}
                         </a>
                         <Link :href="route('login')" @click="open = false">
-                            <Button variant="outline" class="w-full">Connexion</Button>
+                            <Button variant="outline" class="h-auto w-full whitespace-normal break-words px-4 py-2 text-center">
+                                {{ t('landing.login') }}
+                            </Button>
                         </Link>
                         <Link :href="route('products.index')" @click="open = false">
-                            <Button class="w-full">Commencer</Button>
+                            <Button class="h-auto w-full whitespace-normal break-words px-4 py-2 text-center">
+                                {{ t('landing.start') }}
+                            </Button>
                         </Link>
                         <div class="mt-2 flex gap-2">
                             <LanguageSwitcher :floating="false" />

@@ -6,8 +6,10 @@ import { useCartStore } from '@/stores/cart';
 import { Link } from '@inertiajs/vue3';
 import { ShoppingCart, Store } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const cartStore = useCartStore();
+const { t } = useI18n();
 const cartDropdownOpen = ref(false);
 const cartDropdownRef = ref(null);
 
@@ -36,10 +38,10 @@ onUnmounted(() => {
                 <Link :href="route('products.index')" class="text-base font-semibold">MaketuShop</Link>
                 <nav class="hidden items-center gap-3 sm:flex">
                     <Link :href="route('products.index')" class="text-sm text-muted-foreground transition hover:text-foreground">
-                        Produits
+                        {{ t('public.products') }}
                     </Link>
                     <Link :href="route('shops.index')" class="text-sm text-muted-foreground transition hover:text-foreground">
-                        Boutiques
+                        {{ t('public.shops') }}
                     </Link>
                 </nav>
             </div>
@@ -48,7 +50,7 @@ onUnmounted(() => {
                 <LanguageSwitcher :floating="false" />
                 <ThemeToggle :floating="false" />
                 <Link :href="route('shops.index')">
-                    <Button type="button" variant="outline" size="icon" aria-label="Voir les boutiques">
+                    <Button type="button" variant="outline" size="icon" :aria-label="t('public.shops')">
                         <Store class="h-4 w-4" />
                     </Button>
                 </Link>
@@ -63,7 +65,7 @@ onUnmounted(() => {
                         @click.stop="cartDropdownOpen = !cartDropdownOpen"
                     >
                         <ShoppingCart class="h-4 w-4" />
-                        <span class="hidden sm:inline">Panier</span>
+                        <span class="hidden sm:inline">{{ t('cartPage.headTitle') }}</span>
                         <span class="rounded-full bg-primary px-1.5 text-xs text-primary-foreground">{{ cartItemsCount }}</span>
                     </Button>
 
@@ -71,10 +73,10 @@ onUnmounted(() => {
                         v-if="cartDropdownOpen"
                         class="absolute right-0 top-12 z-50 w-72 rounded-lg border border-border bg-background p-3 shadow-lg"
                     >
-                        <p class="mb-2 text-sm font-semibold">Produits ajoutés</p>
+                        <p class="mb-2 text-sm font-semibold">{{ t('productsPage.addedProducts') }}</p>
 
                         <div v-if="!cartItems.length" class="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
-                            Votre panier est vide.
+                            {{ t('productsPage.cartEmpty') }}
                         </div>
 
                         <ul v-else class="max-h-48 space-y-2 overflow-y-auto">
@@ -89,7 +91,7 @@ onUnmounted(() => {
                         </ul>
 
                         <Link :href="route('cart.index')" @click="cartDropdownOpen = false">
-                            <Button class="mt-3 w-full">Voir le panier</Button>
+                            <Button class="mt-3 w-full">{{ t('productsPage.viewCart') }}</Button>
                         </Link>
                     </div>
                 </div>

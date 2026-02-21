@@ -8,12 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCart } from '@/composables/useCart';
 import { Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     product: { type: Object, required: true },
 });
 
 const { addToCart } = useCart();
+const { t } = useI18n();
 
 const onAddToCart = () => {
     addToCart(props.product, 1);
@@ -32,7 +34,7 @@ const onAddToCart = () => {
                         loading="lazy"
                     />
                     <div class="absolute left-2 top-2 flex gap-2">
-                        <Badge v-if="product.is_new" variant="secondary">Nouveau</Badge>
+                        <Badge v-if="product.is_new" variant="secondary">{{ t('productsPage.new') }}</Badge>
                         <Badge v-if="product.discount_percentage" class="bg-destructive text-destructive-foreground">
                             -{{ product.discount_percentage }}%
                         </Badge>
@@ -48,7 +50,7 @@ const onAddToCart = () => {
 
             <div class="space-y-3 p-4">
                 <div class="space-y-1">
-                    <p class="text-xs text-muted-foreground">{{ product.category?.name || 'Sans categorie' }}</p>
+                    <p class="text-xs text-muted-foreground">{{ product.category?.name || t('productsPage.noCategory') }}</p>
                     <Link
                         :href="route('products.show', { product: product.id })"
                         class="line-clamp-2 text-sm font-semibold leading-5 hover:text-primary"
@@ -64,7 +66,7 @@ const onAddToCart = () => {
                     :original-price="product.original_price"
                     :discount-percentage="product.discount_percentage"
                 />
-                <p class="text-xs text-muted-foreground">Livraison: {{ product.delivery_time }}</p>
+                <p class="text-xs text-muted-foreground">{{ t('productsPage.delivery') }}: {{ product.delivery_time }}</p>
 
                 <div class="grid grid-cols-2 gap-2">
                     <Button
@@ -73,11 +75,11 @@ const onAddToCart = () => {
                         :disabled="product.stock <= 0"
                         @click="onAddToCart"
                     >
-                        Ajouter
+                        {{ t('productsPage.add') }}
                     </Button>
                     <Link :href="route('products.buy', { product: product.id })">
                         <Button class="w-full" :disabled="product.stock <= 0">
-                            Acheter
+                            {{ t('productsPage.buy') }}
                         </Button>
                     </Link>
                 </div>

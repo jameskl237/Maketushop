@@ -12,6 +12,7 @@ import { useSearch } from '@/composables/useSearch';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Filter } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     products: { type: Object, required: true },
@@ -22,6 +23,7 @@ const props = defineProps({
 
 const loading = ref(false);
 const mobileCategoryDropdownOpen = ref(false);
+const { t } = useI18n();
 
 const state = reactive({
     search: props.filters.search || '',
@@ -38,20 +40,26 @@ const { search, isSearching } = useSearch(() => applyFilters(), 500);
 
 const activeFilterChips = computed(() => {
     const chips = [];
+    const sortLabelMap = {
+        newest: t('productsPage.sortNewest'),
+        price_asc: t('productsPage.sortPriceAsc'),
+        price_desc: t('productsPage.sortPriceDesc'),
+        popular: t('productsPage.sortPopular'),
+    };
 
-    if (state.search) chips.push({ key: 'search', label: `Recherche: ${state.search}` });
-    if (state.in_stock) chips.push({ key: 'in_stock', label: 'En stock uniquement' });
-    if (state.price_min) chips.push({ key: 'price_min', label: `Prix min: ${state.price_min}` });
-    if (state.price_max) chips.push({ key: 'price_max', label: `Prix max: ${state.price_max}` });
-    if (state.sort && state.sort !== 'newest') chips.push({ key: 'sort', label: `Tri: ${state.sort}` });
+    if (state.search) chips.push({ key: 'search', label: t('productsPage.searchChip', { value: state.search }) });
+    if (state.in_stock) chips.push({ key: 'in_stock', label: t('productsPage.inStockChip') });
+    if (state.price_min) chips.push({ key: 'price_min', label: t('productsPage.priceMinChip', { value: state.price_min }) });
+    if (state.price_max) chips.push({ key: 'price_max', label: t('productsPage.priceMaxChip', { value: state.price_max }) });
+    if (state.sort && state.sort !== 'newest') chips.push({ key: 'sort', label: t('productsPage.sortChip', { value: sortLabelMap[state.sort] || state.sort }) });
 
     state.categories.forEach((categoryId) => {
         const category = props.availableCategories.find((item) => item.id === categoryId);
-        chips.push({ key: `category-${categoryId}`, type: 'category', value: categoryId, label: `Categorie: ${category?.name || categoryId}` });
+        chips.push({ key: `category-${categoryId}`, type: 'category', value: categoryId, label: t('productsPage.categoryChip', { value: category?.name || categoryId }) });
     });
 
     state.locations.forEach((location) => {
-        chips.push({ key: `location-${location}`, type: 'location', value: location, label: `Ville: ${location}` });
+        chips.push({ key: `location-${location}`, type: 'location', value: location, label: t('productsPage.cityChip', { value: location }) });
     });
 
     return chips;
@@ -141,16 +149,16 @@ const removeFilter = (filter) => {
 </script>
 
 <template>
-    <Head title="Produits" />
+    <Head :title="t('productsPage.headTitle')" />
 
     <div>
         <ProductsNavbar />
         <div class="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
             <div class="flex flex-col gap-4">
                 <div class="flex items-center justify-between gap-3">
-                    <h1 class="text-2xl font-bold">Tous les produits</h1>
+                    <h1 class="text-2xl font-bold">{{ t('productsPage.title') }}</h1>
                     <Link href="/" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
-                        Retour a l'accueil
+                        {{ t('public.backHome') }}
                     </Link>
                 </div>
                 <SearchBar v-model="state.search" :is-searching="isSearching" @clear="clearSearch" />
@@ -163,14 +171,14 @@ const removeFilter = (filter) => {
                     <div class="relative lg:hidden">
                         <Button type="button" variant="outline" class="gap-2" @click="mobileCategoryDropdownOpen = !mobileCategoryDropdownOpen">
                             <Filter class="h-4 w-4" />
-                            Categories
+                            {{ t('productsPage.filterCategories') }}
                         </Button>
 
                         <div
                             v-if="mobileCategoryDropdownOpen"
                             class="absolute right-0 top-12 z-50 w-64 rounded-lg border border-border bg-background p-3 shadow-lg"
                         >
-                            <p class="mb-2 text-sm font-semibold">Filtrer par categories</p>
+                            <p class="mb-2 text-sm font-semibold">{{ t('productsPage.filterByCategories') }}</p>
                             <div class="max-h-64 space-y-2 overflow-y-auto">
                                 <label
                                     v-for="category in availableCategories"
@@ -188,27 +196,27 @@ const removeFilter = (filter) => {
                             </div>
 
                             <div class="mt-3 space-y-2 border-t border-border pt-3">
-                                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Prix</p>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{{ t('public.price') }}</p>
                                 <div class="grid grid-cols-2 gap-2">
                                     <input
                                         v-model="state.price_min"
                                         type="number"
                                         min="0"
-                                        placeholder="Min"
+                                        :placeholder="t('public.min')"
                                         class="h-9 rounded-md border border-input bg-background px-2 text-xs"
                                     />
                                     <input
                                         v-model="state.price_max"
                                         type="number"
                                         min="0"
-                                        placeholder="Max"
+                                        :placeholder="t('public.max')"
                                         class="h-9 rounded-md border border-input bg-background px-2 text-xs"
                                     />
                                 </div>
                             </div>
 
                             <Button type="button" variant="outline" class="mt-3 w-full" @click="mobileCategoryDropdownOpen = false">
-                                Fermer
+                                {{ t('public.close') }}
                             </Button>
                         </div>
                     </div>

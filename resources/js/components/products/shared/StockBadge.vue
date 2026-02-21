@@ -1,7 +1,10 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+
 const props = defineProps({
     stock: { type: Number, default: 0 },
 });
+const { t } = useI18n();
 </script>
 
 <template>
@@ -16,7 +19,7 @@ const props = defineProps({
         "
     >
         {{
-            stock <= 0 ? 'Rupture' : stock <= 10 ? `Stock faible (${stock})` : `En stock (${stock})`
+            stock <= 0 ? t('supplier.outOfStock') : stock <= 10 ? `Stock faible (${stock})` : `${t('supplier.inStock')} (${stock})`
         }}
     </span>
 </template>

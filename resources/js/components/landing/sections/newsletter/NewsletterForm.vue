@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 /**
  * @component NewsletterForm
@@ -13,20 +14,21 @@ const email = ref('');
 const loading = ref(false);
 const status = ref('');
 const error = ref('');
+const { t } = useI18n();
 
 const submit = async () => {
     status.value = '';
     error.value = '';
 
     if (!email.value.includes('@')) {
-        error.value = 'Veuillez entrer une adresse email valide.';
+        error.value = t('landing.newsletterInvalid');
         return;
     }
 
     loading.value = true;
     await new Promise((resolve) => setTimeout(resolve, 900));
     loading.value = false;
-    status.value = 'Merci ! Vous êtes inscrit à la newsletter.';
+    status.value = t('landing.newsletterSuccess');
     email.value = '';
 };
 </script>
@@ -40,12 +42,12 @@ const submit = async () => {
                 v-model="email"
                 type="email"
                 autocomplete="email"
-                placeholder="Votre email professionnel"
+                :placeholder="t('landing.newsletterPlaceholder')"
                 aria-label="Adresse email newsletter"
                 required
             />
-            <Button type="submit" :disabled="loading">
-                {{ loading ? 'Inscription...' : "S'abonner" }}
+            <Button type="submit" class="px-5" :disabled="loading">
+                {{ loading ? t('landing.newsletterLoading') : t('landing.newsletterSubscribe') }}
             </Button>
         </div>
         <p v-if="status" class="text-sm text-emerald-600">{{ status }}</p>

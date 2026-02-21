@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Search, Store } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     shops: { type: Object, required: true },
@@ -14,6 +15,7 @@ const props = defineProps({
 });
 
 const search = ref(props.filters?.search || '');
+const { t } = useI18n();
 
 let timeoutId = null;
 watch(search, (value) => {
@@ -31,29 +33,29 @@ const hasShops = computed(() => Boolean(props.shops.data?.length));
 </script>
 
 <template>
-    <Head title="Boutiques" />
+    <Head :title="t('shopsPage.headTitle')" />
 
     <div>
         <ProductsNavbar />
         <div class="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
             <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <Link href="/" class="hover:text-foreground">Accueil</Link>
+                <Link href="/" class="hover:text-foreground">{{ t('public.home') }}</Link>
                 <span>/</span>
-                <Link :href="route('products.index')" class="hover:text-foreground">Produits</Link>
+                <Link :href="route('products.index')" class="hover:text-foreground">{{ t('public.products') }}</Link>
                 <span>/</span>
-                <span class="text-foreground">Boutiques</span>
+                <span class="text-foreground">{{ t('public.shops') }}</span>
             </div>
 
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 class="text-2xl font-bold">Toutes les boutiques</h1>
+                <h1 class="text-2xl font-bold">{{ t('shopsPage.title') }}</h1>
                 <div class="relative w-full sm:w-80">
                     <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input v-model="search" class="pl-9" placeholder="Rechercher une boutique..." />
+                    <Input v-model="search" class="pl-9" :placeholder="t('shopsPage.searchPlaceholder')" />
                 </div>
             </div>
 
             <div v-if="!hasShops" class="rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">
-                Aucune boutique disponible pour le moment.
+                {{ t('shopsPage.empty') }}
             </div>
 
             <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -71,15 +73,15 @@ const hasShops = computed(() => Boolean(props.shops.data?.length));
                             </div>
                             <CardTitle class="line-clamp-1 text-lg">{{ shop.name }}</CardTitle>
                         </div>
-                        <Badge variant="secondary">{{ shop.products_count }} produit(s)</Badge>
+                        <Badge variant="secondary">{{ t('shopsPage.productsCount', { count: shop.products_count }) }}</Badge>
                     </CardHeader>
                     <CardContent class="space-y-3">
                         <p class="text-sm text-muted-foreground">{{ shop.city }} - {{ shop.district }}</p>
                         <p class="line-clamp-2 text-sm text-muted-foreground">
-                            {{ shop.description || 'Cette boutique n’a pas encore de description.' }}
+                            {{ shop.description || t('shopsPage.noDescription') }}
                         </p>
                         <Link :href="route('shops.show', { shop: shop.id })">
-                            <Button variant="outline" class="w-full">Voir la boutique</Button>
+                            <Button variant="outline" class="w-full">{{ t('shopsPage.viewShop') }}</Button>
                         </Link>
                     </CardContent>
                 </Card>
