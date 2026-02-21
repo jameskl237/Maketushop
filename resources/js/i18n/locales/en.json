@@ -52,7 +52,7 @@
         "alreadyRegisteredLogin": "Already registered? Log in",
         "exampleFullName": "Ex: John Doe",
         "exampleUsername": "Ex: john_supplier",
-        "exampleEmail": "Ex: supplier@example.com",
+        "exampleEmail": "Ex: supplier[at]example.com",
         "examplePhone": "695988879",
         "exampleAddress": "City, district, landmark..."
     },
