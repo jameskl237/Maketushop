@@ -2,6 +2,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { Calendar, MapPin, Store } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -27,7 +28,10 @@ const formatDate = (value) => {
                 <Badge variant="secondary">Boutique</Badge>
                 <Store class="h-4 w-4 text-muted-foreground" />
             </div>
-            <CardTitle class="line-clamp-1">{{ props.shop.name }}</CardTitle>
+            <div class="flex items-center justify-between gap-2">
+                <CardTitle class="line-clamp-1">{{ props.shop.name }}</CardTitle>
+                <CopyShopLinkButton :shop-id="props.shop.id" :shop-name="props.shop.name" />
+            </div>
             <CardDescription class="line-clamp-2">
                 {{ props.shop.description || 'Aucune description pour le moment.' }}
             </CardDescription>

@@ -2,6 +2,7 @@
 import SupplierLayout from '@/Layouts/SupplierLayout.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
@@ -105,6 +106,10 @@ const confirmDeleteMedia = () => {
                 >
                     ← Retour aux produits de la boutique
                 </Link>
+                <div class="flex items-center gap-1.5 rounded-md border border-border px-2 py-1 w-fit">
+                    <span class="text-sm font-medium">{{ shop.name }}</span>
+                    <CopyShopLinkButton :shop-id="shop.id" :shop-name="shop.name" />
+                </div>
 
                 <Card>
                     <CardHeader>

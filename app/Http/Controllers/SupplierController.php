@@ -127,6 +127,7 @@ class SupplierController extends Controller
                         return [
                             'id' => $product->id,
                             'name' => $product->name,
+                            'shop_id' => $product->shop_id,
                             'shop_name' => $product->shop?->name,
                             'quantity' => (int) ($product->pivot->quantity ?? 0),
                             'price' => $product->pivot->price ?? null,
