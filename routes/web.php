@@ -29,7 +29,7 @@ Route::get('/products/{product}', [ProductController::class, 'show'])->name('pro
 Route::get('/products/{product}/buy', [ProductController::class, 'buy'])->name('products.buy');
 Route::get('/payments/unavailable', [ProductController::class, 'paymentUnavailable'])->name('payments.unavailable');
 Route::get('/shops', [ProductController::class, 'shops'])->name('shops.index');
-Route::get('/shops/{shop}', [ProductController::class, 'shopShow'])->name('shops.show');
+Route::get('/shops/{shop}/{slug?}', [ProductController::class, 'shopShow'])->name('shops.show');
 Route::get('/cart', [ProductController::class, 'cart'])->name('cart.index');
 Route::get('/cart/metadata', [ProductController::class, 'cartMetadata'])->name('cart.metadata');
 

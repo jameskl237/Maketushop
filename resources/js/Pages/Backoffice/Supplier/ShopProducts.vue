@@ -2,6 +2,7 @@
 import SupplierLayout from '@/Layouts/SupplierLayout.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
@@ -170,9 +171,15 @@ const confirmDeleteProduct = () => {
         <template #content>
             <div class="min-w-0 max-w-full space-y-6 overflow-x-hidden">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <Link :href="route('backoffice.supplier.dashboard')" class="text-sm text-muted-foreground hover:text-foreground">
-                        ← Retour au dashboard
-                    </Link>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Link :href="route('backoffice.supplier.dashboard')" class="text-sm text-muted-foreground hover:text-foreground">
+                            ← Retour au dashboard
+                        </Link>
+                        <div class="flex items-center gap-1.5 rounded-md border border-border px-2 py-1">
+                            <span class="max-w-[14rem] truncate text-sm font-medium">{{ shop.name }}</span>
+                            <CopyShopLinkButton :shop-id="shop.id" :shop-name="shop.name" />
+                        </div>
+                    </div>
                     <Button class="w-full gap-2 sm:w-auto" @click="openAddProductModal">
                         <Plus class="h-4 w-4" />
                         Ajouter un produit
@@ -218,7 +225,10 @@ const confirmDeleteProduct = () => {
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-muted-foreground">Boutique</p>
-                                    <p class="mt-1 text-lg font-semibold line-clamp-1">{{ shop.name }}</p>
+                                    <div class="mt-1 flex items-center gap-1.5">
+                                        <p class="line-clamp-1 text-lg font-semibold">{{ shop.name }}</p>
+                                        <CopyShopLinkButton :shop-id="shop.id" :shop-name="shop.name" />
+                                    </div>
                                 </div>
                                 <Store class="h-5 w-5 text-primary" />
                             </div>

@@ -1,5 +1,6 @@
 <script setup>
 import SupplierLayout from '@/Layouts/SupplierLayout.vue';
+import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Head, Link } from '@inertiajs/vue3';
@@ -38,7 +39,10 @@ defineProps({
                             class="rounded-lg border border-border p-4"
                         >
                             <div class="mb-3 flex items-center justify-between gap-3">
-                                <h3 class="line-clamp-1 text-base font-semibold">{{ shop.name }}</h3>
+                                <div class="flex min-w-0 items-center gap-1.5">
+                                    <h3 class="line-clamp-1 text-base font-semibold">{{ shop.name }}</h3>
+                                    <CopyShopLinkButton :shop-id="shop.id" :shop-name="shop.name" />
+                                </div>
                                 <Badge variant="secondary">{{ shop.products_count }} {{ $t('supplier.products') }}</Badge>
                             </div>
                             <p class="line-clamp-2 text-sm text-muted-foreground">

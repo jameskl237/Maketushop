@@ -1,5 +1,6 @@
 <script setup>
 import SupplierLayout from '@/Layouts/SupplierLayout.vue';
+import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Head } from '@inertiajs/vue3';
@@ -58,7 +59,14 @@ const formatDate = (value) => new Date(value).toLocaleDateString('fr-FR');
                                     :key="`${order.id}-${item.id}`"
                                     class="flex flex-wrap items-center justify-between gap-2 rounded border border-border/70 px-3 py-2"
                                 >
-                                    <span>{{ item.name }} ({{ item.shop_name || $t('supplier.shop') }})</span>
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span>{{ item.name }} ({{ item.shop_name || $t('supplier.shop') }})</span>
+                                        <CopyShopLinkButton
+                                            v-if="item.shop_id && item.shop_name"
+                                            :shop-id="item.shop_id"
+                                            :shop-name="item.shop_name"
+                                        />
+                                    </div>
                                     <span class="text-muted-foreground">{{ $t('supplier.quantity') }}: {{ item.quantity }} - {{ item.price }} FCFA</span>
                                 </div>
                             </div>
