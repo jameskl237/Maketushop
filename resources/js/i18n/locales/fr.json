@@ -50,6 +50,7 @@
         "phone": "Téléphone",
         "address": "Adresse",
         "alreadyRegisteredLogin": "Déjà inscrit ? Se connecter",
+        "googleLogin": "Continuer avec Google",
         "exampleFullName": "Ex: Jean Dupont",
         "exampleUsername": "Ex: jean_supplier",
         "exampleEmail": "Ex: supplier[at]example.com",
