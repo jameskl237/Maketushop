@@ -5,7 +5,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 
 defineProps({
     canResetPassword: {
@@ -15,6 +15,9 @@ defineProps({
         type: String,
     },
 });
+
+const page = usePage();
+const isGoogleOAuthConfigured = Boolean(page.props.auth?.google_oauth_configured ?? false);
 
 const form = useForm({
     email: '',
@@ -98,7 +101,7 @@ const submit = () => {
                     {{ $t('auth.login') }}
                 </PrimaryButton>
             </div>
-            <div class="mt-3">
+            <div v-if="isGoogleOAuthConfigured" class="mt-3">
                 <a
                     :href="route('auth.google.redirect')"
                     class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"

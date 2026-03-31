@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import InputError from '@/Components/InputError.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
 
 const form = useForm({
@@ -44,6 +44,8 @@ const buildPhoneCountryCodes = () => {
 };
 
 const phoneCountryCodes = buildPhoneCountryCodes();
+const page = usePage();
+const isGoogleOAuthConfigured = Boolean(page.props.auth?.google_oauth_configured ?? false);
 
 const submit = () => {
     form.phone_number = form.phone_number.replace(/\D/g, '');
@@ -198,6 +200,7 @@ const submit = () => {
                         </Button>
                     </div>
                     <a
+                        v-if="isGoogleOAuthConfigured"
                         :href="route('auth.google.redirect')"
                         class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted"
                     >
