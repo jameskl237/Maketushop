@@ -2,6 +2,7 @@
 import EmptyState from '@/components/supplier/EmptyState.vue';
 import ShopCard from '@/components/supplier/ShopCard.vue';
 import { Card, CardContent } from '@/components/ui/card';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     shops: {
@@ -19,13 +20,14 @@ const props = defineProps({
 });
 
 defineEmits(['create-shop', 'view-shop', 'edit-shop']);
+const { t } = useI18n();
 </script>
 
 <template>
     <!-- Exemple:
       <ShopsGrid :shops="shops" @create-shop="openDialog" @view-shop="openShop" />
     -->
-    <section aria-label="Liste des boutiques" class="space-y-4">
+    <section :aria-label="t('supplier.shopsListAria')" class="space-y-4">
         <div v-if="loading" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <Card v-for="idx in 6" :key="`shop-skeleton-${idx}`">
                 <CardContent class="space-y-3 p-5">
@@ -39,16 +41,16 @@ defineEmits(['create-shop', 'view-shop', 'edit-shop']);
 
         <EmptyState
             v-else-if="props.shops.length === 0"
-            title="Aucune boutique"
-            description="Crée ta première boutique pour démarrer la vente de tes produits."
-            action-label="Créer ma boutique"
+            :title="t('supplier.emptyShopsTitle')"
+            :description="t('supplier.emptyShopsDescription')"
+            :action-label="t('supplier.createShop')"
             @action="props.canCreateShop && $emit('create-shop')"
         />
 
         <template v-else>
             <div class="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-card p-4">
                 <p class="text-sm text-muted-foreground">
-                    {{ props.shops.length }} boutique<span v-if="props.shops.length > 1">s</span> disponible<span v-if="props.shops.length > 1">s</span>
+                    {{ t('supplier.availableShops', { count: props.shops.length }) }}
                 </p>
             </div>
 
@@ -64,4 +66,3 @@ defineEmits(['create-shop', 'view-shop', 'edit-shop']);
         </template>
     </section>
 </template>
-

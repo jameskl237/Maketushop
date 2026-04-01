@@ -2,11 +2,14 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Store } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 defineProps({
     title: { type: String, required: true },
     description: { type: String, required: true },
-    actionLabel: { type: String, default: 'Créer' },
+    actionLabel: { type: String, default: '' },
 });
 
 defineEmits(['action']);
@@ -25,8 +28,7 @@ defineEmits(['action']);
             <CardDescription>{{ description }}</CardDescription>
         </CardHeader>
         <CardContent class="text-center">
-            <Button @click="$emit('action')">{{ actionLabel }}</Button>
+            <Button @click="$emit('action')">{{ actionLabel || t('supplier.create') }}</Button>
         </CardContent>
     </Card>
 </template>
-

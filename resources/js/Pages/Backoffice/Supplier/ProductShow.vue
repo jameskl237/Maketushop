@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ImageIcon, Plus, Save, Trash2, Video } from 'lucide-vue-next';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     shop: { type: Object, required: true },
@@ -41,6 +42,7 @@ const mediasForm = useForm({
 });
 const deleteMediaDialogOpen = ref(false);
 const mediaToDelete = ref(null);
+const { t } = useI18n();
 
 const onMediasChange = (event) => {
     mediasForm.medias = Array.from(event.target.files ?? []);
@@ -89,11 +91,11 @@ const confirmDeleteMedia = () => {
 </script>
 
 <template>
-    <Head :title="`Produit - ${product.name}`" />
+    <Head :title="`${t('supplier.product')} - ${product.name}`" />
 
     <SupplierLayout
         :title="product.name"
-        :subtitle="`Gestion du produit - ${shop.name}`"
+        :subtitle="t('supplier.productManagementSubtitle', { shop: shop.name })"
         active-route="backoffice.supplier.dashboard"
         :can-create-shop="false"
     >
@@ -103,30 +105,30 @@ const confirmDeleteMedia = () => {
                     :href="route('backoffice.supplier.shops.show', { shop: shop.id })"
                     class="text-sm text-muted-foreground hover:text-foreground"
                 >
-                    ← Retour aux produits de la boutique
+                    {{ t('supplier.backToShopProducts') }}
                 </Link>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Informations produit</CardTitle>
+                        <CardTitle>{{ t('supplier.productInformation') }}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form class="space-y-4" @submit.prevent="submitProductUpdate">
                             <div class="grid gap-4 sm:grid-cols-2">
                                 <div class="space-y-2 sm:col-span-2">
-                                    <Label for="name">Nom</Label>
+                                    <Label for="name">{{ t('supplier.name') }}</Label>
                                     <Input id="name" v-model="productForm.name" type="text" required />
                                     <p v-if="productForm.errors.name" class="text-sm text-destructive">{{ productForm.errors.name }}</p>
                                 </div>
 
                                 <div class="space-y-2">
-                                    <Label for="category_id">Categorie</Label>
+                                    <Label for="category_id">{{ t('supplier.category') }}</Label>
                                     <select
                                         id="category_id"
                                         v-model="productForm.category_id"
                                         class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                     >
-                                        <option value="">Sans categorie</option>
+                                        <option value="">{{ t('supplier.noCategory') }}</option>
                                         <option v-for="category in categories" :key="category.id" :value="category.id">
                                             {{ category.name }}
                                         </option>
@@ -134,58 +136,58 @@ const confirmDeleteMedia = () => {
                                 </div>
 
                                 <div class="space-y-2">
-                                    <Label for="origin">Origine</Label>
+                                    <Label for="origin">{{ t('supplier.origin') }}</Label>
                                     <select
                                         id="origin"
                                         v-model="productForm.origin"
                                         class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                     >
-                                        <option value="local">Local</option>
-                                        <option value="imported">Imported</option>
+                                        <option value="local">{{ t('supplier.local') }}</option>
+                                        <option value="imported">{{ t('supplier.imported') }}</option>
                                     </select>
                                 </div>
 
                                 <div class="space-y-2">
-                                    <Label for="price">Prix</Label>
+                                    <Label for="price">{{ t('supplier.price') }}</Label>
                                     <Input id="price" v-model="productForm.price" type="number" min="0" step="0.01" required />
                                 </div>
 
                                 <div class="space-y-2">
-                                    <Label for="promotion_price">Prix promo</Label>
+                                    <Label for="promotion_price">{{ t('supplier.promoPrice') }}</Label>
                                     <Input id="promotion_price" v-model="productForm.promotion_price" type="number" min="0" step="0.01" />
                                 </div>
 
                                 <div class="space-y-2">
-                                    <Label for="quantity">Quantite</Label>
+                                    <Label for="quantity">{{ t('supplier.quantityLabel') }}</Label>
                                     <Input id="quantity" v-model="productForm.quantity" type="number" min="0" step="0.01" required />
                                 </div>
 
                                 <div class="space-y-2">
-                                    <Label for="in_stock">Disponibilite</Label>
+                                    <Label for="in_stock">{{ t('supplier.availability') }}</Label>
                                     <select
                                         id="in_stock"
                                         v-model="productForm.in_stock"
                                         class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                                     >
-                                        <option :value="true">En stock</option>
-                                        <option :value="false">Rupture</option>
+                                        <option :value="true">{{ t('supplier.inStock') }}</option>
+                                        <option :value="false">{{ t('supplier.outOfStock') }}</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="space-y-2">
-                                <Label for="description">Description courte</Label>
+                                <Label for="description">{{ t('supplier.shortDescription') }}</Label>
                                 <Input id="description" v-model="productForm.description" type="text" />
                             </div>
 
                             <div class="space-y-2">
-                                <Label for="long_description">Description longue</Label>
+                                <Label for="long_description">{{ t('supplier.longDescription') }}</Label>
                                 <Textarea id="long_description" v-model="productForm.long_description" rows="4" />
                             </div>
 
                             <Button type="submit" class="gap-2" :disabled="productForm.processing">
                                 <Save class="h-4 w-4" />
-                                {{ productForm.processing ? 'Mise a jour...' : 'Mettre a jour le produit' }}
+                                {{ productForm.processing ? t('supplier.updating') : t('supplier.updateProduct') }}
                             </Button>
                         </form>
                     </CardContent>
@@ -193,11 +195,11 @@ const confirmDeleteMedia = () => {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Medias du produit</CardTitle>
+                        <CardTitle>{{ t('supplier.productMedia') }}</CardTitle>
                     </CardHeader>
                     <CardContent class="space-y-4">
                         <form class="space-y-3" @submit.prevent="submitMediaUpload">
-                            <Label for="medias">Ajouter des medias (images/videos)</Label>
+                            <Label for="medias">{{ t('supplier.addMediaLabel') }}</Label>
                             <Input
                                 id="medias"
                                 type="file"
@@ -207,12 +209,12 @@ const confirmDeleteMedia = () => {
                             />
                             <Button type="submit" class="gap-2" :disabled="mediasForm.processing">
                                 <Plus class="h-4 w-4" />
-                                {{ mediasForm.processing ? 'Upload...' : 'Ajouter medias' }}
+                                {{ mediasForm.processing ? t('supplier.uploading') : t('supplier.addMedia') }}
                             </Button>
                         </form>
 
                         <div v-if="!product.medias || product.medias.length === 0" class="rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
-                            Aucun media sur ce produit.
+                            {{ t('supplier.noMedia') }}
                         </div>
 
                         <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -230,7 +232,7 @@ const confirmDeleteMedia = () => {
                                     <Button
                                         size="icon"
                                         variant="outline"
-                                        aria-label="Supprimer le media"
+                                        :aria-label="t('supplier.deleteMediaAria')"
                                         @click="requestDeleteMedia(media)"
                                     >
                                         <Trash2 class="h-4 w-4 text-destructive" />
@@ -240,7 +242,7 @@ const confirmDeleteMedia = () => {
                                 <img
                                     v-if="media.type === 'image'"
                                     :src="media.full_url"
-                                    alt="Media produit"
+                                    :alt="t('supplier.productMediaAlt')"
                                     class="h-40 w-full rounded object-cover"
                                 />
                                 <video
@@ -260,10 +262,9 @@ const confirmDeleteMedia = () => {
     <Dialog :open="deleteMediaDialogOpen" @update:open="deleteMediaDialogOpen = $event">
         <DialogContent class="sm:max-w-md">
             <DialogHeader>
-                <DialogTitle>Confirmer la suppression</DialogTitle>
+                <DialogTitle>{{ t('supplier.deleteConfirmTitle') }}</DialogTitle>
                 <DialogDescription>
-                    Voulez-vous vraiment supprimer ce media ?
-                    Cette action est irreversible.
+                    {{ t('supplier.deleteMediaConfirmDescription') }}
                 </DialogDescription>
             </DialogHeader>
 
@@ -273,17 +274,16 @@ const confirmDeleteMedia = () => {
                     variant="outline"
                     @click="deleteMediaDialogOpen = false"
                 >
-                    Annuler
+                    {{ t('common.cancel') }}
                 </Button>
                 <Button
                     type="button"
                     variant="destructive"
                     @click="confirmDeleteMedia"
                 >
-                    Supprimer
+                    {{ t('common.delete') }}
                 </Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>
 </template>
-
