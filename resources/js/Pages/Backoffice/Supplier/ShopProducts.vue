@@ -19,6 +19,7 @@ import axios from 'axios';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { Boxes, Eye, FolderTree, Package, Plus, Search, Store, Trash2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     shop: {
@@ -41,6 +42,7 @@ const searchQuery = ref('');
 const availableCategories = ref([...(props.categories ?? [])]);
 const categoriesLoading = ref(false);
 const productToDelete = ref(null);
+const { t } = useI18n();
 
 const form = useForm({
     name: '',
@@ -69,7 +71,7 @@ const filteredProducts = computed(() => {
             product.promotion_price,
             product.quantity,
             product.origin,
-            product.in_stock ? 'en stock' : 'rupture',
+            product.in_stock ? t('supplier.inStock').toLowerCase() : t('supplier.outOfStock').toLowerCase(),
             product.category?.name,
         ]
             .filter(Boolean)
@@ -85,13 +87,13 @@ const productsCount = computed(() => props.products.length);
 const dominantCategory = computed(() => {
     const counts = new Map();
     for (const product of props.products) {
-        const categoryName = product.category?.name ?? 'Sans categorie';
+        const categoryName = product.category?.name ?? t('supplier.noCategory');
         counts.set(categoryName, (counts.get(categoryName) ?? 0) + 1);
     }
 
-    if (counts.size === 0) return 'Aucune';
+    if (counts.size === 0) return t('supplier.none');
 
-    let dominant = 'Aucune';
+    let dominant = t('supplier.none');
     let max = 0;
     for (const [name, count] of counts.entries()) {
         if (count > max) {
@@ -160,7 +162,7 @@ const confirmDeleteProduct = () => {
 </script>
 
 <template>
-    <Head :title="`Boutique - ${shop.name}`" />
+    <Head :title="`${t('supplier.shop')} - ${shop.name}`" />
 
     <SupplierLayout
         :title="shop.name"
@@ -171,18 +173,12 @@ const confirmDeleteProduct = () => {
         <template #content>
             <div class="min-w-0 max-w-full space-y-6 overflow-x-hidden">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <Link :href="route('backoffice.supplier.dashboard')" class="text-sm text-muted-foreground hover:text-foreground">
-                            ← Retour au dashboard
-                        </Link>
-                        <div class="flex items-center gap-1.5 rounded-md border border-border px-2 py-1">
-                            <span class="max-w-[14rem] truncate text-sm font-medium">{{ shop.name }}</span>
-                            <CopyShopLinkButton :shop-id="shop.id" :shop-name="shop.name" />
-                        </div>
-                    </div>
+                    <Link :href="route('backoffice.supplier.dashboard')" class="text-sm text-muted-foreground hover:text-foreground">
+                        {{ t('supplier.backToDashboard') }}
+                    </Link>
                     <Button class="w-full gap-2 sm:w-auto" @click="openAddProductModal">
                         <Plus class="h-4 w-4" />
-                        Ajouter un produit
+                        {{ t('supplier.addProduct') }}
                     </Button>
                 </div>
 
@@ -191,7 +187,7 @@ const confirmDeleteProduct = () => {
                         <CardContent class="p-5">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm text-muted-foreground">Nombre de produits</p>
+                                    <p class="text-sm text-muted-foreground">{{ t('supplier.productCount') }}</p>
                                     <p class="mt-1 text-2xl font-semibold">{{ productsCount }}</p>
                                 </div>
                                 <Package class="h-5 w-5 text-primary" />
@@ -202,7 +198,7 @@ const confirmDeleteProduct = () => {
                         <CardContent class="p-5">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm text-muted-foreground">Categorie dominante</p>
+                                    <p class="text-sm text-muted-foreground">{{ t('supplier.dominantCategory') }}</p>
                                     <p class="mt-1 text-lg font-semibold">{{ dominantCategory }}</p>
                                 </div>
                                 <FolderTree class="h-5 w-5 text-primary" />
@@ -213,7 +209,7 @@ const confirmDeleteProduct = () => {
                         <CardContent class="p-5">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm text-muted-foreground">Médias uploadés</p>
+                                    <p class="text-sm text-muted-foreground">{{ t('supplier.uploadedMedia') }}</p>
                                     <p class="mt-1 text-2xl font-semibold">{{ mediaCount }}</p>
                                 </div>
                                 <Boxes class="h-5 w-5 text-primary" />
@@ -224,11 +220,8 @@ const confirmDeleteProduct = () => {
                         <CardContent class="p-5">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm text-muted-foreground">Boutique</p>
-                                    <div class="mt-1 flex items-center gap-1.5">
-                                        <p class="line-clamp-1 text-lg font-semibold">{{ shop.name }}</p>
-                                        <CopyShopLinkButton :shop-id="shop.id" :shop-name="shop.name" />
-                                    </div>
+                                    <p class="text-sm text-muted-foreground">{{ t('supplier.shop') }}</p>
+                                    <p class="mt-1 text-lg font-semibold line-clamp-1">{{ shop.name }}</p>
                                 </div>
                                 <Store class="h-5 w-5 text-primary" />
                             </div>
@@ -238,7 +231,7 @@ const confirmDeleteProduct = () => {
 
                 <Card class="min-w-0 max-w-full">
                     <CardHeader>
-                        <CardTitle>Produits</CardTitle>
+                        <CardTitle>{{ t('supplier.products') }}</CardTitle>
                     </CardHeader>
                     <CardContent class="min-w-0 max-w-full space-y-4 overflow-x-hidden">
                         <div class="relative">
@@ -247,27 +240,27 @@ const confirmDeleteProduct = () => {
                                 v-model="searchQuery"
                                 type="text"
                                 class="pl-9"
-                                placeholder="Rechercher (nom, code, categorie, description, prix...)"
-                                aria-label="Recherche produits"
+                                :placeholder="t('supplier.searchProductsPlaceholder')"
+                                :aria-label="t('supplier.searchProductsAria')"
                             />
                         </div>
 
                         <div v-if="filteredProducts.length === 0" class="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-                            Aucun produit trouvé pour cette recherche.
+                            {{ t('supplier.noProductsFound') }}
                         </div>
 
                         <div v-else class="w-full max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-border">
                             <table class="min-w-[900px] text-sm">
                                 <thead class="bg-muted/40">
                                     <tr class="text-left">
-                                        <th class="px-4 py-3 font-medium">Code</th>
-                                        <th class="px-4 py-3 font-medium">Nom</th>
-                                        <th class="px-4 py-3 font-medium">Categorie</th>
-                                        <th class="px-4 py-3 font-medium">Prix</th>
-                                        <th class="px-4 py-3 font-medium">Stock</th>
-                                        <th class="px-4 py-3 font-medium">Quantite</th>
-                                        <th class="px-4 py-3 font-medium">Medias</th>
-                                        <th class="px-4 py-3 font-medium">Actions</th>
+                                        <th class="px-4 py-3 font-medium">{{ t('supplier.code') }}</th>
+                                        <th class="px-4 py-3 font-medium">{{ t('supplier.name') }}</th>
+                                        <th class="px-4 py-3 font-medium">{{ t('supplier.category') }}</th>
+                                        <th class="px-4 py-3 font-medium">{{ t('supplier.price') }}</th>
+                                        <th class="px-4 py-3 font-medium">{{ t('supplier.stock') }}</th>
+                                        <th class="px-4 py-3 font-medium">{{ t('supplier.quantityLabel') }}</th>
+                                        <th class="px-4 py-3 font-medium">{{ t('supplier.medias') }}</th>
+                                        <th class="px-4 py-3 font-medium">{{ t('supplier.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -283,11 +276,11 @@ const confirmDeleteProduct = () => {
                                                 {{ product.description || '-' }}
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3">{{ product.category?.name || 'Sans categorie' }}</td>
+                                        <td class="px-4 py-3">{{ product.category?.name || t('supplier.noCategory') }}</td>
                                         <td class="px-4 py-3">{{ product.price }} FCFA</td>
                                         <td class="px-4 py-3">
                                             <Badge :variant="product.in_stock ? 'secondary' : 'outline'">
-                                                {{ product.in_stock ? 'En stock' : 'Rupture' }}
+                                                {{ product.in_stock ? t('supplier.inStock') : t('supplier.outOfStock') }}
                                             </Badge>
                                         </td>
                                         <td class="px-4 py-3">{{ product.quantity }}</td>
@@ -297,7 +290,7 @@ const confirmDeleteProduct = () => {
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
-                                                    aria-label="Voir le produit"
+                                                    :aria-label="t('supplier.viewProductAria')"
                                                     @click="goToProductShow(product)"
                                                 >
                                                     <Eye class="h-4 w-4" />
@@ -305,7 +298,7 @@ const confirmDeleteProduct = () => {
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
-                                                    aria-label="Supprimer le produit"
+                                                    :aria-label="t('supplier.deleteProductAria')"
                                                     @click="requestDeleteProduct(product)"
                                                 >
                                                     <Trash2 class="h-4 w-4 text-destructive" />
@@ -325,60 +318,60 @@ const confirmDeleteProduct = () => {
     <Dialog :open="addProductDialogOpen" @update:open="addProductDialogOpen = $event">
         <DialogContent class="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
             <DialogHeader>
-                <DialogTitle>Ajouter un produit</DialogTitle>
+                <DialogTitle>{{ t('supplier.addProductTitle') }}</DialogTitle>
                 <DialogDescription>
-                    Renseigne les informations du produit et ajoute les médias (images / vidéos).
+                    {{ t('supplier.addProductDescription') }}
                 </DialogDescription>
             </DialogHeader>
 
             <form class="space-y-4" @submit.prevent="submitProduct">
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div class="space-y-2 sm:col-span-2">
-                        <Label for="product-name">Nom</Label>
+                        <Label for="product-name">{{ t('supplier.name') }}</Label>
                         <Input id="product-name" v-model="form.name" type="text" required />
                         <p v-if="form.errors.name" class="text-sm text-destructive">{{ form.errors.name }}</p>
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="product-category">Categorie</Label>
+                        <Label for="product-category">{{ t('supplier.category') }}</Label>
                         <select
                             id="product-category"
                             v-model="form.category_id"
                             class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                         >
-                            <option value="">Sans categorie</option>
+                            <option value="">{{ t('supplier.noCategory') }}</option>
                             <option v-for="category in availableCategories" :key="category.id" :value="category.id">
                                 {{ category.name }}
                             </option>
                         </select>
-                        <p v-if="categoriesLoading" class="text-xs text-muted-foreground">Chargement des categories...</p>
+                        <p v-if="categoriesLoading" class="text-xs text-muted-foreground">{{ t('supplier.loadingCategories') }}</p>
                         <p v-else-if="availableCategories.length === 0" class="text-xs text-muted-foreground">
-                            Aucune categorie disponible pour le moment.
+                            {{ t('supplier.noCategoriesAvailable') }}
                         </p>
                         <p v-if="form.errors.category_id" class="text-sm text-destructive">{{ form.errors.category_id }}</p>
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="product-origin">Origine</Label>
+                        <Label for="product-origin">{{ t('supplier.origin') }}</Label>
                         <select
                             id="product-origin"
                             v-model="form.origin"
                             class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                         >
-                            <option value="local">Local</option>
-                            <option value="imported">Imported</option>
+                            <option value="local">{{ t('supplier.local') }}</option>
+                            <option value="imported">{{ t('supplier.imported') }}</option>
                         </select>
                         <p v-if="form.errors.origin" class="text-sm text-destructive">{{ form.errors.origin }}</p>
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="product-price">Prix</Label>
+                        <Label for="product-price">{{ t('supplier.price') }}</Label>
                         <Input id="product-price" v-model="form.price" type="number" min="0" step="0.01" required />
                         <p v-if="form.errors.price" class="text-sm text-destructive">{{ form.errors.price }}</p>
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="product-promo-price">Prix promo</Label>
+                        <Label for="product-promo-price">{{ t('supplier.promoPrice') }}</Label>
                         <Input id="product-promo-price" v-model="form.promotion_price" type="number" min="0" step="0.01" />
                         <p v-if="form.errors.promotion_price" class="text-sm text-destructive">
                             {{ form.errors.promotion_price }}
@@ -386,33 +379,33 @@ const confirmDeleteProduct = () => {
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="product-quantity">Quantite</Label>
+                        <Label for="product-quantity">{{ t('supplier.quantityLabel') }}</Label>
                         <Input id="product-quantity" v-model="form.quantity" type="number" min="0" step="0.01" required />
                         <p v-if="form.errors.quantity" class="text-sm text-destructive">{{ form.errors.quantity }}</p>
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="product-stock">Disponibilite</Label>
+                        <Label for="product-stock">{{ t('supplier.availability') }}</Label>
                         <select
                             id="product-stock"
                             v-model="form.in_stock"
                             class="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                         >
-                            <option :value="true">En stock</option>
-                            <option :value="false">Rupture</option>
+                            <option :value="true">{{ t('supplier.inStock') }}</option>
+                            <option :value="false">{{ t('supplier.outOfStock') }}</option>
                         </select>
                         <p v-if="form.errors.in_stock" class="text-sm text-destructive">{{ form.errors.in_stock }}</p>
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="product-description">Description courte</Label>
+                    <Label for="product-description">{{ t('supplier.shortDescription') }}</Label>
                     <Input id="product-description" v-model="form.description" type="text" />
                     <p v-if="form.errors.description" class="text-sm text-destructive">{{ form.errors.description }}</p>
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="product-long-description">Description longue</Label>
+                    <Label for="product-long-description">{{ t('supplier.longDescription') }}</Label>
                     <Textarea id="product-long-description" v-model="form.long_description" rows="4" />
                     <p v-if="form.errors.long_description" class="text-sm text-destructive">
                         {{ form.errors.long_description }}
@@ -420,7 +413,7 @@ const confirmDeleteProduct = () => {
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="product-medias">Médias (images/vidéos)</Label>
+                    <Label for="product-medias">{{ t('supplier.productMediasLabel') }}</Label>
                     <Input
                         id="product-medias"
                         type="file"
@@ -429,16 +422,16 @@ const confirmDeleteProduct = () => {
                         @change="onMediaChange"
                     />
                     <p class="text-xs text-muted-foreground">
-                        Tu peux uploader plusieurs photos et videos (max 10 fichiers).
+                        {{ t('supplier.mediaHint') }}
                     </p>
                     <p v-if="form.errors.medias" class="text-sm text-destructive">{{ form.errors.medias }}</p>
                     <p v-if="form.errors['medias.0']" class="text-sm text-destructive">{{ form.errors['medias.0'] }}</p>
                 </div>
 
                 <DialogFooter class="gap-2 sm:gap-0">
-                    <Button type="button" variant="outline" @click="addProductDialogOpen = false">Annuler</Button>
+                    <Button type="button" variant="outline" @click="addProductDialogOpen = false">{{ t('common.cancel') }}</Button>
                     <Button type="submit" :disabled="form.processing">
-                        {{ form.processing ? 'Creation...' : 'Creer le produit' }}
+                        {{ form.processing ? t('supplier.creating') : t('supplier.createProduct') }}
                     </Button>
                 </DialogFooter>
             </form>
@@ -448,13 +441,9 @@ const confirmDeleteProduct = () => {
     <Dialog :open="deleteProductDialogOpen" @update:open="deleteProductDialogOpen = $event">
         <DialogContent class="sm:max-w-md">
             <DialogHeader>
-                <DialogTitle>Confirmer la suppression</DialogTitle>
+                <DialogTitle>{{ t('supplier.deleteConfirmTitle') }}</DialogTitle>
                 <DialogDescription>
-                    Voulez-vous vraiment supprimer
-                    <span class="font-semibold text-foreground">
-                        {{ productToDelete?.name ?? 'ce produit' }}
-                    </span>
-                    ? Cette action est irreversible.
+                    {{ t('supplier.deleteProductConfirmDescription', { product: productToDelete?.name ?? t('supplier.thisProduct') }) }}
                 </DialogDescription>
             </DialogHeader>
 
@@ -464,17 +453,16 @@ const confirmDeleteProduct = () => {
                     variant="outline"
                     @click="deleteProductDialogOpen = false"
                 >
-                    Annuler
+                    {{ t('common.cancel') }}
                 </Button>
                 <Button
                     type="button"
                     variant="destructive"
                     @click="confirmDeleteProduct"
                 >
-                    Supprimer
+                    {{ t('common.delete') }}
                 </Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>
 </template>
-

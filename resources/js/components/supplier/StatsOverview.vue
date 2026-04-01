@@ -1,5 +1,6 @@
 <script setup>
 import StatCard from '@/components/supplier/StatCard.vue';
+import { useI18n } from 'vue-i18n';
 
 defineProps({
     stats: {
@@ -11,11 +12,13 @@ defineProps({
         default: false,
     },
 });
+
+const { t } = useI18n();
 </script>
 
 <template>
     <!-- Exemple: <StatsOverview :stats="stats" :loading="false" /> -->
-    <section aria-label="Résumé des statistiques">
+    <section :aria-label="t('supplier.statsOverviewAria')">
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
                 v-for="(item, index) in stats"
@@ -30,4 +33,3 @@ defineProps({
         </div>
     </section>
 </template>
-

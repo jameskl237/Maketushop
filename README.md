@@ -77,6 +77,24 @@ npm run dev
 php artisan serve
 ```
 
+### Configuration Google OAuth
+
+Renseigner ces variables dans `.env` pour activer la connexion Google :
+
+```bash
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI="${APP_URL}/auth/google/callback"
+```
+
+Dans la console Google Cloud, l'URI de redirection autorisee doit correspondre a :
+
+```text
+http://localhost/auth/google/callback
+```
+
+ou a votre domaine local/reel si `APP_URL` est different.
+
 ### Points techniques inclus
 
 - Header sticky avec transition transparent -> solide au scroll.

@@ -207,9 +207,9 @@ const submitShopUpdate = () => {
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="shop-logo">Logo de la boutique</Label>
+                    <Label for="shop-logo">{{ $t('supplier.shopLogo') }}</Label>
                     <Input id="shop-logo" type="file" accept="image/*" @change="onLogoChange" />
-                    <p class="text-xs text-muted-foreground">Format image, max 5MB.</p>
+                    <p class="text-xs text-muted-foreground">{{ $t('supplier.imageHint') }}</p>
                     <p v-if="form.errors.logo" class="text-sm text-destructive">{{ form.errors.logo }}</p>
                 </div>
 
@@ -228,9 +228,9 @@ const submitShopUpdate = () => {
     <Dialog :open="editShopDialogOpen" @update:open="editShopDialogOpen = $event">
         <DialogContent class="sm:max-w-lg">
             <DialogHeader>
-                <DialogTitle>Modifier la boutique</DialogTitle>
+                <DialogTitle>{{ $t('supplier.editShopTitle') }}</DialogTitle>
                 <DialogDescription>
-                    Mets a jour les informations de ta boutique. Laisse le telephone vide pour utiliser celui de ton profil.
+                    {{ $t('supplier.editShopDescription') }}
                 </DialogDescription>
             </DialogHeader>
 
@@ -256,10 +256,10 @@ const submitShopUpdate = () => {
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="edit-shop-phone">Telephone WhatsApp (optionnel)</Label>
-                    <Input id="edit-shop-phone" v-model="editForm.phone" type="text" placeholder="Ex: 6XXXXXXXX" />
+                    <Label for="edit-shop-phone">{{ $t('supplier.whatsappPhoneOptional') }}</Label>
+                    <Input id="edit-shop-phone" v-model="editForm.phone" type="text" :placeholder="$t('supplier.phonePlaceholder')" />
                     <p class="text-xs text-muted-foreground">
-                        Si ce champ est vide, le systeme utilisera le numero de ton compte utilisateur.
+                        {{ $t('supplier.phoneFallbackHint') }}
                     </p>
                     <p v-if="editForm.errors.phone" class="text-sm text-destructive">{{ editForm.errors.phone }}</p>
                 </div>
@@ -271,9 +271,9 @@ const submitShopUpdate = () => {
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="edit-shop-logo">Logo de la boutique (optionnel)</Label>
+                    <Label for="edit-shop-logo">{{ $t('supplier.shopLogoOptional') }}</Label>
                     <Input id="edit-shop-logo" type="file" accept="image/*" @change="onEditLogoChange" />
-                    <p class="text-xs text-muted-foreground">Format image, max 5MB.</p>
+                    <p class="text-xs text-muted-foreground">{{ $t('supplier.imageHint') }}</p>
                     <p v-if="editForm.errors.logo" class="text-sm text-destructive">{{ editForm.errors.logo }}</p>
                 </div>
 
@@ -282,11 +282,10 @@ const submitShopUpdate = () => {
                         {{ $t('common.cancel') }}
                     </Button>
                     <Button type="submit" :disabled="editForm.processing">
-                        {{ editForm.processing ? $t('common.saving') : 'Mettre a jour' }}
+                        {{ editForm.processing ? $t('common.saving') : $t('supplier.updateShop') }}
                     </Button>
                 </DialogFooter>
             </form>
         </DialogContent>
     </Dialog>
 </template>
-

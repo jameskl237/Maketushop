@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { Calendar, MapPin, Store } from 'lucide-vue-next';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     shop: {
@@ -13,6 +14,7 @@ const props = defineProps({
 });
 
 defineEmits(['view', 'edit']);
+const { t } = useI18n();
 
 const formatDate = (value) => {
     if (!value) return '-';
@@ -25,7 +27,7 @@ const formatDate = (value) => {
     <Card class="h-full border-border/60 transition-all duration-300 hover:shadow-lg">
         <CardHeader>
             <div class="mb-2 flex items-center justify-between">
-                <Badge variant="secondary">Boutique</Badge>
+                <Badge variant="secondary">{{ t('supplier.shopBadge') }}</Badge>
                 <Store class="h-4 w-4 text-muted-foreground" />
             </div>
             <div class="flex items-center justify-between gap-2">
@@ -33,7 +35,7 @@ const formatDate = (value) => {
                 <CopyShopLinkButton :shop-id="props.shop.id" :shop-name="props.shop.name" />
             </div>
             <CardDescription class="line-clamp-2">
-                {{ props.shop.description || 'Aucune description pour le moment.' }}
+                {{ props.shop.description || t('supplier.noShopDescription') }}
             </CardDescription>
         </CardHeader>
         <CardContent class="space-y-3">
@@ -43,17 +45,16 @@ const formatDate = (value) => {
             </div>
             <div class="flex items-center gap-2 text-xs text-muted-foreground">
                 <Calendar class="h-3.5 w-3.5" />
-                <span>Créée le {{ formatDate(props.shop.created_at) }}</span>
+                <span>{{ t('supplier.createdAt', { date: formatDate(props.shop.created_at) }) }}</span>
             </div>
             <div class="grid grid-cols-2 gap-2">
-            <Button class="w-full" variant="outline" aria-label="Voir la boutique" @click="$emit('view', props.shop)">
-                    Voir
+                <Button class="w-full" variant="outline" :aria-label="t('supplier.viewShopAria')" @click="$emit('view', props.shop)">
+                    {{ t('supplier.view') }}
                 </Button>
-                <Button class="w-full" variant="secondary" aria-label="Modifier la boutique" @click="$emit('edit', props.shop)">
-                    Modifier
-            </Button>
+                <Button class="w-full" variant="secondary" :aria-label="t('supplier.editShopAria')" @click="$emit('edit', props.shop)">
+                    {{ t('supplier.edit') }}
+                </Button>
             </div>
         </CardContent>
     </Card>
 </template>
-
