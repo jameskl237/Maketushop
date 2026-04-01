@@ -11,6 +11,7 @@ const props = defineProps({
     product: { type: Object, required: true },
 });
 const { t } = useI18n();
+const publicBaseUrl = (import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin).replace(/\/+$/, '');
 
 const sellerPhone = computed(() => props.product.shop?.owner_phone || '');
 
@@ -22,13 +23,14 @@ const whatsappPhone = computed(() => {
 });
 
 const whatsappText = computed(() => {
+    const productUrl = `${publicBaseUrl}${route('products.show', { product: props.product.id }, false)}`;
     const lines = [
         t('productBuy.waHello'),
         `- ${t('productBuy.waName')}: ${props.product.name}`,
         `- ${t('productBuy.waPrice')}: ${props.product.current_price} FCFA`,
         `- ${t('productBuy.waShop')}: ${props.product.shop?.name || 'N/A'}`,
         `- ${t('productBuy.waImage')}: ${props.product.main_image || ''}`,
-        `- ${t('productBuy.waLink')}: ${window.location.origin}${route('products.show', { product: props.product.id })}`,
+        `- ${t('productBuy.waLink')}: ${productUrl}`,
     ];
 
     return encodeURIComponent(lines.join('\n'));

@@ -1,5 +1,6 @@
 <script setup>
 import SupplierLayout from '@/Layouts/SupplierLayout.vue';
+import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Head, Link } from '@inertiajs/vue3';
@@ -53,7 +54,13 @@ defineProps({
                                 >
                                     <td class="px-4 py-3">{{ product.code }}</td>
                                     <td class="px-4 py-3 font-medium">{{ product.name }}</td>
-                                    <td class="px-4 py-3">{{ product.shop?.name || '-' }}</td>
+                                    <td class="px-4 py-3">
+                                        <div v-if="product.shop?.name" class="flex items-center gap-1.5">
+                                            <span class="line-clamp-1">{{ product.shop.name }}</span>
+                                            <CopyShopLinkButton :shop-id="product.shop_id" :shop-name="product.shop.name" />
+                                        </div>
+                                        <span v-else>-</span>
+                                    </td>
                                     <td class="px-4 py-3">{{ product.category?.name || $t('supplier.noCategory') }}</td>
                                     <td class="px-4 py-3">{{ product.price }} FCFA</td>
                                     <td class="px-4 py-3">

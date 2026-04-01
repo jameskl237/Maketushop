@@ -11,6 +11,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import {
     Check,
     Clock,
+    Copy,
     Filter,
     Heart,
     Loader2,
@@ -38,7 +39,10 @@ const props = defineProps({
 const activeTab = ref('products');
 const loading = ref(false);
 const mobileFiltersOpen = ref(false);
+const copiedShopLink = ref(false);
+let copiedShopLinkTimeout = null;
 const { t } = useI18n();
+const productionBaseUrl = (import.meta.env.VITE_PUBLIC_APP_URL || 'https://maketushop.com').replace(/\/+$/, '');
 
 const state = reactive({
     search: props.filters.search || '',
@@ -116,6 +120,43 @@ const whatsappUrl = computed(() => {
     const text = encodeURIComponent(`Bonjour ${props.shop.name}, je souhaite en savoir plus sur vos produits.`);
     return `https://wa.me/${phone}?text=${text}`;
 });
+
+const slugify = (value) =>
+    String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+const shopPublicUrl = computed(() =>
+    `${productionBaseUrl}${route('shops.show', { shop: props.shop.id, slug: slugify(props.shop.name) || 'boutique' }, false)}`,
+);
+
+const copyShopLink = async () => {
+    try {
+        if (navigator?.clipboard?.writeText) {
+            await navigator.clipboard.writeText(shopPublicUrl.value);
+        } else {
+            const input = document.createElement('textarea');
+            input.value = shopPublicUrl.value;
+            input.setAttribute('readonly', '');
+            input.style.position = 'absolute';
+            input.style.left = '-9999px';
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+        }
+        copiedShopLink.value = true;
+        if (copiedShopLinkTimeout) clearTimeout(copiedShopLinkTimeout);
+        copiedShopLinkTimeout = setTimeout(() => {
+            copiedShopLink.value = false;
+        }, 1800);
+    } catch (error) {
+        copiedShopLink.value = false;
+    }
+};
 </script>
 
 <template>
@@ -239,6 +280,17 @@ const whatsappUrl = computed(() => {
                         </Button>
                         <Button variant="outline" size="icon"><Heart class="h-4 w-4" /></Button>
                         <Button variant="outline" size="icon"><Share2 class="h-4 w-4" /></Button>
+                    </div>
+                </div>
+
+                <div class="mb-6 rounded-xl border border-border bg-card p-4">
+                    <p class="mb-2 text-sm font-medium">{{ t('shopShow.copyLinkTitle') }}</p>
+                    <div class="flex flex-col gap-2 sm:flex-row">
+                        <Input :model-value="shopPublicUrl" readonly class="font-mono text-xs sm:text-sm" />
+                        <Button class="gap-2 sm:w-auto" @click="copyShopLink">
+                            <Copy class="h-4 w-4" />
+                            {{ copiedShopLink ? t('public.copied') : t('shopShow.copyLinkButton') }}
+                        </Button>
                     </div>
                 </div>
 

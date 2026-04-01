@@ -2,6 +2,7 @@
 import SupplierLayout from '@/Layouts/SupplierLayout.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,

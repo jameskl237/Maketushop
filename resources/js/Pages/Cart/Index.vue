@@ -12,6 +12,7 @@ import { useI18n } from 'vue-i18n';
 
 const cartStore = useCartStore();
 const { t } = useI18n();
+const publicBaseUrl = (import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin).replace(/\/+$/, '');
 
 const formatPrice = (value) =>
     new Intl.NumberFormat('fr-FR', {
@@ -68,12 +69,13 @@ const buildShopOrderMessage = (group) => {
     ];
 
     group.items.forEach((item, index) => {
+        const productUrl = `${publicBaseUrl}${route('products.show', { product: item.id }, false)}`;
         lines.push(
             `${index + 1}. ${item.name}`,
             `   - ${t('cartPage.waQuantity')}: ${item.quantity}`,
             `   - ${t('cartPage.waUnitPrice')}: ${formatPrice(item.price)}`,
             `   - ${t('cartPage.waSubtotal')}: ${formatPrice((Number(item.price) || 0) * item.quantity)}`,
-            `   - ${t('cartPage.waProductLink')}: ${window.location.origin}${route('products.show', { product: item.id })}`,
+            `   - ${t('cartPage.waProductLink')}: ${productUrl}`,
             '',
         );
     });
