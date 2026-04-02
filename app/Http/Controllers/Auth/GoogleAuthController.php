@@ -63,10 +63,17 @@ class GoogleAuthController extends Controller
             ->first();
 
         if ($user) {
-            $user->forceFill([
+            $updates = [
                 'google_id' => $user->google_id ?: $googleUser->getId(),
                 'email_verified_at' => $user->email_verified_at ?: now(),
-            ])->save();
+            ];
+
+            // Si l'utilisateur n'est pas un admin, l'enregistrer comme supplier
+            if ($user->role !== User::ROLE_ADMIN) {
+                $updates['role'] = User::ROLE_SUPPLIER;
+            }
+
+            $user->forceFill($updates)->save();
         } else {
             $baseUsername = Str::slug($googleUser->getName() ?: Str::before($email, '@'), '_');
             $username = $this->buildUniqueUsername($baseUsername !== '' ? $baseUsername : 'user');
@@ -76,16 +83,18 @@ class GoogleAuthController extends Controller
                 'username' => $username,
                 'email' => $email,
                 'google_id' => $googleUser->getId(),
-                'role' => User::ROLE_USER,
+                // Par défaut, un utilisateur créé via Google doit être un fournisseur
+                'role' => User::ROLE_SUPPLIER,
                 'password' => Hash::make(Str::random(32)),
                 'email_verified_at' => now(),
             ]);
         }
 
-        Auth::login($user, true);
-        $request->session()->regenerate();
+    Auth::login($user, true);
+    $request->session()->regenerate();
 
-        return redirect()->route('dashboard');
+    // Rediriger vers le dashboard adapté au rôle (ex: backoffice.supplier.dashboard)
+    return redirect()->route($user->dashboardRouteName());
     }
 
     private function buildUniqueUsername(string $base): string
