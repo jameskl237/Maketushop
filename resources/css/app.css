@@ -75,6 +75,38 @@
     }
   }
 
+    /* Form controls that follow design tokens so they adapt to .dark */
+    .form-input {
+      @apply mt-1 block w-full rounded-md px-3 py-2 text-sm;
+      border: 1px solid transparent; /* fallback if border-border not available at runtime */
+      background-color: hsl(var(--card));
+      color: hsl(var(--card-foreground));
+    }
+
+    .form-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(var(--ring), .12);
+      border-color: hsl(var(--ring));
+    }
+
+    .form-select {
+      @apply mt-1 block w-full rounded-md text-sm px-3 py-2;
+      background-color: hsl(var(--card));
+      color: hsl(var(--card-foreground));
+      border: 1px solid hsl(var(--border));
+    }
+
+    .form-textarea {
+      @apply mt-1 block w-full rounded-md text-sm px-3 py-2;
+      background-color: hsl(var(--card));
+      color: hsl(var(--card-foreground));
+      border: 1px solid hsl(var(--border));
+    }
+
+    .form-checkbox {
+      @apply rounded text-primary;
+    }
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }

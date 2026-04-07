@@ -296,31 +296,31 @@ const deleteCategory = (category) => {
                     <form @submit.prevent="submitUser" class="space-y-3">
                         <div>
                             <label class="block text-sm">Nom</label>
-                            <input v-model="userForm.name" class="mt-1 block w-full" />
+                            <input v-model="userForm.name" class="form-input" />
                             <p v-if="userForm.errors.name" class="text-sm text-destructive mt-1">{{ userForm.errors.name }}</p>
                         </div>
                         <div>
                             <label class="block text-sm">Username</label>
-                            <input v-model="userForm.username" class="mt-1 block w-full" />
+                            <input v-model="userForm.username" class="form-input" />
                             <p v-if="userForm.errors.username" class="text-sm text-destructive mt-1">{{ userForm.errors.username }}</p>
                         </div>
                         <div>
                             <label class="block text-sm">Email</label>
-                            <input v-model="userForm.email" class="mt-1 block w-full" type="email" />
+                            <input v-model="userForm.email" class="form-input" type="email" />
                             <p v-if="userForm.errors.email" class="text-sm text-destructive mt-1">{{ userForm.errors.email }}</p>
                         </div>
                         <div>
                             <label class="block text-sm">Google ID</label>
-                            <input v-model="userForm.google_id" class="mt-1 block w-full" />
+                            <input v-model="userForm.google_id" class="form-input" />
                             <p v-if="userForm.errors.google_id" class="text-sm text-destructive mt-1">{{ userForm.errors.google_id }}</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <input id="email_verified" type="checkbox" v-model="userForm.email_verified" class="rounded" />
+                            <input id="email_verified" type="checkbox" v-model="userForm.email_verified" class="form-checkbox" />
                             <label for="email_verified" class="text-sm">Email vérifié</label>
                         </div>
                         <div>
                             <label class="block text-sm">Rôle</label>
-                            <select v-model="userForm.role" class="mt-1 block w-full">
+                            <select v-model="userForm.role" class="form-select">
                                 <option value="admin">admin</option>
                                 <option value="supplier">supplier</option>
                                 <option value="user">user</option>
@@ -343,12 +343,12 @@ const deleteCategory = (category) => {
                     <form @submit.prevent="submitShop" class="space-y-3">
                         <div>
                             <label class="block text-sm">Nom</label>
-                            <input v-model="shopForm.name" class="mt-1 block w-full" />
+                            <input v-model="shopForm.name" class="form-input" />
                             <p v-if="shopForm.errors.name" class="text-sm text-destructive mt-1">{{ shopForm.errors.name }}</p>
                         </div>
                         <div>
                             <label class="block text-sm">Ville</label>
-                            <input v-model="shopForm.city" class="mt-1 block w-full" />
+                            <input v-model="shopForm.city" class="form-input" />
                             <p v-if="shopForm.errors.city" class="text-sm text-destructive mt-1">{{ shopForm.errors.city }}</p>
                         </div>
                         <div class="flex justify-end gap-2">
@@ -366,12 +366,12 @@ const deleteCategory = (category) => {
                     <form @submit.prevent="submitProduct" class="space-y-3">
                         <div>
                             <label class="block text-sm">Nom</label>
-                            <input v-model="productForm.name" class="mt-1 block w-full" />
+                            <input v-model="productForm.name" class="form-input" />
                             <p v-if="productForm.errors.name" class="text-sm text-destructive mt-1">{{ productForm.errors.name }}</p>
                         </div>
                         <div>
                             <label class="block text-sm">Prix</label>
-                            <input v-model="productForm.price" class="mt-1 block w-full" type="number" />
+                            <input v-model="productForm.price" class="form-input" type="number" />
                             <p v-if="productForm.errors.price" class="text-sm text-destructive mt-1">{{ productForm.errors.price }}</p>
                         </div>
                         <div class="flex justify-end gap-2">
@@ -389,7 +389,7 @@ const deleteCategory = (category) => {
                     <form @submit.prevent="submitCategory" class="space-y-3">
                         <div>
                             <label class="block text-sm">Nom</label>
-                            <input v-model="categoryForm.name" class="mt-1 block w-full" />
+                            <input v-model="categoryForm.name" class="form-input" />
                             <p v-if="categoryForm.errors.name" class="text-sm text-destructive mt-1">{{ categoryForm.errors.name }}</p>
                         </div>
                         <div class="flex justify-end gap-2">

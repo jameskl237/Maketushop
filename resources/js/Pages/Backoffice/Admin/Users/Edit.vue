@@ -47,32 +47,32 @@ const submit = () => {
                     <form @submit.prevent="submit" class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-muted-foreground">Nom</label>
-                            <input v-model="form.name" type="text" class="mt-1 block w-full" />
+                            <input v-model="form.name" type="text" class="form-input" />
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-muted-foreground">Nom d'utilisateur</label>
-                            <input v-model="form.username" type="text" class="mt-1 block w-full" />
+                            <input v-model="form.username" type="text" class="form-input" />
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-muted-foreground">Email</label>
-                            <input v-model="form.email" type="email" class="mt-1 block w-full" />
+                            <input v-model="form.email" type="email" class="form-input" />
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-muted-foreground">Téléphone</label>
-                            <input v-model="form.phone" type="text" class="mt-1 block w-full" />
+                            <input v-model="form.phone" type="text" class="form-input" />
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-muted-foreground">Adresse</label>
-                            <input v-model="form.address" type="text" class="mt-1 block w-full" />
+                            <input v-model="form.address" type="text" class="form-input" />
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-muted-foreground">Rôle</label>
-                            <select v-model="form.role" class="mt-1 block w-full">
+                            <select v-model="form.role" class="form-select">
                                 <option value="admin">admin</option>
                                 <option value="supplier">supplier</option>
                                 <option value="user">user</option>
@@ -81,17 +81,17 @@ const submit = () => {
 
                         <div>
                             <label class="block text-sm font-medium text-muted-foreground">Google ID</label>
-                            <input v-model="form.google_id" type="text" class="mt-1 block w-full" />
+                            <input v-model="form.google_id" type="text" class="form-input" />
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <input id="email_verified_edit" type="checkbox" v-model="form.email_verified" class="rounded" />
+                            <input id="email_verified_edit" type="checkbox" v-model="form.email_verified" class="form-checkbox" />
                             <label for="email_verified_edit" class="text-sm font-medium text-muted-foreground">Email vérifié</label>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-muted-foreground">Mot de passe (laisser vide pour conserver)</label>
-                            <input v-model="form.password" type="password" class="mt-1 block w-full" />
+                            <input v-model="form.password" type="password" class="form-input" />
                         </div>
 
                         <div class="flex items-center justify-end gap-3">
