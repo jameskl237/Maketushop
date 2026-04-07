@@ -9,6 +9,7 @@ use App\Http\Controllers\Backoffice\Admin\AdminController;
 use App\Http\Controllers\Backoffice\Admin\ShopController as AdminShopController;
 use App\Http\Controllers\Backoffice\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Backoffice\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Backoffice\Admin\OrderController as AdminOrderController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -76,8 +77,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('backoffice/admin')->group(fun
     Route::delete('/products/{product}', [AdminProductController::class, 'destroy'])->name('backoffice.admin.products.destroy');
     Route::get('/categories', [AdminCategoryController::class, 'index'])->name('backoffice.admin.categories.index');
     Route::post('/categories', [AdminCategoryController::class, 'store'])->name('backoffice.admin.categories.store');
-use App\Http\Controllers\Backoffice\Admin\OrderController as AdminOrderController;
-...
     Route::get('/categories/{category}', [AdminCategoryController::class, 'show'])->name('backoffice.admin.categories.show');
     Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('backoffice.admin.categories.update');
     Route::delete('/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('backoffice.admin.categories.destroy');

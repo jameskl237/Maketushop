@@ -37,9 +37,11 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|alpha_dash|unique:'.User::class,
+            'google_id' => 'nullable|string|max:255|unique:'.User::class,
             'email' => 'required|string|email|max:255|unique:'.User::class,
             'phone' => 'nullable|string|max:20|regex:/^[0-9]{4,20}$/',
             'address' => 'nullable|string|max:255',
+            'email_verified' => 'nullable|boolean',
             'role' => 'required|in:'.implode(',', [User::ROLE_ADMIN, User::ROLE_SUPPLIER, User::ROLE_USER]),
             'password' => ['nullable', 'confirmed'],
         ]);
@@ -50,6 +52,11 @@ class UserController extends Controller
             $data['password'] = Hash::make(
                 \Illuminate\Support\Str::random(12)
             );
+        }
+
+        if (! empty($data['email_verified'])) {
+            $data['email_verified_at'] = now();
+            unset($data['email_verified']);
         }
 
         User::create($data);
@@ -85,9 +92,11 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|alpha_dash|unique:'.User::class.',username,'.$user->id,
+            'google_id' => 'nullable|string|max:255|unique:'.User::class.',google_id,'.$user->id,
             'email' => 'required|string|email|max:255|unique:'.User::class.',email,'.$user->id,
             'phone' => 'nullable|string|max:20|regex:/^[0-9]{4,20}$/',
             'address' => 'nullable|string|max:255',
+            'email_verified' => 'nullable|boolean',
             'role' => 'required|in:'.implode(',', [User::ROLE_ADMIN, User::ROLE_SUPPLIER, User::ROLE_USER]),
             'password' => ['nullable', 'confirmed'],
         ]);
@@ -96,6 +105,15 @@ class UserController extends Controller
             $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);
+        }
+
+        if (array_key_exists('email_verified', $data)) {
+            if (! empty($data['email_verified'])) {
+                $data['email_verified_at'] = now();
+            } else {
+                $data['email_verified_at'] = null;
+            }
+            unset($data['email_verified']);
         }
 
         $user->update($data);

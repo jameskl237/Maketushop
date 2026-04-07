@@ -13,6 +13,8 @@ const form = useForm({
     email: props.user.email || '',
     phone: props.user.phone || '',
     address: props.user.address || '',
+    google_id: props.user.google_id || '',
+    email_verified: !!props.user.email_verified_at,
     role: props.user.role || 'user',
     password: '',
     password_confirmation: '',
@@ -41,35 +43,35 @@ const submit = () => {
 
         <div class="py-6">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                <div class="bg-white shadow sm:rounded-lg p-6">
+                <div class="border border-border bg-card text-foreground shadow sm:rounded-lg p-6">
                     <form @submit.prevent="submit" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Nom</label>
+                            <label class="block text-sm font-medium text-muted-foreground">Nom</label>
                             <input v-model="form.name" type="text" class="mt-1 block w-full" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Nom d'utilisateur</label>
+                            <label class="block text-sm font-medium text-muted-foreground">Nom d'utilisateur</label>
                             <input v-model="form.username" type="text" class="mt-1 block w-full" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Email</label>
+                            <label class="block text-sm font-medium text-muted-foreground">Email</label>
                             <input v-model="form.email" type="email" class="mt-1 block w-full" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Téléphone</label>
+                            <label class="block text-sm font-medium text-muted-foreground">Téléphone</label>
                             <input v-model="form.phone" type="text" class="mt-1 block w-full" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Adresse</label>
+                            <label class="block text-sm font-medium text-muted-foreground">Adresse</label>
                             <input v-model="form.address" type="text" class="mt-1 block w-full" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Rôle</label>
+                            <label class="block text-sm font-medium text-muted-foreground">Rôle</label>
                             <select v-model="form.role" class="mt-1 block w-full">
                                 <option value="admin">admin</option>
                                 <option value="supplier">supplier</option>
@@ -78,7 +80,17 @@ const submit = () => {
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Mot de passe (laisser vide pour conserver)</label>
+                            <label class="block text-sm font-medium text-muted-foreground">Google ID</label>
+                            <input v-model="form.google_id" type="text" class="mt-1 block w-full" />
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <input id="email_verified_edit" type="checkbox" v-model="form.email_verified" class="rounded" />
+                            <label for="email_verified_edit" class="text-sm font-medium text-muted-foreground">Email vérifié</label>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-muted-foreground">Mot de passe (laisser vide pour conserver)</label>
                             <input v-model="form.password" type="password" class="mt-1 block w-full" />
                         </div>
 

@@ -15,20 +15,20 @@ const props = defineProps({
             <div class="py-6">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <h3 class="text-lg font-medium">Liste des boutiques</h3>
-                    <div class="mt-4 bg-white shadow sm:rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                    <div class="mt-4 border border-border bg-card shadow sm:rounded-lg">
+                        <table class="min-w-full divide-y divide-border">
+                            <thead class="bg-muted/40">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ville</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Nom</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Ville</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 bg-white">
+                            <tbody class="divide-y divide-border bg-card">
                                 <tr v-for="shop in props.shops.data" :key="shop.id">
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ shop.id }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">{{ shop.name }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-500">{{ shop.city }}</td>
+                                    <td class="px-6 py-4 text-sm text-foreground">{{ shop.id }}</td>
+                                    <td class="px-6 py-4 text-sm text-foreground">{{ shop.name }}</td>
+                                    <td class="px-6 py-4 text-sm text-muted-foreground">{{ shop.city }}</td>
                                 </tr>
                             </tbody>
                         </table>

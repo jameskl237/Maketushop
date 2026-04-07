@@ -22,26 +22,31 @@ const users = ref(props.users.data || []);
 
         <div class="py-6">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow sm:rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                <div class="overflow-hidden border border-border bg-card shadow sm:rounded-lg">
+                    <table class="min-w-full divide-y divide-border">
+                        <thead class="bg-muted/40">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Nom</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Rôle</th>
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white">
+                        <tbody class="divide-y divide-border bg-card">
                             <tr v-for="user in users" :key="user.id">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.id }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.role }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <Link :href="route('profile.edit')" class="text-indigo-600 hover:text-indigo-900">Edit</Link>
-                                </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">{{ user.id }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">{{ user.name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">{{ user.username }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ user.email }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ user.google_id ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ user.role }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ user.phone ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ user.address ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ user.email_verified_at ? new Date(user.email_verified_at).toLocaleString() : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <Link :href="route('backoffice.admin.users.show', { user: user.id })" class="text-primary hover:text-primary/80">Voir</Link>
+                                    </td>
                             </tr>
                         </tbody>
                     </table>

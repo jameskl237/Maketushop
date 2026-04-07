@@ -33,31 +33,39 @@ const destroy = () => {
 
         <div class="py-6">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                <div class="bg-white shadow sm:rounded-lg p-6">
-                    <dl class="divide-y divide-gray-200">
+                <div class="border border-border bg-card text-foreground shadow sm:rounded-lg p-6">
+                    <dl class="divide-y divide-border">
                         <div class="py-4 flex justify-between">
-                            <dt class="text-sm font-medium text-gray-500">Nom</dt>
-                            <dd class="text-sm text-gray-900">{{ user.name }}</dd>
+                            <dt class="text-sm font-medium text-muted-foreground">Nom</dt>
+                            <dd class="text-sm text-foreground">{{ user.name }}</dd>
                         </div>
                         <div class="py-4 flex justify-between">
-                            <dt class="text-sm font-medium text-gray-500">Email</dt>
-                            <dd class="text-sm text-gray-900">{{ user.email }}</dd>
+                            <dt class="text-sm font-medium text-muted-foreground">Email</dt>
+                            <dd class="text-sm text-foreground">{{ user.email }}</dd>
                         </div>
                         <div class="py-4 flex justify-between">
-                            <dt class="text-sm font-medium text-gray-500">Nom d'utilisateur</dt>
-                            <dd class="text-sm text-gray-900">{{ user.username }}</dd>
+                            <dt class="text-sm font-medium text-muted-foreground">Nom d'utilisateur</dt>
+                            <dd class="text-sm text-foreground">{{ user.username }}</dd>
                         </div>
                         <div class="py-4 flex justify-between">
-                            <dt class="text-sm font-medium text-gray-500">Rôle</dt>
-                            <dd class="text-sm text-gray-900">{{ user.role }}</dd>
+                            <dt class="text-sm font-medium text-muted-foreground">Google ID</dt>
+                            <dd class="text-sm text-foreground">{{ user.google_id ?? '-' }}</dd>
                         </div>
                         <div class="py-4 flex justify-between">
-                            <dt class="text-sm font-medium text-gray-500">Téléphone</dt>
-                            <dd class="text-sm text-gray-900">{{ user.phone ?? '-' }}</dd>
+                            <dt class="text-sm font-medium text-muted-foreground">Rôle</dt>
+                            <dd class="text-sm text-foreground">{{ user.role }}</dd>
                         </div>
                         <div class="py-4 flex justify-between">
-                            <dt class="text-sm font-medium text-gray-500">Adresse</dt>
-                            <dd class="text-sm text-gray-900">{{ user.address ?? '-' }}</dd>
+                            <dt class="text-sm font-medium text-muted-foreground">Téléphone</dt>
+                            <dd class="text-sm text-foreground">{{ user.phone ?? '-' }}</dd>
+                        </div>
+                        <div class="py-4 flex justify-between">
+                            <dt class="text-sm font-medium text-muted-foreground">Adresse</dt>
+                            <dd class="text-sm text-foreground">{{ user.address ?? '-' }}</dd>
+                        </div>
+                        <div class="py-4 flex justify-between">
+                            <dt class="text-sm font-medium text-muted-foreground">Email vérifié</dt>
+                            <dd class="text-sm text-foreground">{{ user.email_verified_at ? new Date(user.email_verified_at).toLocaleString() : '-' }}</dd>
                         </div>
                     </dl>
 
