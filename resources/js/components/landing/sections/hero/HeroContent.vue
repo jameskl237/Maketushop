@@ -3,45 +3,46 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import ScrollReveal from '@/components/landing/utils/ScrollReveal.vue';
 import { useI18n } from 'vue-i18n';
+import { ArrowRight } from 'lucide-vue-next';
 
-/**
- * @component HeroContent
- * @description Bloc texte principal du hero avec CTA dual.
- * @emits primary
- * @emits secondary
- * @example <HeroContent @primary="..." @secondary="..." />
- */
 defineEmits(['primary', 'secondary']);
 const { t } = useI18n();
 </script>
 
 <template>
-    <div class="space-y-6">
+    <div class="space-y-7">
         <ScrollReveal>
-            <Badge variant="secondary" class="rounded-full px-3 py-1 text-xs">{{ t('landing.heroBadge') }}</Badge>
+            <div class="section-label">
+                <span>{{ t('landing.heroBadge') }}</span>
+            </div>
         </ScrollReveal>
 
         <ScrollReveal :delay="80">
-            <h1 class="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            <h1 class="font-display text-5xl font-semibold leading-[1.12] tracking-tight text-foreground sm:text-6xl lg:text-[4.25rem]">
                 {{ t('landing.heroTitle') }}
             </h1>
         </ScrollReveal>
 
         <ScrollReveal :delay="160">
-            <p class="max-w-2xl text-base text-muted-foreground sm:text-lg">
+            <p class="max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
                 {{ t('landing.heroSubtitle') }}
             </p>
         </ScrollReveal>
 
-        <ScrollReveal :delay="220">
-            <div class="flex flex-col gap-3 sm:flex-row">
-                <Button size="lg" class="h-auto w-full whitespace-normal break-words px-5 py-2 text-center sm:w-auto" @click="$emit('primary')">
+        <ScrollReveal :delay="240">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Button
+                    size="lg"
+                    class="group h-12 rounded-full px-8 text-[13px] font-semibold tracking-wide shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+                    @click="$emit('primary')"
+                >
                     {{ t('landing.heroBuy') }}
+                    <ArrowRight class="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </Button>
                 <Button
                     size="lg"
                     variant="outline"
-                    class="h-auto w-full whitespace-normal break-words px-5 py-2 text-center sm:w-auto"
+                    class="h-12 rounded-full px-8 text-[13px] font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5"
                     @click="$emit('secondary')"
                 >
                     {{ t('landing.heroSell') }}
@@ -50,5 +51,3 @@ const { t } = useI18n();
         </ScrollReveal>
     </div>
 </template>
-
-

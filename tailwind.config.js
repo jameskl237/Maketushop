@@ -14,10 +14,8 @@ export default {
     theme: {
     	extend: {
     		fontFamily: {
-    			sans: [
-    				'Figtree',
-                    ...defaultTheme.fontFamily.sans
-                ]
+    			sans: ['DM Sans', ...defaultTheme.fontFamily.sans],
+    			display: ['Cormorant Garamond', ...defaultTheme.fontFamily.serif],
     		},
     		borderRadius: {
     			lg: 'var(--radius)',

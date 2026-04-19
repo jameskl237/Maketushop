@@ -2,11 +2,6 @@
 import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
 
-/**
- * @component LandingFooter
- * @description Footer complet avec colonnes de liens et infos marque.
- * @example <LandingFooter />
- */
 const { t } = useI18n();
 
 const columns = computed(() => [
@@ -50,39 +45,54 @@ const columns = computed(() => [
 </script>
 
 <template>
-    <footer class="border-t border-border bg-card/50">
-        <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-            <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
+    <footer class="border-t border-border/60 bg-card/40">
+        <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10">
+            <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
+                <!-- Brand -->
                 <div class="lg:col-span-1">
-                    <div class="flex items-center gap-2">
-                        <img src="/images/Maketu1.png" alt="Logo MaketuShop" class="h-9 w-auto" loading="lazy" />
-                        <span class="text-base font-semibold">MaketuShop</span>
-                    </div>
-                    <p class="mt-4 text-sm text-muted-foreground">{{ t('landing.footerTagline') }}</p>
+                    <a href="#top" class="group flex items-center gap-2.5">
+                        <img src="/images/Maketu1.png" alt="Logo MaketuShop" class="h-8 w-auto transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                        <span class="font-display text-lg font-semibold text-foreground">MaketuShop</span>
+                    </a>
+                    <p class="mt-4 text-[12px] leading-relaxed text-muted-foreground">
+                        {{ t('landing.footerTagline') }}
+                    </p>
                 </div>
 
+                <!-- Link columns -->
                 <div
                     v-for="col in columns"
                     :key="col.title"
-                    class="space-y-3"
+                    class="space-y-4"
                 >
-                    <h3 class="text-sm font-semibold text-foreground">{{ col.title }}</h3>
-                    <ul class="space-y-2">
+                    <h3 class="text-[11px] font-semibold uppercase tracking-widest text-foreground">{{ col.title }}</h3>
+                    <ul class="space-y-2.5">
                         <li
                             v-for="item in col.links"
                             :key="item.label"
-                            class="text-sm text-muted-foreground transition-colors hover:text-foreground"
                         >
-                            <a :href="item.href">{{ item.label }}</a>
+                            <a
+                                :href="item.href"
+                                class="text-[12px] text-muted-foreground transition-colors duration-150 hover:text-foreground"
+                            >
+                                {{ item.label }}
+                            </a>
                         </li>
                     </ul>
                 </div>
             </div>
-            <div class="mt-8 border-t border-border pt-6 text-xs text-muted-foreground">
-                © {{ new Date().getFullYear() }} MaketuShop. {{ t('landing.footerRights') }}
+
+            <!-- Bottom bar -->
+            <div class="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border/50 pt-6 sm:flex-row">
+                <p class="text-[11px] text-muted-foreground">
+                    © {{ new Date().getFullYear() }} MaketuShop. {{ t('landing.footerRights') }}
+                </p>
+                <div class="flex items-center gap-1">
+                    <div class="h-1 w-1 rounded-full bg-primary/60" />
+                    <div class="h-1 w-1 rounded-full bg-primary/40" />
+                    <div class="h-1 w-1 rounded-full bg-primary/20" />
+                </div>
             </div>
         </div>
     </footer>
 </template>
-
-
