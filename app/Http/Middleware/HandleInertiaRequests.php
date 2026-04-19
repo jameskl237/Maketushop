@@ -37,6 +37,11 @@ class HandleInertiaRequests extends Middleware
                     && filled(config('services.google.client_secret'))
                     && filled(config('services.google.redirect')),
             ],
+            'flash' => [
+                'message' => fn () => $request->session()->get('message'),
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
         ];
     }
 }

@@ -208,6 +208,16 @@ const showingNavigationDropdown = ref(false);
                 </div>
             </header>
 
+            <!-- Flash Messages -->
+            <div v-if="$page.props.flash.success || $page.props.flash.error" class="mx-auto max-w-7xl mt-4 px-4 sm:px-6 lg:px-8">
+                <div v-if="$page.props.flash.success" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{{ $page.props.flash.success }}</span>
+                </div>
+                <div v-if="$page.props.flash.error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{{ $page.props.flash.error }}</span>
+                </div>
+            </div>
+
             <!-- Page Content -->
             <main>
                 <slot />

@@ -3,7 +3,7 @@ import ProductsNavbar from '@/components/products/layout/ProductsNavbar.vue';
 import PriceDisplay from '@/components/products/shared/PriceDisplay.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -11,6 +11,11 @@ const props = defineProps({
     product: { type: Object, required: true },
 });
 const { t } = useI18n();
+
+const handlePlatformBuy = () => {
+    router.post(route('payments.checkout', { product: props.product.id }));
+};
+
 const publicBaseUrl = (import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin).replace(/\/+$/, '');
 
 const sellerPhone = computed(() => props.product.shop?.owner_phone || '');
@@ -88,11 +93,13 @@ const whatsappUrl = computed(() => {
                             </Button>
                         </a>
 
-                        <Link :href="route('payments.unavailable')">
-                            <Button variant="outline" class="w-full">
-                                {{ t('productBuy.platformBuy') }}
-                            </Button>
-                        </Link>
+                        <Button 
+                            variant="outline" 
+                            class="w-full"
+                            @click="handlePlatformBuy"
+                        >
+                            {{ t('productBuy.platformBuy') }}
+                        </Button>
                     </div>
 
                     <p v-if="!whatsappPhone" class="text-sm text-destructive">

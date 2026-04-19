@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Backoffice\Admin\UserController;
 use App\Http\Controllers\Backoffice\Admin\AdminController;
 use App\Http\Controllers\Backoffice\Admin\ShopController as AdminShopController;
@@ -34,6 +35,8 @@ Route::get('/contact', function () {
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/products/{product}/buy', [ProductController::class, 'buy'])->name('products.buy');
+Route::post('/products/{product}/checkout', [PaymentController::class, 'initialize'])->name('payments.checkout');
+Route::get('/payments/callback', [PaymentController::class, 'callback'])->name('payments.callback');
 Route::get('/payments/unavailable', [ProductController::class, 'paymentUnavailable'])->name('payments.unavailable');
 Route::get('/shops', [ProductController::class, 'shops'])->name('shops.index');
 Route::get('/shops/{shop}/{slug?}', [ProductController::class, 'shopShow'])->name('shops.show');

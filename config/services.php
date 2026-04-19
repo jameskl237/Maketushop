@@ -41,4 +41,9 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', rtrim((string) env('APP_URL', 'http://localhost'), '/').'/auth/google/callback'),
     ],
 
+    'notchpay' => [
+        'public_key' => env('NOTCHPAY_PUBLIC_KEY', env('NOTCHPAY_API_KEY')),
+        'secret_key' => env('NOTCHPAY_SECRET_KEY', env('NOTCHPAY_GRANT_KEY')),
+    ],
+
 ];
