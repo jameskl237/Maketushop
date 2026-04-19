@@ -1,6 +1,7 @@
 <script setup>
 import LandingFooter from '@/components/landing/layout/LandingFooter.vue';
 import LandingHeader from '@/components/landing/layout/LandingHeader.vue';
+import MobileTabBar from '@/components/landing/layout/MobileTabBar.vue';
 import { Head } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import {
@@ -100,7 +101,7 @@ const faqs = computed(() => [
 <template>
     <Head :title="t('landing.metaTitle')" />
 
-    <div id="top" class="min-h-screen bg-background text-foreground">
+    <div id="top" class="min-h-screen bg-background text-foreground pb-16 md:pb-0">
         <LandingHeader :nav-items="navItems" />
 
         <main>
@@ -117,6 +118,7 @@ const faqs = computed(() => [
         </main>
 
         <LandingFooter />
+        <MobileTabBar />
     </div>
 </template>
 

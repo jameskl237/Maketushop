@@ -1,12 +1,6 @@
 <script setup>
-import GradientBlob from '@/components/landing/utils/GradientBlob.vue';
 import ScrollReveal from '@/components/landing/utils/ScrollReveal.vue';
 
-/**
- * @component HeroVisual
- * @description Visuel mascotte avec décor gradient.
- * @example <HeroVisual image-src="/images/mascot/hero.webp" />
- */
 defineProps({
     imageSrc: { type: String, default: '/images/maketa.png' },
     imageAlt: { type: String, default: 'Mascotte MaketuShop' },
@@ -14,19 +8,18 @@ defineProps({
 </script>
 
 <template>
-    <ScrollReveal as="div" class="relative mx-auto w-full max-w-xl">
-        <GradientBlob class="-left-6 top-8" />
-        <GradientBlob class="-right-6 bottom-2 bg-accent/30" />
-        <div class="relative overflow-hidden rounded-2xl border border-border bg-card/70 p-4 shadow-xl backdrop-blur">
+    <ScrollReveal as="div" class="relative mx-auto w-full max-w-lg">
+        <!-- Outer ring decoration -->
+        <div class="absolute -inset-3 rounded-3xl border border-border/40 opacity-70" />
+
+        <div class="relative overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-[0_4px_24px_-4px_hsl(var(--foreground)/0.06)]">
             <img
                 :src="imageSrc"
                 :alt="imageAlt"
                 loading="lazy"
                 decoding="async"
-                class="mx-auto h-[320px] w-full object-contain animate-float sm:h-[420px]"
+                class="mx-auto h-[300px] w-full object-contain animate-float sm:h-[400px]"
             />
         </div>
     </ScrollReveal>
 </template>
-
-
