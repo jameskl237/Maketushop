@@ -75,11 +75,20 @@ onUnmounted(() => {
             <div class="hidden items-center gap-2 md:flex">
                 <LanguageSwitcher :floating="false" />
                 <ThemeToggle :floating="false" />
-                <Link :href="route('login')">
-                    <Button variant="ghost" class="h-9 px-5 text-[13px] font-medium tracking-wide">
-                        {{ t('landing.login') }}
-                    </Button>
-                </Link>
+                <template v-if="$page.props.auth.user">
+                    <Link :href="route('dashboard')">
+                        <Button variant="ghost" class="h-9 px-5 text-[13px] font-medium tracking-wide">
+                            {{ t('common.dashboard') }}
+                        </Button>
+                    </Link>
+                </template>
+                <template v-else>
+                    <Link :href="route('login')">
+                        <Button variant="ghost" class="h-9 px-5 text-[13px] font-medium tracking-wide">
+                            {{ t('landing.login') }}
+                        </Button>
+                    </Link>
+                </template>
                 <Link :href="route('products.index')">
                     <Button class="h-9 rounded-full px-6 text-[13px] font-medium tracking-wide shadow-sm">
                         {{ t('landing.start') }}
@@ -120,11 +129,20 @@ onUnmounted(() => {
                                 {{ item.label }}
                             </a>
                             <div class="my-1 h-px bg-border" />
-                            <Link :href="route('login')" @click="open = false">
-                                <Button variant="outline" class="w-full rounded-xl text-[13px]">
-                                    {{ t('landing.login') }}
-                                </Button>
-                            </Link>
+                            <template v-if="$page.props.auth.user">
+                                <Link :href="route('dashboard')" @click="open = false">
+                                    <Button variant="outline" class="w-full rounded-xl text-[13px]">
+                                        {{ t('common.dashboard') }}
+                                    </Button>
+                                </Link>
+                            </template>
+                            <template v-else>
+                                <Link :href="route('login')" @click="open = false">
+                                    <Button variant="outline" class="w-full rounded-xl text-[13px]">
+                                        {{ t('landing.login') }}
+                                    </Button>
+                                </Link>
+                            </template>
                             <Link :href="route('products.index')" @click="open = false">
                                 <Button class="w-full rounded-xl text-[13px]">
                                     {{ t('landing.start') }}

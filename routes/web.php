@@ -49,9 +49,10 @@ Route::get('/dashboard', function () {
     return redirect()->route($user->dashboardRouteName());
 })->middleware('auth')->name('dashboard');
 
-Route::get('/user/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware('auth')->name('user.dashboard');
+use App\Http\Controllers\UserDashboardController;
+Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
+    ->middleware('auth')
+    ->name('user.dashboard');
 
 Route::middleware(['auth', 'role:admin'])->prefix('backoffice/admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('backoffice.admin.dashboard');

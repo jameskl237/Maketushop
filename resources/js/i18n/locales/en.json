@@ -16,7 +16,22 @@
         "title": "Welcome"
     },
     "dashboard": {
-        "loggedIn": "You're logged in!"
+        "loggedIn": "You're logged in!",
+        "client": {
+            "title": "My Dashboard",
+            "subtitle": "Manage your orders and payments",
+            "orders": "My Orders",
+            "noOrders": "You haven't placed any orders yet.",
+            "orderNumber": "Order #",
+            "date": "Date",
+            "total": "Total",
+            "status": "Status",
+            "view": "Details",
+            "items": "{count} item(s)",
+            "completed": "Completed",
+            "pending": "Pending",
+            "failed": "Failed"
+        }
     },
     "auth": {
         "login": "Log in",

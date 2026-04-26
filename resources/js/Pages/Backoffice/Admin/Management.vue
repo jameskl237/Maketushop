@@ -1,18 +1,68 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, useForm, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import Pagination from '@/Components/Pagination.vue';
+import DeleteConfirmationModal from '@/Components/DeleteConfirmationModal.vue';
+import Modal from '@/Components/Modal.vue';
+import InputLabel from '@/Components/InputLabel.vue';
+import TextInput from '@/Components/TextInput.vue';
+import InputError from '@/Components/InputError.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 
 const props = defineProps({
     users: Object,
     shops: Object,
     products: Object,
     categories: Object,
+    orders: Object,
+    all_users: Array,
+    all_shops: Array,
+    all_categories: Array,
 });
 
-const activeTab = ref('users');
+const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'users');
 
-// Users form (create/edit)
+const setActiveTab = (tab) => {
+    activeTab.value = tab;
+    // Optional: update URL without reload to persist tab on refresh
+    const url = new URL(window.location);
+    url.searchParams.set('tab', tab);
+    window.history.pushState({}, '', url);
+};
+
+// --- MODALS & FORMS ---
+
+const deleteModalOpen = ref(false);
+const itemToDelete = ref(null);
+const deleteType = ref('');
+
+const confirmDelete = (item, type) => {
+    itemToDelete.value = item;
+    deleteType.value = type;
+    deleteModalOpen.value = true;
+};
+
+const executeDelete = () => {
+    const routes = {
+        user: 'backoffice.admin.users.destroy',
+        shop: 'backoffice.admin.shops.destroy',
+        product: 'backoffice.admin.products.destroy',
+        category: 'backoffice.admin.categories.destroy',
+        order: 'backoffice.admin.orders.destroy',
+    };
+
+    router.delete(route(routes[deleteType.value], { [deleteType.value]: itemToDelete.value.id }), {
+        preserveScroll: true,
+        onSuccess: () => {
+            deleteModalOpen.value = false;
+            itemToDelete.value = null;
+        },
+    });
+};
+
+// Forms
 const userForm = useForm({
     id: null,
     name: '',
@@ -26,379 +76,532 @@ const userForm = useForm({
     password: '',
     password_confirmation: '',
 });
-const userModalOpen = ref(false);
-const isEditingUser = ref(false);
 
-const openCreateUser = () => {
-    isEditingUser.value = false;
-    userForm.reset();
-    userModalOpen.value = true;
+const shopForm = useForm({
+    id: null,
+    name: '',
+    description: '',
+    city: '',
+    district: '',
+    phone: '',
+    user_id: '',
+});
+
+const productForm = useForm({
+    id: null,
+    name: '',
+    description: '',
+    long_description: '',
+    price: 0,
+    promotion_price: '',
+    in_stock: true,
+    quantity: 0,
+    category_id: '',
+    shop_id: '',
+    user_id: '',
+    code: '',
+});
+
+const categoryForm = useForm({
+    id: null,
+    name: '',
+    slug: '',
+    description: '',
+});
+
+// Modal control
+const modalOpen = ref({
+    user: false,
+    shop: false,
+    product: false,
+    category: false,
+});
+
+const isEditing = ref({
+    user: false,
+    shop: false,
+    product: false,
+    category: false,
+});
+
+const openModal = (type, item = null) => {
+    if (item) {
+        isEditing.value[type] = true;
+        if (type === 'user') {
+            userForm.id = item.id;
+            userForm.name = item.name;
+            userForm.username = item.username;
+            userForm.email = item.email;
+            userForm.google_id = item.google_id;
+            userForm.email_verified = !!item.email_verified_at;
+            userForm.phone = item.phone;
+            userForm.address = item.address;
+            userForm.role = item.role;
+        } else if (type === 'shop') {
+            shopForm.id = item.id;
+            shopForm.name = item.name;
+            shopForm.description = item.description;
+            shopForm.city = item.city;
+            shopForm.district = item.district;
+            shopForm.phone = item.phone;
+            shopForm.user_id = item.user_id;
+        } else if (type === 'product') {
+            productForm.id = item.id;
+            productForm.name = item.name;
+            productForm.description = item.description;
+            productForm.long_description = item.long_description;
+            productForm.price = item.price;
+            productForm.promotion_price = item.promotion_price;
+            productForm.in_stock = item.in_stock;
+            productForm.quantity = item.quantity;
+            productForm.category_id = item.category_id;
+            productForm.shop_id = item.shop_id;
+            productForm.user_id = item.user_id;
+            productForm.code = item.code;
+        } else if (type === 'category') {
+            categoryForm.id = item.id;
+            categoryForm.name = item.name;
+            categoryForm.slug = item.slug;
+            categoryForm.description = item.description;
+        }
+    } else {
+        isEditing.value[type] = false;
+        if (type === 'user') userForm.reset();
+        else if (type === 'shop') shopForm.reset();
+        else if (type === 'product') productForm.reset();
+        else if (type === 'category') categoryForm.reset();
+    }
+    modalOpen.value[type] = true;
 };
 
-const openEditUser = (user) => {
-    isEditingUser.value = true;
-    userForm.reset();
-    userForm.id = user.id;
-    userForm.name = user.name || '';
-    userForm.username = user.username || '';
-    userForm.email = user.email || '';
-    userForm.google_id = user.google_id || '';
-    userForm.email_verified = !!user.email_verified_at;
-    userForm.phone = user.phone || '';
-    userForm.address = user.address || '';
-    userForm.role = user.role || 'user';
-    userModalOpen.value = true;
-};
-
-const submitUser = () => {
-    if (isEditingUser.value) {
-        userForm.put(route('backoffice.admin.users.update', { user: userForm.id }), {
-            preserveScroll: true,
-            onSuccess: () => (userModalOpen.value = false),
+const submitForm = (type) => {
+    const form = type === 'user' ? userForm : (type === 'shop' ? shopForm : (type === 'product' ? productForm : categoryForm));
+    const singularType = type;
+    const baseRoute = `backoffice.admin.${type}s`;
+    
+    if (isEditing.value[type]) {
+        form.put(route(`${baseRoute}.update`, { [singularType]: form.id }), {
+            onSuccess: () => modalOpen.value[type] = false,
         });
     } else {
-        userForm.post(route('backoffice.admin.users.store'), {
-            preserveScroll: true,
-            onSuccess: () => (userModalOpen.value = false),
+        form.post(route(`${baseRoute}.store`), {
+            onSuccess: () => modalOpen.value[type] = false,
         });
     }
 };
 
-const deleteUser = (user) => {
-    if (!confirm('Supprimer cet utilisateur ?')) return;
-    const form = useForm();
-    form.delete(route('backoffice.admin.users.destroy', { user: user.id }), { preserveScroll: true });
-};
-
-// For shops/products/categories we'll open simple create forms (similar pattern)
-const shopForm = useForm({ id: null, name: '', description: '', city: '', district: '', phone: '', user_id: null });
-const shopModalOpen = ref(false);
-const isEditingShop = ref(false);
-const openCreateShop = () => { isEditingShop.value = false; shopForm.reset(); shopModalOpen.value = true; };
-const openEditShop = (shop) => {
-    isEditingShop.value = true;
-    shopForm.reset();
-    shopForm.id = shop.id;
-    shopForm.name = shop.name || '';
-    shopForm.description = shop.description || '';
-    shopForm.city = shop.city || '';
-    shopForm.district = shop.district || '';
-    shopForm.phone = shop.phone || '';
-    shopForm.user_id = shop.user_id || null;
-    shopModalOpen.value = true;
-};
-const submitShop = () => {
-    if (isEditingShop.value) {
-        shopForm.put(route('backoffice.admin.shops.update', { shop: shopForm.id }), { onSuccess: () => (shopModalOpen.value = false) });
-    } else {
-        shopForm.post(route('backoffice.admin.shops.store'), { onSuccess: () => (shopModalOpen.value = false) });
-    }
-};
-const deleteShop = (shop) => {
-    if (!confirm('Supprimer cette boutique ?')) return;
-    const f = useForm();
-    f.delete(route('backoffice.admin.shops.destroy', { shop: shop.id }), { preserveScroll: true });
-};
-
-const productForm = useForm({ id: null, name: '', description: '', price: 0, category_id: null, shop_id: null });
-const productModalOpen = ref(false);
-const isEditingProduct = ref(false);
-const openCreateProduct = () => { isEditingProduct.value = false; productForm.reset(); productModalOpen.value = true; };
-const openEditProduct = (product) => {
-    isEditingProduct.value = true;
-    productForm.reset();
-    productForm.id = product.id;
-    productForm.name = product.name || '';
-    productForm.description = product.description || '';
-    productForm.price = product.price || 0;
-    productForm.category_id = product.category_id || null;
-    productForm.shop_id = product.shop_id || null;
-    productModalOpen.value = true;
-};
-const submitProduct = () => {
-    if (isEditingProduct.value) {
-        productForm.put(route('backoffice.admin.products.update', { product: productForm.id }), { onSuccess: () => (productModalOpen.value = false) });
-    } else {
-        productForm.post(route('backoffice.admin.products.store'), { onSuccess: () => (productModalOpen.value = false) });
-    }
-};
-const deleteProduct = (product) => {
-    if (!confirm('Supprimer ce produit ?')) return;
-    const f = useForm();
-    f.delete(route('backoffice.admin.products.destroy', { product: product.id }), { preserveScroll: true });
-};
-
-const categoryForm = useForm({ id: null, name: '', slug: '', description: '' });
-const categoryModalOpen = ref(false);
-const isEditingCategory = ref(false);
-const openCreateCategory = () => { isEditingCategory.value = false; categoryForm.reset(); categoryModalOpen.value = true; };
-const openEditCategory = (category) => {
-    isEditingCategory.value = true;
-    categoryForm.reset();
-    categoryForm.id = category.id;
-    categoryForm.name = category.name || '';
-    categoryForm.slug = category.slug || '';
-    categoryForm.description = category.description || '';
-    categoryModalOpen.value = true;
-};
-const submitCategory = () => {
-    if (isEditingCategory.value) {
-        categoryForm.put(route('backoffice.admin.categories.update', { category: categoryForm.id }), { onSuccess: () => (categoryModalOpen.value = false) });
-    } else {
-        categoryForm.post(route('backoffice.admin.categories.store'), { onSuccess: () => (categoryModalOpen.value = false) });
-    }
-};
-const deleteCategory = (category) => {
-    if (!confirm('Supprimer cette catégorie ?')) return;
-    const f = useForm();
-    f.delete(route('backoffice.admin.categories.destroy', { category: category.id }), { preserveScroll: true });
-};
 </script>
 
 <template>
-    <Head title="Administration — Gestion" />
+    <Head title="Gestion du Catalogue" />
 
-    <AdminLayout :title="'Gestion'" :active-route="'backoffice.admin.management'">
+    <AdminLayout title="Gestion du Catalogue" subtitle="Gérez les utilisateurs, boutiques, produits et catégories.">
         <template #content>
-            <div class="py-6">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-medium">Gestion — Tables</h3>
-                        <div class="flex items-center gap-2">
-                            <button v-if="activeTab === 'users'" @click="openCreateUser" class="btn btn-primary">Nouveau utilisateur</button>
-                            <button v-if="activeTab === 'shops'" @click="openCreateShop" class="btn btn-primary">Nouvelle boutique</button>
-                            <button v-if="activeTab === 'products'" @click="openCreateProduct" class="btn btn-primary">Nouveau produit</button>
-                            <button v-if="activeTab === 'categories'" @click="openCreateCategory" class="btn btn-primary">Nouvelle catégorie</button>
-                        </div>
-                    </div>
+            <div class="space-y-6">
+                <!-- Tabs -->
+                <div class="border-b border-border">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button v-for="tab in ['users', 'shops', 'products', 'categories', 'orders']" :key="tab"
+                            @click="setActiveTab(tab)"
+                            :class="[
+                                activeTab === tab
+                                    ? 'border-primary text-primary font-semibold'
+                                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border',
+                                'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm capitalize transition-colors'
+                            ]">
+                            {{ tab === 'users' ? 'Utilisateurs' : (tab === 'shops' ? 'Boutiques' : (tab === 'products' ? 'Produits' : (tab === 'categories' ? 'Catégories' : 'Commandes'))) }}
+                        </button>
+                    </nav>
+                </div>
 
-                    <div class="mt-4">
-                        <nav class="flex space-x-2">
-                            <button @click="activeTab = 'users'" :class="activeTab==='users' ? 'px-3 py-1 rounded bg-primary/12 text-primary' : 'px-3 py-1 rounded text-muted-foreground'">Utilisateurs</button>
-                            <button @click="activeTab = 'shops'" :class="activeTab==='shops' ? 'px-3 py-1 rounded bg-primary/12 text-primary' : 'px-3 py-1 rounded text-muted-foreground'">Boutiques</button>
-                            <button @click="activeTab = 'products'" :class="activeTab==='products' ? 'px-3 py-1 rounded bg-primary/12 text-primary' : 'px-3 py-1 rounded text-muted-foreground'">Produits</button>
-                            <button @click="activeTab = 'categories'" :class="activeTab==='categories' ? 'px-3 py-1 rounded bg-primary/12 text-primary' : 'px-3 py-1 rounded text-muted-foreground'">Catégories</button>
-                        </nav>
-                    </div>
+                <!-- Action Bar -->
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-foreground">
+                        {{ activeTab === 'users' ? 'Utilisateurs' : (activeTab === 'shops' ? 'Boutiques' : (activeTab === 'products' ? 'Produits' : (activeTab === 'categories' ? 'Catégories' : 'Commandes'))) }}
+                    </h3>
+                    <PrimaryButton v-if="activeTab !== 'orders'" @click="openModal(activeTab.slice(0, -1))">
+                        Ajouter {{ activeTab === 'users' ? 'un utilisateur' : (activeTab === 'shops' ? 'une boutique' : (activeTab === 'products' ? 'un produit' : 'une catégorie')) }}
+                    </PrimaryButton>
+                </div>
 
-                    <div class="mt-6">
-                        <!-- Users Table -->
-                        <div v-show="activeTab === 'users'">
-                            <div class="border border-border bg-card shadow sm:rounded-lg">
-                                <table class="min-w-full divide-y divide-border">
-                                    <thead class="bg-muted/40"><tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">ID</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Nom</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Rôle</th>
-                                        <th class="px-6 py-3"></th>
-                                    </tr></thead>
-                                    <tbody class="divide-y divide-border bg-card">
-                                        <tr v-for="user in props.users.data" :key="user.id">
-                                            <td class="px-6 py-4 text-sm text-foreground">{{ user.id }}</td>
-                                            <td class="px-6 py-4 text-sm text-foreground">{{ user.name }}</td>
-                                            <td class="px-6 py-4 text-sm text-muted-foreground">{{ user.email }}</td>
-                                            <td class="px-6 py-4 text-sm text-muted-foreground">{{ user.role }}</td>
-                                            <td class="px-6 py-4 text-right text-sm font-medium">
-                                                <a :href="route('backoffice.admin.users.show', { user: user.id })" class="text-primary hover:text-primary/80 mr-2">Voir</a>
-                                                <button @click.prevent="openEditUser(user)" class="text-secondary hover:text-secondary-foreground mr-2">Éditer</button>
-                                                <button @click.prevent="deleteUser(user)" class="text-destructive hover:text-destructive/90">Supprimer</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                <!-- Tables -->
+                <div class="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+                    
+                    <!-- Users -->
+                    <table v-if="activeTab === 'users'" class="w-full text-left text-sm">
+                        <thead class="bg-muted/50 text-muted-foreground border-b border-border">
+                            <tr>
+                                <th class="p-4 font-medium">ID</th>
+                                <th class="p-4 font-medium">Utilisateur</th>
+                                <th class="p-4 font-medium">Contact</th>
+                                <th class="p-4 font-medium">Rôle</th>
+                                <th class="p-4 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border">
+                            <tr v-for="user in props.users.data" :key="user.id" class="hover:bg-muted/30 transition-colors">
+                                <td class="p-4 font-mono text-xs">{{ user.id }}</td>
+                                <td class="p-4">
+                                    <div class="font-medium text-foreground">{{ user.name }}</div>
+                                    <div class="text-xs text-muted-foreground">@{{ user.username }}</div>
+                                </td>
+                                <td class="p-4">
+                                    <div class="text-foreground">{{ user.email }}</div>
+                                    <div class="text-xs text-muted-foreground">{{ user.phone || 'Pas de téléphone' }}</div>
+                                </td>
+                                <td class="p-4">
+                                    <span :class="[
+                                        'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize',
+                                        user.role === 'admin' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' : 
+                                        (user.role === 'supplier' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400')
+                                    ]">
+                                        {{ user.role }}
+                                    </span>
+                                </td>
+                                <td class="p-4 text-right space-x-2">
+                                    <button @click="openModal('user', user)" class="text-primary hover:underline font-medium">Éditer</button>
+                                    <button @click="confirmDelete(user, 'user')" class="text-destructive hover:underline font-medium">Supprimer</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                        <!-- Shops Table -->
-                        <div v-show="activeTab === 'shops'">
-                            <div class="border border-border bg-card shadow sm:rounded-lg">
-                                <table class="min-w-full divide-y divide-border">
-                                    <thead class="bg-muted/40"><tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">ID</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Nom</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Ville</th>
-                                        <th class="px-6 py-3"></th>
-                                    </tr></thead>
-                                    <tbody class="divide-y divide-border bg-card">
-                                        <tr v-for="shop in props.shops.data" :key="shop.id">
-                                            <td class="px-6 py-4 text-sm text-foreground">{{ shop.id }}</td>
-                                            <td class="px-6 py-4 text-sm text-foreground">{{ shop.name }}</td>
-                                            <td class="px-6 py-4 text-sm text-muted-foreground">{{ shop.city }}</td>
-                                            <td class="px-6 py-4 text-right text-sm font-medium">
-                                                <a :href="route('backoffice.admin.shops.show', { shop: shop.id })" class="text-primary hover:text-primary/80 mr-2">Voir</a>
-                                                <button @click.prevent="openEditShop(shop)" class="text-secondary hover:text-secondary-foreground mr-2">Éditer</button>
-                                                <button @click.prevent="deleteShop(shop)" class="text-destructive hover:text-destructive/90">Supprimer</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <!-- Shops -->
+                    <table v-if="activeTab === 'shops'" class="w-full text-left text-sm">
+                        <thead class="bg-muted/50 text-muted-foreground border-b border-border">
+                            <tr>
+                                <th class="p-4 font-medium">ID</th>
+                                <th class="p-4 font-medium">Boutique</th>
+                                <th class="p-4 font-medium">Localisation</th>
+                                <th class="p-4 font-medium">Vendeur</th>
+                                <th class="p-4 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border">
+                            <tr v-for="shop in props.shops.data" :key="shop.id" class="hover:bg-muted/30 transition-colors">
+                                <td class="p-4 font-mono text-xs">{{ shop.id }}</td>
+                                <td class="p-4">
+                                    <div class="font-medium text-foreground">{{ shop.name }}</div>
+                                    <div class="text-xs text-muted-foreground">{{ shop.phone }}</div>
+                                </td>
+                                <td class="p-4">
+                                    <div class="text-foreground">{{ shop.city }}</div>
+                                    <div class="text-xs text-muted-foreground">{{ shop.district }}</div>
+                                </td>
+                                <td class="p-4 text-muted-foreground">{{ shop.user?.name || 'N/A' }}</td>
+                                <td class="p-4 text-right space-x-2">
+                                    <button @click="openModal('shop', shop)" class="text-primary hover:underline font-medium">Éditer</button>
+                                    <button @click="confirmDelete(shop, 'shop')" class="text-destructive hover:underline font-medium">Supprimer</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                        <!-- Products Table -->
-                        <div v-show="activeTab === 'products'">
-                            <div class="border border-border bg-card shadow sm:rounded-lg">
-                                <table class="min-w-full divide-y divide-border">
-                                    <thead class="bg-muted/40"><tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">ID</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Nom</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Prix</th>
-                                        <th class="px-6 py-3"></th>
-                                    </tr></thead>
-                                    <tbody class="divide-y divide-border bg-card">
-                                        <tr v-for="product in props.products.data" :key="product.id">
-                                            <td class="px-6 py-4 text-sm text-foreground">{{ product.id }}</td>
-                                            <td class="px-6 py-4 text-sm text-foreground">{{ product.name }}</td>
-                                            <td class="px-6 py-4 text-sm text-muted-foreground">{{ product.price }}</td>
-                                            <td class="px-6 py-4 text-right text-sm font-medium">
-                                                <a :href="route('backoffice.admin.products.show', { product: product.id })" class="text-primary hover:text-primary/80 mr-2">Voir</a>
-                                                <button @click.prevent="openEditProduct(product)" class="text-secondary hover:text-secondary-foreground mr-2">Éditer</button>
-                                                <button @click.prevent="deleteProduct(product)" class="text-destructive hover:text-destructive/90">Supprimer</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <!-- Products -->
+                    <table v-if="activeTab === 'products'" class="w-full text-left text-sm">
+                        <thead class="bg-muted/50 text-muted-foreground border-b border-border">
+                            <tr>
+                                <th class="p-4 font-medium">ID</th>
+                                <th class="p-4 font-medium">Produit</th>
+                                <th class="p-4 font-medium">Prix</th>
+                                <th class="p-4 font-medium">Stock</th>
+                                <th class="p-4 font-medium">Catégorie / Boutique</th>
+                                <th class="p-4 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border">
+                            <tr v-for="product in props.products.data" :key="product.id" class="hover:bg-muted/30 transition-colors">
+                                <td class="p-4 font-mono text-xs">{{ product.id }}</td>
+                                <td class="p-4">
+                                    <div class="font-medium text-foreground">{{ product.name }}</div>
+                                    <div class="text-xs text-muted-foreground">Code: {{ product.code || 'N/A' }}</div>
+                                </td>
+                                <td class="p-4">
+                                    <div class="font-bold text-foreground">{{ product.price }} FCFA</div>
+                                    <div v-if="product.promotion_price" class="text-xs text-green-600">Promo: {{ product.promotion_price }}</div>
+                                </td>
+                                <td class="p-4">
+                                    <span :class="[
+                                        'px-2 py-0.5 rounded text-xs font-medium',
+                                        product.in_stock ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                    ]">
+                                        {{ product.in_stock ? 'En Stock' : 'Rupture' }}
+                                    </span>
+                                    <div class="text-xs text-muted-foreground mt-1">Qté: {{ product.quantity }}</div>
+                                </td>
+                                <td class="p-4">
+                                    <div class="text-foreground">{{ product.category?.name || 'Sans catégorie' }}</div>
+                                    <div class="text-xs text-muted-foreground">{{ product.shop?.name || 'Sans boutique' }}</div>
+                                </td>
+                                <td class="p-4 text-right space-x-2">
+                                    <button @click="openModal('product', product)" class="text-primary hover:underline font-medium">Éditer</button>
+                                    <button @click="confirmDelete(product, 'product')" class="text-destructive hover:underline font-medium">Supprimer</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                        <!-- Categories Table -->
-                        <div v-show="activeTab === 'categories'">
-                            <div class="border border-border bg-card shadow sm:rounded-lg">
-                                <table class="min-w-full divide-y divide-border">
-                                    <thead class="bg-muted/40"><tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">ID</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Nom</th>
-                                        <th class="px-6 py-3"></th>
-                                    </tr></thead>
-                                    <tbody class="divide-y divide-border bg-card">
-                                        <tr v-for="category in props.categories.data" :key="category.id">
-                                            <td class="px-6 py-4 text-sm text-foreground">{{ category.id }}</td>
-                                            <td class="px-6 py-4 text-sm text-foreground">{{ category.name }}</td>
-                                            <td class="px-6 py-4 text-right text-sm font-medium">
-                                                <a :href="route('backoffice.admin.categories.show', { category: category.id })" class="text-primary hover:text-primary/80 mr-2">Voir</a>
-                                                <button @click.prevent="openEditCategory(category)" class="text-secondary hover:text-secondary-foreground mr-2">Éditer</button>
-                                                <button @click.prevent="deleteCategory(category)" class="text-destructive hover:text-destructive/90">Supprimer</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Categories -->
+                    <table v-if="activeTab === 'categories'" class="w-full text-left text-sm">
+                        <thead class="bg-muted/50 text-muted-foreground border-b border-border">
+                            <tr>
+                                <th class="p-4 font-medium">ID</th>
+                                <th class="p-4 font-medium">Nom</th>
+                                <th class="p-4 font-medium">Slug</th>
+                                <th class="p-4 font-medium">Description</th>
+                                <th class="p-4 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border">
+                            <tr v-for="category in props.categories.data" :key="category.id" class="hover:bg-muted/30 transition-colors">
+                                <td class="p-4 font-mono text-xs">{{ category.id }}</td>
+                                <td class="p-4 font-medium text-foreground">{{ category.name }}</td>
+                                <td class="p-4 text-muted-foreground">{{ category.slug }}</td>
+                                <td class="p-4 text-muted-foreground truncate max-w-xs">{{ category.description }}</td>
+                                <td class="p-4 text-right space-x-2">
+                                    <button @click="openModal('category', category)" class="text-primary hover:underline font-medium">Éditer</button>
+                                    <button @click="confirmDelete(category, 'category')" class="text-destructive hover:underline font-medium">Supprimer</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Orders -->
+                    <table v-if="activeTab === 'orders'" class="w-full text-left text-sm">
+                        <thead class="bg-muted/50 text-muted-foreground border-b border-border">
+                            <tr>
+                                <th class="p-4 font-medium">ID</th>
+                                <th class="p-4 font-medium">Numéro</th>
+                                <th class="p-4 font-medium">Client</th>
+                                <th class="p-4 font-medium">Articles</th>
+                                <th class="p-4 font-medium">Total</th>
+                                <th class="p-4 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border">
+                            <tr v-for="order in props.orders.data" :key="order.id" class="hover:bg-muted/30 transition-colors">
+                                <td class="p-4 font-mono text-xs">{{ order.id }}</td>
+                                <td class="p-4 font-bold text-foreground">{{ order.order_number }}</td>
+                                <td class="p-4 text-muted-foreground">{{ order.user?.name || 'Client inconnu' }}</td>
+                                <td class="p-4 text-foreground">{{ order.total_products }}</td>
+                                <td class="p-4 font-bold text-primary">{{ order.total_price }} FCFA</td>
+                                <td class="p-4 text-right">
+                                    <button @click="confirmDelete(order, 'order')" class="text-destructive hover:underline font-medium">Annuler / Suppr</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-4 flex justify-center">
+                    <Pagination :links="props[activeTab].links" />
                 </div>
             </div>
+
+            <!-- MODALS -->
 
             <!-- User Modal -->
-            <div v-if="userModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                <div class="mb-6 transform overflow-hidden rounded-lg border border-border bg-card text-foreground shadow-xl p-6 w-full max-w-2xl">
-                    <h4 class="text-lg font-semibold mb-4">{{ isEditingUser ? 'Éditer utilisateur' : 'Nouveau utilisateur' }}</h4>
-                    <form @submit.prevent="submitUser" class="space-y-3">
+            <Modal :show="modalOpen.user" @close="modalOpen.user = false">
+                <form @submit.prevent="submitForm('user')" class="p-6">
+                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.user ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm">Nom</label>
-                            <input v-model="userForm.name" class="form-input" />
-                            <p v-if="userForm.errors.name" class="text-sm text-destructive mt-1">{{ userForm.errors.name }}</p>
+                            <InputLabel for="name" value="Nom Complet" />
+                            <TextInput id="name" type="text" class="mt-1 block w-full" v-model="userForm.name" required />
+                            <InputError :message="userForm.errors.name" class="mt-2" />
                         </div>
                         <div>
-                            <label class="block text-sm">Username</label>
-                            <input v-model="userForm.username" class="form-input" />
-                            <p v-if="userForm.errors.username" class="text-sm text-destructive mt-1">{{ userForm.errors.username }}</p>
+                            <InputLabel for="username" value="Nom d'utilisateur" />
+                            <TextInput id="username" type="text" class="mt-1 block w-full" v-model="userForm.username" required />
+                            <InputError :message="userForm.errors.username" class="mt-2" />
                         </div>
                         <div>
-                            <label class="block text-sm">Email</label>
-                            <input v-model="userForm.email" class="form-input" type="email" />
-                            <p v-if="userForm.errors.email" class="text-sm text-destructive mt-1">{{ userForm.errors.email }}</p>
+                            <InputLabel for="email" value="Email" />
+                            <TextInput id="email" type="email" class="mt-1 block w-full" v-model="userForm.email" required />
+                            <InputError :message="userForm.errors.email" class="mt-2" />
                         </div>
                         <div>
-                            <label class="block text-sm">Google ID</label>
-                            <input v-model="userForm.google_id" class="form-input" />
-                            <p v-if="userForm.errors.google_id" class="text-sm text-destructive mt-1">{{ userForm.errors.google_id }}</p>
+                            <InputLabel for="phone" value="Téléphone" />
+                            <TextInput id="phone" type="text" class="mt-1 block w-full" v-model="userForm.phone" />
+                            <InputError :message="userForm.errors.phone" class="mt-2" />
                         </div>
-                        <div class="flex items-center gap-2">
-                            <input id="email_verified" type="checkbox" v-model="userForm.email_verified" class="form-checkbox" />
-                            <label for="email_verified" class="text-sm">Email vérifié</label>
+                        <div class="md:col-span-2">
+                            <InputLabel for="address" value="Adresse" />
+                            <TextInput id="address" type="text" class="mt-1 block w-full" v-model="userForm.address" />
+                            <InputError :message="userForm.errors.address" class="mt-2" />
                         </div>
                         <div>
-                            <label class="block text-sm">Rôle</label>
-                            <select v-model="userForm.role" class="form-select">
-                                <option value="admin">admin</option>
-                                <option value="supplier">supplier</option>
-                                <option value="user">user</option>
+                            <InputLabel for="role" value="Rôle" />
+                            <select id="role" v-model="userForm.role" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm">
+                                <option value="user">Utilisateur / Client</option>
+                                <option value="supplier">Vendeur / Supplier</option>
+                                <option value="admin">Administrateur</option>
                             </select>
-                            <p v-if="userForm.errors.role" class="text-sm text-destructive mt-1">{{ userForm.errors.role }}</p>
+                            <InputError :message="userForm.errors.role" class="mt-2" />
                         </div>
-                        <div class="flex justify-end gap-2">
-                            <button type="button" @click="userModalOpen = false" class="btn">Annuler</button>
-                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        <div class="flex items-center pt-6">
+                            <label class="flex items-center">
+                                <input type="checkbox" v-model="userForm.email_verified" class="rounded border-gray-300 text-primary shadow-sm focus:ring-primary" />
+                                <span class="ms-2 text-sm text-muted-foreground">Email vérifié</span>
+                            </label>
                         </div>
-                        <p v-if="$page.props.flash?.success" class="text-sm text-green-600">{{ $page.props.flash.success }}</p>
-                    </form>
-                </div>
-            </div>
+                        <template v-if="!isEditing.user">
+                            <div>
+                                <InputLabel for="password" value="Mot de passe" />
+                                <TextInput id="password" type="password" class="mt-1 block w-full" v-model="userForm.password" required />
+                            </div>
+                            <div>
+                                <InputLabel for="password_confirmation" value="Confirmation" />
+                                <TextInput id="password_confirmation" type="password" class="mt-1 block w-full" v-model="userForm.password_confirmation" required />
+                            </div>
+                        </template>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <SecondaryButton @click="modalOpen.user = false">Annuler</SecondaryButton>
+                        <PrimaryButton :disabled="userForm.processing">Enregistrer</PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
 
-            <!-- Shop Modal (create) -->
-            <div v-if="shopModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                <div class="mb-6 transform overflow-hidden rounded-lg border border-border bg-card text-foreground shadow-xl p-6 w-full max-w-2xl">
-                    <h4 class="text-lg font-semibold mb-4">Nouvelle boutique</h4>
-                    <form @submit.prevent="submitShop" class="space-y-3">
+            <!-- Shop Modal -->
+            <Modal :show="modalOpen.shop" @close="modalOpen.shop = false">
+                <form @submit.prevent="submitForm('shop')" class="p-6">
+                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.shop ? 'Modifier la boutique' : 'Nouvelle boutique' }}</h2>
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm">Nom</label>
-                            <input v-model="shopForm.name" class="form-input" />
-                            <p v-if="shopForm.errors.name" class="text-sm text-destructive mt-1">{{ shopForm.errors.name }}</p>
+                            <InputLabel for="shop_name" value="Nom de la boutique" />
+                            <TextInput id="shop_name" type="text" class="mt-1 block w-full" v-model="shopForm.name" required />
+                            <InputError :message="shopForm.errors.name" class="mt-2" />
                         </div>
                         <div>
-                            <label class="block text-sm">Ville</label>
-                            <input v-model="shopForm.city" class="form-input" />
-                            <p v-if="shopForm.errors.city" class="text-sm text-destructive mt-1">{{ shopForm.errors.city }}</p>
+                            <InputLabel for="shop_desc" value="Description" />
+                            <textarea id="shop_desc" v-model="shopForm.description" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm" rows="3"></textarea>
+                            <InputError :message="shopForm.errors.description" class="mt-2" />
                         </div>
-                        <div class="flex justify-end gap-2">
-                            <button type="button" @click="shopModalOpen = false" class="btn">Annuler</button>
-                            <button type="submit" class="btn btn-primary">{{ isEditingShop ? 'Enregistrer' : 'Créer' }}</button>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <InputLabel for="shop_city" value="Ville" />
+                                <TextInput id="shop_city" type="text" class="mt-1 block w-full" v-model="shopForm.city" />
+                            </div>
+                            <div>
+                                <InputLabel for="shop_district" value="Quartier" />
+                                <TextInput id="shop_district" type="text" class="mt-1 block w-full" v-model="shopForm.district" />
+                            </div>
                         </div>
-                    </form>
-                </div>
-            </div>
+                        <div>
+                            <InputLabel for="shop_phone" value="Téléphone boutique" />
+                            <TextInput id="shop_phone" type="text" class="mt-1 block w-full" v-model="shopForm.phone" />
+                        </div>
+                        <div>
+                            <InputLabel for="shop_user" value="Vendeur (Propriétaire)" />
+                            <select id="shop_user" v-model="shopForm.user_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm">
+                                <option value="">Sélectionner un vendeur</option>
+                                <option v-for="user in all_users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                            </select>
+                            <InputError :message="shopForm.errors.user_id" class="mt-2" />
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <SecondaryButton @click="modalOpen.shop = false">Annuler</SecondaryButton>
+                        <PrimaryButton :disabled="shopForm.processing">Enregistrer</PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
 
-            <!-- Product Modal (create) -->
-            <div v-if="productModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                <div class="mb-6 transform overflow-hidden rounded-lg border border-border bg-card text-foreground shadow-xl p-6 w-full max-w-2xl">
-                    <h4 class="text-lg font-semibold mb-4">Nouveau produit</h4>
-                    <form @submit.prevent="submitProduct" class="space-y-3">
-                        <div>
-                            <label class="block text-sm">Nom</label>
-                            <input v-model="productForm.name" class="form-input" />
-                            <p v-if="productForm.errors.name" class="text-sm text-destructive mt-1">{{ productForm.errors.name }}</p>
+            <!-- Product Modal -->
+            <Modal :show="modalOpen.product" @close="modalOpen.product = false">
+                <form @submit.prevent="submitForm('product')" class="p-6">
+                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.product ? 'Modifier le produit' : 'Nouveau produit' }}</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <InputLabel for="prod_name" value="Nom du produit" />
+                            <TextInput id="prod_name" type="text" class="mt-1 block w-full" v-model="productForm.name" required />
+                            <InputError :message="productForm.errors.name" class="mt-2" />
                         </div>
                         <div>
-                            <label class="block text-sm">Prix</label>
-                            <input v-model="productForm.price" class="form-input" type="number" />
-                            <p v-if="productForm.errors.price" class="text-sm text-destructive mt-1">{{ productForm.errors.price }}</p>
+                            <InputLabel for="prod_code" value="Code SKU" />
+                            <TextInput id="prod_code" type="text" class="mt-1 block w-full" v-model="productForm.code" />
                         </div>
-                        <div class="flex justify-end gap-2">
-                            <button type="button" @click="productModalOpen = false" class="btn">Annuler</button>
-                            <button type="submit" class="btn btn-primary">{{ isEditingProduct ? 'Enregistrer' : 'Créer' }}</button>
+                        <div>
+                            <InputLabel for="prod_price" value="Prix (FCFA)" />
+                            <TextInput id="prod_price" type="number" class="mt-1 block w-full" v-model="productForm.price" required />
                         </div>
-                    </form>
-                </div>
-            </div>
+                        <div>
+                            <InputLabel for="prod_promo" value="Prix Promotionnel" />
+                            <TextInput id="prod_promo" type="number" class="mt-1 block w-full" v-model="productForm.promotion_price" />
+                        </div>
+                        <div>
+                            <InputLabel for="prod_qty" value="Quantité en stock" />
+                            <TextInput id="prod_qty" type="number" class="mt-1 block w-full" v-model="productForm.quantity" />
+                        </div>
+                        <div>
+                            <InputLabel for="prod_cat" value="Catégorie" />
+                            <select id="prod_cat" v-model="productForm.category_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm">
+                                <option value="">Sélectionner</option>
+                                <option v-for="cat in all_categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <InputLabel for="prod_shop" value="Boutique" />
+                            <select id="prod_shop" v-model="productForm.shop_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm">
+                                <option value="">Sélectionner</option>
+                                <option v-for="shop in all_shops" :key="shop.id" :value="shop.id">{{ shop.name }}</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <InputLabel value="Description Courte" />
+                            <textarea v-model="productForm.description" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm" rows="2"></textarea>
+                        </div>
+                        <div class="flex items-center">
+                            <label class="flex items-center">
+                                <input type="checkbox" v-model="productForm.in_stock" class="rounded border-gray-300 text-primary shadow-sm focus:ring-primary" />
+                                <span class="ms-2 text-sm text-muted-foreground">En stock</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <SecondaryButton @click="modalOpen.product = false">Annuler</SecondaryButton>
+                        <PrimaryButton :disabled="productForm.processing">Enregistrer</PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
 
-            <!-- Category Modal (create) -->
-            <div v-if="categoryModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                <div class="mb-6 transform overflow-hidden rounded-lg border border-border bg-card text-foreground shadow-xl p-6 w-full max-w-2xl">
-                    <h4 class="text-lg font-semibold mb-4">Nouvelle catégorie</h4>
-                    <form @submit.prevent="submitCategory" class="space-y-3">
+            <!-- Category Modal -->
+            <Modal :show="modalOpen.category" @close="modalOpen.category = false">
+                <form @submit.prevent="submitForm('category')" class="p-6">
+                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.category ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}</h2>
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm">Nom</label>
-                            <input v-model="categoryForm.name" class="form-input" />
-                            <p v-if="categoryForm.errors.name" class="text-sm text-destructive mt-1">{{ categoryForm.errors.name }}</p>
+                            <InputLabel for="cat_name" value="Nom" />
+                            <TextInput id="cat_name" type="text" class="mt-1 block w-full" v-model="categoryForm.name" required />
+                            <InputError :message="categoryForm.errors.name" class="mt-2" />
                         </div>
-                        <div class="flex justify-end gap-2">
-                            <button type="button" @click="categoryModalOpen = false" class="btn">Annuler</button>
-                            <button type="submit" class="btn btn-primary">{{ isEditingCategory ? 'Enregistrer' : 'Créer' }}</button>
+                        <div>
+                            <InputLabel for="cat_slug" value="Slug (URL)" />
+                            <TextInput id="cat_slug" type="text" class="mt-1 block w-full" v-model="categoryForm.slug" placeholder="laisse vide pour générer" />
                         </div>
-                    </form>
-                </div>
-            </div>
+                        <div>
+                            <InputLabel for="cat_desc" value="Description" />
+                            <textarea id="cat_desc" v-model="categoryForm.description" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <SecondaryButton @click="modalOpen.category = false">Annuler</SecondaryButton>
+                        <PrimaryButton :disabled="categoryForm.processing">Enregistrer</PrimaryButton>
+                    </div>
+                </form>
+            </Modal>
+
+            <!-- Delete Confirmation -->
+            <DeleteConfirmationModal 
+                :show="deleteModalOpen" 
+                @close="deleteModalOpen = false" 
+                @confirm="executeDelete"
+                :title="'Confirmer la suppression'"
+                :message="'Êtes-vous sûr de vouloir supprimer cet élément (' + deleteType + ') ? Cette action est irréversible.'"
+            />
+
         </template>
     </AdminLayout>
 </template>

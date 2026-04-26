@@ -10,15 +10,9 @@ use Inertia\Response;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $perPage = (int) $request->get('per_page', 15);
-
-        $categories = Category::query()->orderBy('created_at', 'desc')->paginate($perPage)->withQueryString();
-
-        return Inertia::render('Backoffice/Admin/Categories/Index', [
-            'categories' => $categories,
-        ]);
+        return redirect()->route('backoffice.admin.management', ['tab' => 'categories']);
     }
 
     public function store(Request $request)
@@ -31,7 +25,7 @@ class CategoryController extends Controller
 
         $category = Category::create($data);
 
-        return redirect()->route('backoffice.admin.categories.index')->with('success', 'Catégorie créée.');
+        return redirect()->route('backoffice.admin.management', ['tab' => 'categories'])->with('success', 'Catégorie créée.');
     }
 
     public function show(Category $category)
@@ -51,13 +45,13 @@ class CategoryController extends Controller
 
         $category->update($data);
 
-        return redirect()->route('backoffice.admin.categories.index')->with('success', 'Catégorie mise à jour.');
+        return redirect()->route('backoffice.admin.management', ['tab' => 'categories'])->with('success', 'Catégorie mise à jour.');
     }
 
     public function destroy(Category $category)
     {
         $category->delete();
 
-        return redirect()->route('backoffice.admin.categories.index')->with('success', 'Catégorie supprimée.');
+        return redirect()->route('backoffice.admin.management', ['tab' => 'categories'])->with('success', 'Catégorie supprimée.');
     }
 }

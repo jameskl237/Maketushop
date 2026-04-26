@@ -4,21 +4,16 @@ namespace App\Http\Controllers\Backoffice\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Shop;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ShopController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): RedirectResponse
     {
-        $perPage = (int) $request->get('per_page', 15);
-
-        $shops = Shop::query()->orderBy('created_at', 'desc')->paginate($perPage)->withQueryString();
-
-        return Inertia::render('Backoffice/Admin/Shops/Index', [
-            'shops' => $shops,
-        ]);
+        return redirect()->route('backoffice.admin.management', ['tab' => 'shops']);
     }
 
     public function store(Request $request)
@@ -34,7 +29,7 @@ class ShopController extends Controller
 
         $shop = Shop::create($data);
 
-        return redirect()->route('backoffice.admin.shops.index')->with('success', 'Boutique créée.');
+        return redirect()->route('backoffice.admin.management', ['tab' => 'shops'])->with('success', 'Boutique créée.');
     }
 
     public function show(Shop $shop)
@@ -56,13 +51,13 @@ class ShopController extends Controller
 
         $shop->update($data);
 
-        return redirect()->route('backoffice.admin.shops.index')->with('success', 'Boutique mise à jour.');
+        return redirect()->route('backoffice.admin.management', ['tab' => 'shops'])->with('success', 'Boutique mise à jour.');
     }
 
     public function destroy(Shop $shop)
     {
         $shop->delete();
 
-        return redirect()->route('backoffice.admin.shops.index')->with('success', 'Boutique supprimée.');
+        return redirect()->route('backoffice.admin.management', ['tab' => 'shops'])->with('success', 'Boutique supprimée.');
     }
 }

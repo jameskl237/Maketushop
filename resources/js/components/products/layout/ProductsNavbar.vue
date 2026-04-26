@@ -49,6 +49,22 @@ onUnmounted(() => {
             <div class="flex items-center gap-2">
                 <LanguageSwitcher :floating="false" />
                 <ThemeToggle :floating="false" />
+                
+                <template v-if="$page.props.auth.user">
+                    <Link :href="route('dashboard')">
+                        <Button variant="ghost" class="hidden sm:flex items-center gap-2">
+                            {{ t('common.dashboard') }}
+                        </Button>
+                    </Link>
+                </template>
+                <template v-else>
+                    <Link :href="route('login')">
+                        <Button variant="ghost" class="hidden sm:flex items-center gap-2">
+                            {{ t('landing.login') }}
+                        </Button>
+                    </Link>
+                </template>
+
                 <Link :href="route('shops.index')">
                     <Button type="button" variant="outline" size="icon" :aria-label="t('public.shops')">
                         <Store class="h-4 w-4" />

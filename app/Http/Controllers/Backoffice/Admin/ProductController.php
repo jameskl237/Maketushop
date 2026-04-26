@@ -10,15 +10,9 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $perPage = (int) $request->get('per_page', 15);
-
-        $products = Product::query()->orderBy('created_at', 'desc')->paginate($perPage)->withQueryString();
-
-        return Inertia::render('Backoffice/Admin/Products/Index', [
-            'products' => $products,
-        ]);
+        return redirect()->route('backoffice.admin.management', ['tab' => 'products']);
     }
 
     public function store(Request $request)
@@ -37,7 +31,7 @@ class ProductController extends Controller
 
         $product = Product::create($data);
 
-        return redirect()->route('backoffice.admin.products.index')->with('success', 'Produit créé.');
+        return redirect()->route('backoffice.admin.management', ['tab' => 'products'])->with('success', 'Produit créé.');
     }
 
     public function show(Product $product)
@@ -62,13 +56,13 @@ class ProductController extends Controller
 
         $product->update($data);
 
-        return redirect()->route('backoffice.admin.products.index')->with('success', 'Produit mis à jour.');
+        return redirect()->route('backoffice.admin.management', ['tab' => 'products'])->with('success', 'Produit mis à jour.');
     }
 
     public function destroy(Product $product)
     {
         $product->delete();
 
-        return redirect()->route('backoffice.admin.products.index')->with('success', 'Produit supprimé.');
+        return redirect()->route('backoffice.admin.management', ['tab' => 'products'])->with('success', 'Produit supprimé.');
     }
 }

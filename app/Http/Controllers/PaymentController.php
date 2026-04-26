@@ -14,7 +14,8 @@ class PaymentController extends Controller
 {
     public function __construct()
     {
-        NotchPay::setApiKey(config('services.notchpay.secret_key'));
+        NotchPay::setApiKey(config('services.notchpay.public_key'));
+        NotchPay::setPrivateKey(config('services.notchpay.secret_key'));
     }
 
     public function initialize(Request $request, Product $product)
@@ -32,10 +33,15 @@ class PaymentController extends Controller
             $payment = Payment::initialize([
                 'amount' => (int) $product->price,
                 'email' => $user->email,
-                'currency' => 'XAF', // Assuming XAF as default
+                'currency' => 'XAF',
                 'reference' => $reference,
                 'callback' => route('payments.callback'),
                 'description' => 'Achat de ' . $product->name . ' sur MaketuShop',
+                'customer' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                ],
                 'metadata' => [
                     'user_id' => $user->id,
                     'product_id' => $product->id,

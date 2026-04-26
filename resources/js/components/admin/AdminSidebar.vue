@@ -45,6 +45,12 @@ const props = defineProps({
                         <Tag class="h-4 w-4" />
                         Catégories
                     </Link>
+
+                    <Link :href="route('backoffice.admin.orders.index')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
+                        :class="activeRoute === 'backoffice.admin.orders.index' ? 'bg-primary/12 text-primary font-medium' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'">
+                        <CreditCard class="h-4 w-4" />
+                        Commandes
+                    </Link>
                 </div>
             </div>
 

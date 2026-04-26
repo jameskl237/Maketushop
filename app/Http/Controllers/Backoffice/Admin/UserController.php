@@ -15,18 +15,9 @@ class UserController extends Controller
     /**
      * Display a listing of the users for the admin backoffice.
      */
-    public function index(Request $request): Response
+    public function index(Request $request): RedirectResponse
     {
-        $perPage = (int) $request->get('per_page', 15);
-
-        $users = User::query()
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage)
-            ->withQueryString();
-
-        return Inertia::render('Backoffice/Admin/Users/Index', [
-            'users' => $users,
-        ]);
+        return redirect()->route('backoffice.admin.management', ['tab' => 'users']);
     }
 
     /**
@@ -143,6 +134,6 @@ class UserController extends Controller
 
         $user->delete();
 
-        return redirect()->route('backoffice.admin.users.index')->with('success', 'Utilisateur supprimé.');
+        return redirect()->route('backoffice.admin.management', ['tab' => 'users'])->with('success', 'Utilisateur supprimé.');
     }
 }

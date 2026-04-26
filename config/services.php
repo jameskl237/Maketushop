@@ -44,6 +44,8 @@ return [
     'notchpay' => [
         'public_key' => env('NOTCHPAY_PUBLIC_KEY', env('NOTCHPAY_API_KEY')),
         'secret_key' => env('NOTCHPAY_SECRET_KEY', env('NOTCHPAY_GRANT_KEY')),
+        'webhook_secret' => env('NOTCHPAY_WEBHOOK_SECRET'),
+        'test_mode' => env('NOTCHPAY_TEST_MODE', false),
     ],
 
 ];

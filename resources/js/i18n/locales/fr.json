@@ -16,7 +16,22 @@
         "title": "Bienvenue"
     },
     "dashboard": {
-        "loggedIn": "Vous êtes connecté !"
+        "loggedIn": "Vous êtes connecté !",
+        "client": {
+            "title": "Mon Tableau de Bord",
+            "subtitle": "Gérez vos commandes et vos paiements",
+            "orders": "Mes Commandes",
+            "noOrders": "Vous n'avez pas encore passé de commande.",
+            "orderNumber": "N° de commande",
+            "date": "Date",
+            "total": "Total",
+            "status": "Statut",
+            "view": "Détails",
+            "items": "{count} article(s)",
+            "completed": "Complété",
+            "pending": "En attente",
+            "failed": "Échoué"
+        }
     },
     "auth": {
         "login": "Se connecter",
