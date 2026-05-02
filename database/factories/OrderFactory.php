@@ -13,10 +13,13 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'order_number' => 'ORD-' . strtoupper(Str::random(8)),
+            'order_number' => 'ORD-'.strtoupper(Str::random(8)),
             'user_id' => null, // set in seeder
             'total_products' => 0,
             'total_price' => 0,
+            'status' => $this->faker->randomElement([Order::STATUS_PENDING, Order::STATUS_DELIVERED]),
+            'is_delivered' => false,
+            'is_paid' => false,
         ];
     }
 }

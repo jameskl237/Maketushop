@@ -36,6 +36,7 @@ class HandleInertiaRequests extends Middleware
                 'google_oauth_configured' => filled(config('services.google.client_id'))
                     && filled(config('services.google.client_secret'))
                     && filled(config('services.google.redirect')),
+                'must_set_phone' => $request->user() && $request->user()->google_id && !$request->user()->phone,
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),

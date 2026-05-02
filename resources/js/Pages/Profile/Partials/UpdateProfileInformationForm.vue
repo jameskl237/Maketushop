@@ -4,6 +4,8 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
+import { countries } from '@/lib/countries';
 
 defineProps({
     mustVerifyEmail: {
@@ -16,10 +18,32 @@ defineProps({
 
 const user = usePage().props.auth.user;
 
+const selectedCode = ref('+237');
+const phoneNumber = ref('');
+
 const form = useForm({
     name: user.name,
     email: user.email,
+    phone: user.phone || '',
 });
+
+onMounted(() => {
+    if (user.phone) {
+        const country = countries.find(c => user.phone.startsWith(c.code.replace('+', '')));
+        if (country) {
+            selectedCode.value = country.code;
+            phoneNumber.value = user.phone.substring(country.code.replace('+', '').length);
+        } else {
+            phoneNumber.value = user.phone;
+        }
+    }
+});
+
+const submit = () => {
+    const index = selectedCode.value.replace('+', '');
+    form.phone = index + phoneNumber.value.replace(/\s+/g, '');
+    form.patch(route('profile.update'));
+};
 </script>
 
 <template>
@@ -35,7 +59,7 @@ const form = useForm({
         </header>
 
         <form
-            @submit.prevent="form.patch(route('profile.update'))"
+            @submit.prevent="submit"
             class="mt-6 space-y-6"
         >
             <div>
@@ -67,6 +91,30 @@ const form = useForm({
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
+            </div>
+
+            <div>
+                <InputLabel for="phone" value="Numéro de téléphone" />
+
+                <div class="flex mt-1">
+                    <select
+                        v-model="selectedCode"
+                        class="rounded-l-md border border-input bg-background text-foreground shadow-sm focus:border-ring focus:ring-ring border-r-0"
+                    >
+                        <option v-for="country in countries" :key="country.code" :value="country.code">
+                            {{ country.code }} ({{ country.name }})
+                        </option>
+                    </select>
+                    <TextInput
+                        id="phone"
+                        type="text"
+                        class="block w-full rounded-l-none"
+                        v-model="phoneNumber"
+                        placeholder="Ex: 6XXXXXXXX"
+                    />
+                </div>
+
+                <InputError class="mt-2" :message="form.errors.phone" />
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">

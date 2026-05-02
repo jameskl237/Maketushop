@@ -7,6 +7,7 @@ import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
+import PhoneVerificationModal from '@/Components/PhoneVerificationModal.vue';
 import { Link } from '@inertiajs/vue3';
 
 defineProps({
@@ -222,6 +223,8 @@ const showingNavigationDropdown = ref(false);
             <main>
                 <slot />
             </main>
+
+            <PhoneVerificationModal />
         </div>
     </div>
 </template>

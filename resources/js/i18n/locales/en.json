@@ -30,6 +30,8 @@
             "items": "{count} item(s)",
             "completed": "Completed",
             "pending": "Pending",
+            "delivered": "Delivered",
+            "markDelivered": "Mark as delivered",
             "failed": "Failed"
         }
     },
@@ -441,6 +443,10 @@
         "whatsappUnavailable": "WhatsApp number unavailable for {shop}",
         "summary": "Summary",
         "total": "Total",
+        "platformPay": "Pay on the platform",
+    "loginRequiredTitle": "Login required",
+    "loginRequiredMessage": "You must be logged in to continue payment on the platform.",
+    "loginToContinue": "Log in",
         "waGreeting": "Hello {shop},",
         "waIntro": "I would like to order the following products:",
         "waQuantity": "Quantity",
@@ -454,7 +460,11 @@
         "title": "Payment service unavailable",
         "text1": "Payment through the platform (Orange Money, MTN MoMo, PayPal, etc.) is not available yet.",
         "text2": "This feature will be enabled once payment APIs are integrated.",
-        "back": "Go back to previous page"
+        "back": "Go back to previous page",
+        "methodTitle": "Choose a payment method",
+        "methodSubtitle": "Select a method, then you will be redirected to the secure NotchPay checkout.",
+        "summary": "Summary",
+        "continueToNotchPay": "Continue payment"
     },
     "aboutPage": {
         "headTitle": "About MaketuShop",

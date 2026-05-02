@@ -13,7 +13,7 @@ const props = defineProps({
 const { t } = useI18n();
 
 const handlePlatformBuy = () => {
-    router.post(route('payments.checkout', { product: props.product.id }));
+    router.visit(route('payments.product.method', { product: props.product.id }));
 };
 
 const publicBaseUrl = (import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin).replace(/\/+$/, '');
@@ -110,4 +110,3 @@ const whatsappUrl = computed(() => {
         </div>
     </div>
 </template>
-

@@ -10,6 +10,7 @@ import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import { countries } from '@/lib/countries';
 
 const props = defineProps({
     users: Object,
@@ -31,6 +32,15 @@ const setActiveTab = (tab) => {
     url.searchParams.set('tab', tab);
     window.history.pushState({}, '', url);
 };
+
+const orderStatusLabel = (status) => ({
+    pending: 'En cours',
+    delivered: 'Livrée',
+}[status] || 'En cours');
+
+const orderStatusClass = (status) => status === 'delivered'
+    ? 'border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-400'
+    : 'border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400';
 
 // --- MODALS & FORMS ---
 
@@ -86,6 +96,9 @@ const shopForm = useForm({
     phone: '',
     user_id: '',
 });
+
+const shopSelectedCode = ref('+237');
+const shopPhoneNumber = ref('');
 
 const productForm = useForm({
     id: null,
@@ -145,6 +158,16 @@ const openModal = (type, item = null) => {
             shopForm.district = item.district;
             shopForm.phone = item.phone;
             shopForm.user_id = item.user_id;
+
+            const phone = item.phone ?? '';
+            const country = countries.find(c => phone.startsWith(c.code.replace('+', '')));
+            if (country) {
+                shopSelectedCode.value = country.code;
+                shopPhoneNumber.value = phone.substring(country.code.replace('+', '').length);
+            } else {
+                shopSelectedCode.value = '+237';
+                shopPhoneNumber.value = phone;
+            }
         } else if (type === 'product') {
             productForm.id = item.id;
             productForm.name = item.name;
@@ -167,7 +190,11 @@ const openModal = (type, item = null) => {
     } else {
         isEditing.value[type] = false;
         if (type === 'user') userForm.reset();
-        else if (type === 'shop') shopForm.reset();
+        else if (type === 'shop') {
+            shopForm.reset();
+            shopSelectedCode.value = '+237';
+            shopPhoneNumber.value = '';
+        }
         else if (type === 'product') productForm.reset();
         else if (type === 'category') categoryForm.reset();
     }
@@ -176,6 +203,12 @@ const openModal = (type, item = null) => {
 
 const submitForm = (type) => {
     const form = type === 'user' ? userForm : (type === 'shop' ? shopForm : (type === 'product' ? productForm : categoryForm));
+    
+    if (type === 'shop') {
+        const index = shopSelectedCode.value.replace('+', '');
+        shopForm.phone = index + shopPhoneNumber.value.replace(/\s+/g, '');
+    }
+
     const singularType = type;
     const baseRoute = `backoffice.admin.${type}s`;
     
@@ -375,6 +408,7 @@ const submitForm = (type) => {
                                 <th class="p-4 font-medium">Client</th>
                                 <th class="p-4 font-medium">Articles</th>
                                 <th class="p-4 font-medium">Total</th>
+                                <th class="p-4 font-medium">Statut</th>
                                 <th class="p-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
@@ -385,6 +419,11 @@ const submitForm = (type) => {
                                 <td class="p-4 text-muted-foreground">{{ order.user?.name || 'Client inconnu' }}</td>
                                 <td class="p-4 text-foreground">{{ order.total_products }}</td>
                                 <td class="p-4 font-bold text-primary">{{ order.total_price }} FCFA</td>
+                                <td class="p-4">
+                                    <span :class="['inline-flex rounded-full border px-2.5 py-1 text-xs font-medium', orderStatusClass(order.status)]">
+                                        {{ orderStatusLabel(order.status) }}
+                                    </span>
+                                </td>
                                 <td class="p-4 text-right">
                                     <button @click="confirmDelete(order, 'order')" class="text-destructive hover:underline font-medium">Annuler / Suppr</button>
                                 </td>
@@ -491,7 +530,24 @@ const submitForm = (type) => {
                         </div>
                         <div>
                             <InputLabel for="shop_phone" value="Téléphone boutique" />
-                            <TextInput id="shop_phone" type="text" class="mt-1 block w-full" v-model="shopForm.phone" />
+                            <div class="flex mt-1">
+                                <select
+                                    v-model="shopSelectedCode"
+                                    class="rounded-l-md border border-input bg-background text-foreground shadow-sm focus:border-ring focus:ring-ring border-r-0"
+                                >
+                                    <option v-for="country in countries" :key="country.code" :value="country.code">
+                                        {{ country.code }} ({{ country.name }})
+                                    </option>
+                                </select>
+                                <TextInput
+                                    id="shop_phone"
+                                    type="text"
+                                    class="block w-full rounded-l-none"
+                                    v-model="shopPhoneNumber"
+                                    placeholder="Ex: 6XXXXXXXX"
+                                />
+                            </div>
+                            <InputError :message="shopForm.errors.phone" class="mt-2" />
                         </div>
                         <div>
                             <InputLabel for="shop_user" value="Vendeur (Propriétaire)" />

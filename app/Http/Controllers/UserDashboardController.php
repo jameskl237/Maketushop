@@ -22,4 +22,16 @@ class UserDashboardController extends Controller
             'orders' => $orders
         ]);
     }
+
+    public function markAsDelivered(Order $order)
+    {
+        // Ensure the order belongs to the user
+        if ($order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $order->update(['status' => Order::STATUS_DELIVERED]);
+
+        return back()->with('success', 'La commande a été marquée comme livrée.');
+    }
 }

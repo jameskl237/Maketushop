@@ -11,12 +11,37 @@ class Order extends Model
 {
     use HasFactory;
 
+    const STATUS_PENDING = 'pending';
+    const STATUS_DELIVERED = 'delivered';
+
     protected $fillable = [
         'order_number',
         'user_id',
         'total_products',
         'total_price',
+        'status',
+        'is_delivered',
+        'is_paid',
     ];
+
+    protected $casts = [
+        'is_delivered' => 'boolean',
+        'is_paid' => 'boolean',
+        'total_price' => 'decimal:2',
+    ];
+
+    protected static function booted()
+    {
+        static::saving(function ($order) {
+            if ($order->isDirty('status')) {
+                if ($order->status === self::STATUS_DELIVERED) {
+                    $order->is_delivered = true;
+                } else {
+                    $order->is_delivered = false;
+                }
+            }
+        });
+    }
 
     public function user(): BelongsTo
     {

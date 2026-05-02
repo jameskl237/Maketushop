@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="140" viewBox="0 0 240 140" role="img" aria-labelledby="title">
+  <title id="title">Orange Money</title>
+  <rect width="240" height="140" rx="18" fill="#111"/>
+  <rect x="38" y="28" width="72" height="72" fill="#ff7900"/>
+  <text x="49" y="71" fill="#fff" font-family="Arial Black, Arial, sans-serif" font-size="14" font-weight="900">orange</text>
+  <text x="124" y="59" fill="#fff" font-family="Arial, sans-serif" font-size="26" font-weight="800">Orange</text>
+  <text x="124" y="88" fill="#ff7900" font-family="Arial, sans-serif" font-size="26" font-weight="800">Money</text>
+  <text x="42" y="119" fill="#f3f4f6" font-family="Arial, sans-serif" font-size="13" font-weight="700">Cameroun</text>
+</svg>

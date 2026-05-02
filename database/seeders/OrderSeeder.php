@@ -23,6 +23,7 @@ class OrderSeeder extends Seeder
             $user = $users->random();
             $order = Order::factory()->create([
                 'user_id' => $user->id,
+                'status' => Order::STATUS_PENDING,
             ]);
 
             $itemsCount = rand(1, 4);
@@ -44,6 +45,10 @@ class OrderSeeder extends Seeder
 
             $order->total_products = $totalProducts;
             $order->total_price = $totalPrice;
+            $order->is_paid = rand(0, 1);
+            if ($order->is_paid) {
+                $order->status = rand(0, 1) ? Order::STATUS_DELIVERED : Order::STATUS_PENDING;
+            }
             $order->save();
         }
     }

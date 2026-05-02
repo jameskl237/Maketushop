@@ -24,6 +24,12 @@ class GoogleAuthController extends Controller
                 ]);
         }
 
+        // Preserve an optional redirect query param so we can return the user there after OAuth
+        $redirect = request()->query('redirect');
+        if ($redirect) {
+            request()->session()->put('auth_google_redirect', $redirect);
+        }
+
         return Socialite::driver('google')->redirect();
     }
 
@@ -93,7 +99,13 @@ class GoogleAuthController extends Controller
     Auth::login($user, true);
     $request->session()->regenerate();
 
-    // Rediriger vers le dashboard adapté au rôle (ex: backoffice.supplier.dashboard)
+    // If we stored a redirect before starting OAuth, use it
+    $storedRedirect = $request->session()->pull('auth_google_redirect');
+    if ($storedRedirect) {
+        return redirect($storedRedirect);
+    }
+
+    // Default: redirect to the dashboard adapted to the role
     return redirect()->route($user->dashboardRouteName());
     }
 

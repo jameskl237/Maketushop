@@ -14,10 +14,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { Package, ShoppingCart, Store } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { countries } from '@/lib/countries';
 
 const props = defineProps({
     shops: {
@@ -30,6 +31,7 @@ const props = defineProps({
     },
 });
 
+const page = usePage();
 const createShopDialogOpen = ref(false);
 const editShopDialogOpen = ref(false);
 const loading = ref(false);
@@ -37,11 +39,17 @@ const canCreateShop = computed(() => props.shops.length === 0);
 const { t } = useI18n();
 const shopToEdit = ref(null);
 
+const selectedCode = ref('+237');
+const phoneNumber = ref('');
+const editSelectedCode = ref('+237');
+const editPhoneNumber = ref('');
+
 const form = useForm({
     name: '',
     description: '',
     city: '',
     district: '',
+    phone: '',
     logo: null,
 });
 
@@ -87,10 +95,29 @@ const stats = computed(() => [
 
 const openCreateDialog = () => {
     if (!canCreateShop.value) return;
+    
+    const userPhone = page.props.auth.user.phone || '';
+    if (userPhone) {
+        const country = countries.find(c => userPhone.startsWith(c.code.replace('+', '')));
+        if (country) {
+            selectedCode.value = country.code;
+            phoneNumber.value = userPhone.substring(country.code.replace('+', '').length);
+        } else {
+            selectedCode.value = '+237';
+            phoneNumber.value = userPhone;
+        }
+    } else {
+        selectedCode.value = '+237';
+        phoneNumber.value = '';
+    }
+    
     createShopDialogOpen.value = true;
 };
 
 const submitShop = () => {
+    const index = selectedCode.value.replace('+', '');
+    form.phone = index + phoneNumber.value.replace(/\s+/g, '');
+
     form.post(route('backoffice.supplier.shops.store'), {
         forceFormData: true,
         preserveScroll: true,
@@ -116,6 +143,17 @@ const openEditDialog = (shop) => {
     editForm.description = shop.description ?? '';
     editForm.city = shop.city ?? '';
     editForm.district = shop.district ?? '';
+    
+    const phone = shop.phone ?? '';
+    const country = countries.find(c => phone.startsWith(c.code.replace('+', '')));
+    if (country) {
+        editSelectedCode.value = country.code;
+        editPhoneNumber.value = phone.substring(country.code.replace('+', '').length);
+    } else {
+        editSelectedCode.value = '+237';
+        editPhoneNumber.value = phone;
+    }
+
     editForm.phone = shop.phone ?? '';
     editForm.logo = null;
     editShopDialogOpen.value = true;
@@ -127,6 +165,9 @@ const onEditLogoChange = (event) => {
 
 const submitShopUpdate = () => {
     if (!shopToEdit.value) return;
+
+    const index = editSelectedCode.value.replace('+', '');
+    editForm.phone = index + editPhoneNumber.value.replace(/\s+/g, '');
 
     editForm
         .transform((data) => ({ ...data, _method: 'put' }))
@@ -201,6 +242,22 @@ const submitShopUpdate = () => {
                 </div>
 
                 <div class="space-y-2">
+                    <Label for="shop-phone">Numéro de téléphone</Label>
+                    <div class="flex gap-2">
+                        <select
+                            v-model="selectedCode"
+                            class="rounded-md border border-input bg-background text-foreground shadow-sm focus:border-ring focus:ring-ring"
+                        >
+                            <option v-for="country in countries" :key="country.code" :value="country.code">
+                                {{ country.code }} ({{ country.name }})
+                            </option>
+                        </select>
+                        <Input id="shop-phone" v-model="phoneNumber" type="text" placeholder="6XXXXXXXX" required />
+                    </div>
+                    <p v-if="form.errors.phone" class="text-sm text-destructive">{{ form.errors.phone }}</p>
+                </div>
+
+                <div class="space-y-2">
                     <Label for="shop-description">{{ $t('common.description') }}</Label>
                     <Textarea id="shop-description" v-model="form.description" rows="4" />
                     <p v-if="form.errors.description" class="text-sm text-destructive">{{ form.errors.description }}</p>
@@ -256,11 +313,18 @@ const submitShopUpdate = () => {
                 </div>
 
                 <div class="space-y-2">
-                    <Label for="edit-shop-phone">{{ $t('supplier.whatsappPhoneOptional') }}</Label>
-                    <Input id="edit-shop-phone" v-model="editForm.phone" type="text" :placeholder="$t('supplier.phonePlaceholder')" />
-                    <p class="text-xs text-muted-foreground">
-                        {{ $t('supplier.phoneFallbackHint') }}
-                    </p>
+                    <Label for="edit-shop-phone">Numéro de téléphone</Label>
+                    <div class="flex gap-2">
+                        <select
+                            v-model="editSelectedCode"
+                            class="rounded-md border border-input bg-background text-foreground shadow-sm focus:border-ring focus:ring-ring"
+                        >
+                            <option v-for="country in countries" :key="country.code" :value="country.code">
+                                {{ country.code }} ({{ country.name }})
+                            </option>
+                        </select>
+                        <Input id="edit-shop-phone" v-model="editPhoneNumber" type="text" placeholder="6XXXXXXXX" required />
+                    </div>
                     <p v-if="editForm.errors.phone" class="text-sm text-destructive">{{ editForm.errors.phone }}</p>
                 </div>
 

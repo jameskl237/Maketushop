@@ -1,0 +1,18 @@
+export const countries = [
+    { name: 'Cameroun', code: '+237' },
+    { name: 'Côte d’Ivoire', code: '+225' },
+    { name: 'Sénégal', code: '+221' },
+    { name: 'France', code: '+33' },
+    { name: 'Gabon', code: '+241' },
+    { name: 'Bénin', code: '+229' },
+    { name: 'Togo', code: '+228' },
+    { name: 'Mali', code: '+223' },
+    { name: 'Burkina Faso', code: '+226' },
+    { name: 'Niger', code: '+227' },
+    { name: 'RDC', code: '+243' },
+    { name: 'Congo', code: '+242' },
+    { name: 'Tchad', code: '+235' },
+    { name: 'Centrafrique', code: '+236' },
+    { name: 'Guinée', code: '+224' },
+    { name: 'Guinée Équatoriale', code: '+240' },
+];

@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { ShoppingBag, Calendar, CreditCard, ChevronRight } from 'lucide-vue-next';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ShoppingBag, Calendar, CheckCircle } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +26,27 @@ const formatPrice = (price) => {
         style: 'currency',
         currency: 'XAF',
     }).format(price);
+};
+
+const statusLabel = (status) => {
+    const labels = {
+        pending: 'dashboard.client.pending',
+        delivered: 'dashboard.client.delivered',
+    };
+
+    return labels[status] || 'dashboard.client.pending';
+};
+
+const statusBadgeClass = (status) => {
+    return status === 'delivered'
+        ? 'bg-green-500/10 text-green-600 border-green-500/20'
+        : 'bg-amber-500/10 text-amber-600 border-amber-500/20';
+};
+
+const markAsDelivered = (order) => {
+    router.patch(route('orders.delivered', { order: order.id }), {}, {
+        preserveScroll: true,
+    });
 };
 </script>
 
@@ -101,18 +122,25 @@ const formatPrice = (price) => {
                                     </div>
                                 </div>
                                 
-                                <div class="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0">
+                                <div class="flex flex-col items-stretch gap-3 border-t pt-4 md:w-auto md:flex-row md:items-center md:justify-end md:border-t-0 md:pt-0">
                                     <div class="text-right">
                                         <p class="text-lg font-bold text-foreground">
                                             {{ formatPrice(order.total_price) }}
                                         </p>
-                                        <Badge variant="outline" class="bg-green-500/10 text-green-500 border-green-500/20">
-                                            {{ $t('dashboard.client.completed') }}
+                                        <Badge variant="outline" :class="statusBadgeClass(order.status)">
+                                            {{ $t(statusLabel(order.status)) }}
                                         </Badge>
                                     </div>
-                                    <!-- <Button variant="ghost" size="icon">
-                                        <ChevronRight class="h-5 w-5" />
-                                    </Button> -->
+                                    <Button
+                                        v-if="order.status === 'pending'"
+                                        type="button"
+                                        variant="outline"
+                                        class="w-full md:w-auto"
+                                        @click="markAsDelivered(order)"
+                                    >
+                                        <CheckCircle class="mr-2 h-4 w-4" />
+                                        {{ $t('dashboard.client.markDelivered') }}
+                                    </Button>
                                 </div>
                             </div>
                         </div>

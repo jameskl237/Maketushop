@@ -1,16 +1,16 @@
 <?php
 
 use App\Http\Controllers\Auth\GoogleAuthController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\Backoffice\Admin\UserController;
 use App\Http\Controllers\Backoffice\Admin\AdminController;
-use App\Http\Controllers\Backoffice\Admin\ShopController as AdminShopController;
-use App\Http\Controllers\Backoffice\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Backoffice\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Backoffice\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Backoffice\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Backoffice\Admin\ShopController as AdminShopController;
+use App\Http\Controllers\Backoffice\Admin\UserController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -50,13 +50,14 @@ Route::get('/dashboard', function () {
 })->middleware('auth')->name('dashboard');
 
 use App\Http\Controllers\UserDashboardController;
+
 Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
     ->middleware('auth')
     ->name('user.dashboard');
 
 Route::middleware(['auth', 'role:admin'])->prefix('backoffice/admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('backoffice.admin.dashboard');
-    
+
     // Admin: gestion des utilisateurs (CRUD)
     Route::get('/users', [UserController::class, 'index'])->name('backoffice.admin.users.index');
     Route::post('/users', [UserController::class, 'store'])->name('backoffice.admin.users.store');
@@ -64,7 +65,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('backoffice/admin')->group(fun
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('backoffice.admin.users.edit');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('backoffice.admin.users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('backoffice.admin.users.destroy');
-    
+
     // Management single page
     Route::get('/management', [AdminController::class, 'management'])->name('backoffice.admin.management');
 
@@ -110,7 +111,15 @@ Route::middleware(['auth', 'role:supplier'])->prefix('backoffice/supplier')->gro
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/phone', [ProfileController::class, 'updatePhone'])->name('profile.phone.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/products/{product}/payment-method', [PaymentController::class, 'productMethod'])->name('payments.product.method');
+    Route::get('/cart/payment-method', [PaymentController::class, 'cartMethod'])->name('payments.cart.method');
+
+    // Commandes
+    Route::patch('/orders/{order}/delivered', [UserDashboardController::class, 'markAsDelivered'])->name('orders.delivered');
+    Route::post('/cart/checkout', [PaymentController::class, 'checkoutCart'])->name('payments.cart.checkout');
 });
 
 Route::middleware('guest')->group(function () {

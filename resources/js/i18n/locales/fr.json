@@ -29,7 +29,9 @@
             "view": "Détails",
             "items": "{count} article(s)",
             "completed": "Complété",
-            "pending": "En attente",
+            "pending": "En cours",
+            "delivered": "Livrée",
+            "markDelivered": "Marquer comme livrée",
             "failed": "Échoué"
         }
     },
@@ -441,6 +443,10 @@
         "whatsappUnavailable": "Numéro WhatsApp indisponible pour {shop}",
         "summary": "Récapitulatif",
         "total": "Total",
+        "platformPay": "Payer sur la plateforme",
+        "loginRequiredTitle": "Connexion requise",
+        "loginRequiredMessage": "Vous devez vous connecter pour continuer le paiement sur la plateforme.",
+        "loginToContinue": "Se connecter",
         "waGreeting": "Bonjour {shop},",
         "waIntro": "Je souhaite commander les produits suivants :",
         "waQuantity": "Quantité",
@@ -454,7 +460,11 @@
         "title": "Service de paiement indisponible",
         "text1": "Le paiement via la plateforme (Orange Money, MTN MoMo, PayPal, etc.) n'est pas encore disponible.",
         "text2": "Cette fonctionnalité sera activée dès l'intégration des APIs de paiement.",
-        "back": "Revenir à la page précédente"
+        "back": "Revenir à la page précédente",
+        "methodTitle": "Choisir une méthode de paiement",
+        "methodSubtitle": "Sélectionnez une méthode, puis vous serez redirigé vers l'interface sécurisée NotchPay.",
+        "summary": "Récapitulatif",
+        "continueToNotchPay": "Continuer le payement"
     },
     "aboutPage": {
         "headTitle": "À propos de MaketuShop",

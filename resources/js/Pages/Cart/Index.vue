@@ -4,9 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCartStore } from '@/stores/cart';
-import { Head, Link } from '@inertiajs/vue3';
-import { MessageCircle, Store } from 'lucide-vue-next';
-import { computed, onMounted } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { CreditCard, MessageCircle, Store } from 'lucide-vue-next';
+import { computed, onMounted, ref } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 
@@ -100,6 +101,21 @@ const orderAllViaWhatsapp = () => {
             window.open(url, '_blank', 'noopener,noreferrer');
         }, index * 700);
     });
+};
+
+const page = usePage();
+const showLoginPrompt = ref(false);
+
+const isAuthenticated = computed(() => Boolean(page.props?.auth?.user));
+
+const checkoutOnPlatform = () => {
+    if (isAuthenticated.value) {
+        router.visit(route('payments.cart.method'));
+        return;
+    }
+
+    // show a small login prompt so the user can choose to login/register first
+    showLoginPrompt.value = true;
 };
 
 const hydrateLegacyCartItems = async () => {
@@ -260,10 +276,25 @@ onMounted(() => {
                             <MessageCircle class="mr-2 h-4 w-4" />
                             {{ t('cartPage.orderAll') }}
                         </Button>
+                        <Button variant="outline" class="w-full" @click="checkoutOnPlatform">
+                            <CreditCard class="mr-2 h-4 w-4" />
+                            {{ t('cartPage.platformPay') }}
+                        </Button>
                     </CardContent>
                 </Card>
             </div>
         </div>
     </div>
+    
+    <!-- Login prompt modal for guests who try to checkout -->
+    <div v-if="showLoginPrompt" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div class="mb-6 transform overflow-hidden rounded-lg border border-border bg-card text-foreground shadow-xl p-6 w-full max-w-md">
+            <h4 class="text-lg font-semibold mb-4">{{ t('cartPage.loginRequiredTitle') }}</h4>
+            <p class="text-sm text-muted-foreground mb-4">{{ t('cartPage.loginRequiredMessage') }}</p>
+            <div class="flex justify-end gap-2">
+                <button type="button" class="btn" @click="showLoginPrompt = false">{{ t('common.cancel') }}</button>
+                <a :href="route('login') + '?redirect=' + encodeURIComponent(route('payments.cart.method'))" class="btn btn-primary">{{ t('cartPage.loginToContinue') }}</a>
+            </div>
+        </div>
+    </div>
 </template>
-

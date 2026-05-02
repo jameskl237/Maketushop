@@ -41,6 +41,25 @@ class ProfileController extends Controller
     }
 
     /**
+     * Update the user's phone number.
+     */
+    public function updatePhone(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'phone' => ['required', 'string', 'max:20'],
+        ]);
+
+        $user = $request->user();
+        $user->phone = $request->phone;
+        $user->save();
+
+        // Mettre à jour toutes les boutiques de l'utilisateur
+        $user->shops()->update(['phone' => $request->phone]);
+
+        return back()->with('success', 'Numéro de téléphone mis à jour.');
+    }
+
+    /**
      * Delete the user's account.
      */
     public function destroy(Request $request): RedirectResponse

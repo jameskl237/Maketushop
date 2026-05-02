@@ -172,6 +172,7 @@ class SupplierController extends Controller
             'description' => ['nullable', 'string', 'max:1500'],
             'city' => ['required', 'string', 'max:255'],
             'district' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:30'],
             'logo' => ['nullable', 'image', 'max:5120'],
         ]);
 
@@ -185,6 +186,7 @@ class SupplierController extends Controller
             'description' => $validated['description'] ?? null,
             'city' => $validated['city'],
             'district' => $validated['district'],
+            'phone' => $validated['phone'],
             'logo' => $logoPath,
         ]);
 
@@ -202,7 +204,7 @@ class SupplierController extends Controller
             'description' => ['nullable', 'string', 'max:1500'],
             'city' => ['required', 'string', 'max:255'],
             'district' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30'],
             'logo' => ['nullable', 'image', 'max:5120'],
         ]);
 
