@@ -1,6 +1,16 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
-import { Home, Users, Store, Package, Tag, CreditCard, Settings } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { 
+    Home, 
+    Users, 
+    Store, 
+    Package, 
+    Tag, 
+    CreditCard, 
+    Settings,
+    ShieldCheck,
+    BarChart3
+} from 'lucide-vue-next';
 
 const props = defineProps({
     activeRoute: {
@@ -8,24 +18,59 @@ const props = defineProps({
         default: 'backoffice.admin.dashboard',
     },
 });
+
+const page = usePage();
+const currentUser = page && page.props && page.props.value && page.props.value.auth ? page.props.value.auth.user : null;
+const isSuperAdmin = currentUser?.role === 'superadmin';
 </script>
 
 <template>
     <div class="rounded-xl border border-border bg-card p-4 shadow-sm">
-        <nav class="space-y-1">
-            <Link :href="route('backoffice.admin.dashboard')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
-                :class="activeRoute === 'backoffice.admin.dashboard' ? 'bg-primary/12 text-primary font-medium' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'">
-                <Home class="h-4 w-4" />
-                Tableau de bord
-            </Link>
+        <nav class="space-y-6">
+            <!-- SuperAdmin Section -->
+            <div v-if="isSuperAdmin">
+                <div class="text-xs font-bold uppercase text-primary px-3 mb-2 tracking-wider flex items-center gap-2">
+                    <ShieldCheck class="w-3 h-3" />
+                    Super Administration
+                </div>
+                <div class="space-y-1">
+                    <Link :href="route('backoffice.superadmin.dashboard')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
+                        :class="activeRoute === 'backoffice.superadmin.dashboard' ? 'bg-primary/12 text-primary font-medium' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'">
+                        <Home class="h-4 w-4" />
+                        Dashboard Financier
+                    </Link>
+                    <Link :href="route('backoffice.superadmin.accounting')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
+                        :class="activeRoute === 'backoffice.superadmin.accounting' ? 'bg-primary/12 text-primary font-medium' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'">
+                        <BarChart3 class="h-4 w-4" />
+                        Comptabilité Détail
+                    </Link>
+                </div>
+            </div>
 
-            <div class="pt-3">
-                <div class="text-xs font-semibold uppercase text-muted-foreground px-3">Gestion</div>
-                <div class="mt-2 space-y-1">
+            <!-- Admin Section (Only for simple Admins or as secondary for SuperAdmins) -->
+            <div v-if="!isSuperAdmin">
+                <div class="text-xs font-bold uppercase text-muted-foreground px-3 mb-2 tracking-wider">
+                    Admin Dashboard
+                </div>
+                <div class="space-y-1">
+                    <Link :href="route('backoffice.admin.dashboard')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
+                        :class="activeRoute === 'backoffice.admin.dashboard' ? 'bg-primary/12 text-primary font-medium' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'">
+                        <Home class="h-4 w-4" />
+                        Vue d'ensemble
+                    </Link>
+                </div>
+            </div>
+
+            <!-- Shared Management Section -->
+            <div>
+                <div class="text-xs font-bold uppercase text-muted-foreground px-3 mb-2 tracking-wider">
+                    Gestion Opérationnelle
+                </div>
+                <div class="space-y-1">
                     <Link :href="route('backoffice.admin.management')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
                         :class="activeRoute === 'backoffice.admin.management' ? 'bg-primary/12 text-primary font-medium' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'">
                         <Users class="h-4 w-4" />
-                        Gestion (Tous)
+                        Gestion Globale
                     </Link>
 
                     <Link :href="route('backoffice.admin.shops.index')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
@@ -54,18 +99,11 @@ const props = defineProps({
                 </div>
             </div>
 
-            <div class="pt-3">
-                <div class="text-xs font-semibold uppercase text-muted-foreground px-3">Finances</div>
-                <div class="mt-2">
-                    <Link :href="route('backoffice.admin.dashboard')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground">
-                        <CreditCard class="h-4 w-4" />
-                        Comptabilité
-                    </Link>
+            <!-- Settings Section -->
+            <div>
+                <div class="text-xs font-bold uppercase text-muted-foreground px-3 mb-2 tracking-wider">
+                    Compte
                 </div>
-            </div>
-
-            <div class="pt-3">
-                <div class="text-xs font-semibold uppercase text-muted-foreground px-3">Paramètres</div>
                 <div class="mt-2">
                     <Link :href="route('profile.edit')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                         <Settings class="h-4 w-4" />

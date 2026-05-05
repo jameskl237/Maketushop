@@ -108,6 +108,14 @@ Route::middleware(['auth', 'role:supplier'])->prefix('backoffice/supplier')->gro
     Route::delete('/shops/{shop}/products/{product}/medias/{media}', [SupplierController::class, 'destroyProductMedia'])->name('backoffice.supplier.shops.products.medias.destroy');
 });
 
+// SuperAdmin area: financial dashboards and sensitive management (role: superadmin)
+use App\Http\Controllers\Backoffice\SuperAdminController;
+Route::middleware(['auth', 'role:superadmin'])->prefix('backoffice/superadmin')->group(function () {
+    Route::get('/dashboard', [SuperAdminController::class, 'dashboard'])->name('backoffice.superadmin.dashboard');
+    Route::get('/accounting', [SuperAdminController::class, 'accounting'])->name('backoffice.superadmin.accounting');
+    // Additional endpoints for exported reports / payouts / reconciliations can be added here
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

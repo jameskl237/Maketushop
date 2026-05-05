@@ -461,10 +461,19 @@
         "text1": "Payment through the platform (Orange Money, MTN MoMo, PayPal, etc.) is not available yet.",
         "text2": "This feature will be enabled once payment APIs are integrated.",
         "back": "Go back to previous page",
-        "methodTitle": "Choose a payment method",
-        "methodSubtitle": "Select a method, then you will be redirected to the secure NotchPay checkout.",
+        "methodTitle": "Payment Method",
+        "methodSubtitle": "Select your method here, then NotchPay will open the matching payment flow.",
         "summary": "Summary",
-        "continueToNotchPay": "Continue payment"
+        "continueToNotchPay": "Continue payment",
+        "deliveryInfo": "Delivery Information",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "deliveryAddress": "Delivery Location",
+        "phoneNumber": "Phone Number",
+        "next": "Next",
+        "previous": "Previous",
+        "step1": "Delivery",
+        "step2": "Payment"
     },
     "aboutPage": {
         "headTitle": "About MaketuShop",

@@ -17,11 +17,16 @@ class Order extends Model
     protected $fillable = [
         'order_number',
         'user_id',
+        'customer_first_name',
+        'customer_last_name',
+        'delivery_address',
+        'phone_number',
         'total_products',
         'total_price',
         'status',
         'is_delivered',
         'is_paid',
+        'payment_method',
     ];
 
     protected $casts = [

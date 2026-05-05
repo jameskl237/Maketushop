@@ -1,9 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import AdminSidebar from '@/components/admin/AdminSidebar.vue';
-import { ref } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 
-defineProps({
+const props = defineProps({
     title: {
         type: String,
         default: 'Backoffice Admin',
@@ -18,6 +19,8 @@ defineProps({
     },
 });
 
+const page = usePage();
+const currentUser = computed(() => page.props.auth?.user);
 const mobileSidebarVisible = ref(false);
 </script>
 
@@ -25,9 +28,15 @@ const mobileSidebarVisible = ref(false);
     <AuthenticatedLayout :show-logo="false">
         <template #header>
             <div class="flex items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-xl font-semibold leading-tight text-foreground sm:text-2xl">{{ title }}</h2>
-                    <p v-if="subtitle" class="mt-1 text-sm text-muted-foreground">{{ subtitle }}</p>
+                <div class="flex items-center gap-4">
+                    <div>
+                        <h2 class="text-xl font-semibold leading-tight text-foreground sm:text-2xl">{{ title }}</h2>
+                        <p v-if="subtitle" class="mt-1 text-sm text-muted-foreground">{{ subtitle }}</p>
+                    </div>
+                    <div v-if="currentUser" class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider"
+                        :class="currentUser.role === 'superadmin' ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-muted text-muted-foreground border border-border'">
+                        {{ currentUser.role }}
+                    </div>
                 </div>
             </div>
         </template>

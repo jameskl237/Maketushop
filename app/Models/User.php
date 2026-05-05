@@ -14,6 +14,7 @@ class User extends Authenticatable
 
     public const ROLE_ADMIN = 'admin';
     public const ROLE_SUPPLIER = 'supplier';
+    public const ROLE_SUPERADMIN = 'superadmin';
     public const ROLE_USER = 'user';
 
     /**
@@ -44,6 +45,7 @@ class User extends Authenticatable
     public function dashboardRouteName(): string
     {
         return match ($this->role) {
+            self::ROLE_SUPERADMIN => 'backoffice.superadmin.dashboard',
             self::ROLE_ADMIN => 'backoffice.admin.dashboard',
             self::ROLE_SUPPLIER => 'backoffice.supplier.dashboard',
             default => 'user.dashboard',

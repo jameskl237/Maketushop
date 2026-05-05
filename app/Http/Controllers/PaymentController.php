@@ -14,12 +14,6 @@ use NotchPay\Payment;
 
 class PaymentController extends Controller
 {
-    public function __construct()
-    {
-        NotchPay::setApiKey(config('services.notchpay.public_key'));
-        NotchPay::setPrivateKey(config('services.notchpay.secret_key'));
-    }
-
     public function initialize(Request $request, Product $product)
     {
         if (! Auth::check()) {
@@ -27,42 +21,37 @@ class PaymentController extends Controller
         }
 
         $user = Auth::user();
-        $validated = $request->validate([
-            'payment_channel' => ['required', 'string', 'in:cm.mtn,cm.orange'],
-        ]);
+        $validated = $request->validate($this->checkoutValidationRules());
 
-        // Create a temporary order or just use product info
-        $reference = 'ORD-'.strtoupper(Str::random(10));
+        $items = [[
+            'product_id' => $product->id,
+            'quantity' => 1,
+            'price' => $this->productPrice($product),
+        ]];
+
+        $reference = $this->generateReference();
+        $order = $this->createPendingOrder($reference, (int) $user->id, $validated, $items);
 
         try {
-            $payload = $this->withPaymentChannel([
-                'amount' => (int) $this->productPrice($product),
-                'email' => $user->email,
-                'currency' => 'XAF',
-                'reference' => $reference,
-                'callback' => route('payments.callback'),
-                'description' => 'Achat de '.$product->name.' sur MaketuShop',
-                'customer' => [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'phone' => $user->phone,
-                ],
-                'metadata' => [
-                    'user_id' => $user->id,
-                    'items' => [
-                        [
-                            'product_id' => $product->id,
-                            'quantity' => 1,
-                            'price' => $this->productPrice($product),
-                        ],
-                    ],
-                ],
-            ], $validated['payment_channel'] ?? null);
+            $this->configureNotchPay();
 
-            $payment = Payment::initialize($payload);
+            $payment = Payment::initialize($this->buildPaymentPayload(
+                reference: $reference,
+                amount: $order->total_price,
+                email: $user->email,
+                customerName: trim($validated['first_name'].' '.$validated['last_name']),
+                phoneNumber: $validated['phone_number'],
+                description: 'Achat de '.$product->name.' sur MaketuShop',
+                items: $items,
+                userId: (int) $user->id,
+                delivery: $validated,
+                channel: $validated['payment_channel'] ?? null,
+            ));
 
             return Inertia::location($payment->authorization_url);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            $order->delete();
+
             return back()->with('error', 'Une erreur est survenue lors de l\'initialisation du paiement : '.$e->getMessage());
         }
     }
@@ -108,12 +97,11 @@ class PaymentController extends Controller
         }
 
         $user = Auth::user();
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge($this->checkoutValidationRules(), [
             'items' => ['required', 'array', 'min:1', 'max:100'],
             'items.*.id' => ['required', 'integer', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:99'],
-            'payment_channel' => ['required', 'string', 'in:cm.mtn,cm.orange'],
-        ]);
+        ]));
 
         $items = collect($validated['items'])
             ->groupBy('id')
@@ -122,6 +110,7 @@ class PaymentController extends Controller
                 'quantity' => $rows->sum('quantity'),
             ])
             ->values();
+
         $products = Product::query()
             ->whereIn('id', $items->pluck('id')->unique()->values())
             ->get()
@@ -140,32 +129,29 @@ class PaymentController extends Controller
             ->values()
             ->all();
 
-        $totalAmount = $this->itemsTotal($paymentItems);
-        $reference = 'ORD-'.strtoupper(Str::random(10));
+        $reference = $this->generateReference();
+        $order = $this->createPendingOrder($reference, (int) $user->id, $validated, $paymentItems);
 
         try {
-            $payload = $this->withPaymentChannel([
-                'amount' => (int) $totalAmount,
-                'email' => $user->email,
-                'currency' => 'XAF',
-                'reference' => $reference,
-                'callback' => route('payments.callback'),
-                'description' => 'Achat de '.count($paymentItems).' produits sur MaketuShop',
-                'customer' => [
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'phone' => $user->phone,
-                ],
-                'metadata' => [
-                    'user_id' => $user->id,
-                    'items' => $paymentItems,
-                ],
-            ], $validated['payment_channel'] ?? null);
+            $this->configureNotchPay();
 
-            $payment = Payment::initialize($payload);
+            $payment = Payment::initialize($this->buildPaymentPayload(
+                reference: $reference,
+                amount: $order->total_price,
+                email: $user->email,
+                customerName: trim($validated['first_name'].' '.$validated['last_name']),
+                phoneNumber: $validated['phone_number'],
+                description: 'Achat de '.count($paymentItems).' produit(s) sur MaketuShop',
+                items: $paymentItems,
+                userId: (int) $user->id,
+                delivery: $validated,
+                channel: $validated['payment_channel'] ?? null,
+            ));
 
             return Inertia::location($payment->authorization_url);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            $order->delete();
+
             return back()->with('error', 'Une erreur est survenue lors de l\'initialisation du paiement : '.$e->getMessage());
         }
     }
@@ -179,39 +165,128 @@ class PaymentController extends Controller
         }
 
         try {
+            $this->configureNotchPay();
             $payment = Payment::verify($reference);
+            $transaction = $payment->transaction ?? $payment;
+            $status = $transaction->status ?? null;
 
-            if ($payment->transaction->status === 'complete') {
-                $userId = $payment->transaction->metadata->user_id ?? null;
-                $items = $this->normalizeItems($payment->transaction->metadata->items ?? []);
+            $order = Order::where('order_number', $reference)->first();
 
-                if ($userId && ! empty($items)) {
-                    DB::transaction(function () use ($reference, $userId, $items): void {
-                        $order = Order::create([
-                            'order_number' => $reference,
-                            'user_id' => $userId,
-                            'total_products' => collect($items)->sum('quantity'),
-                            'total_price' => $this->itemsTotal($items),
-                            'status' => Order::STATUS_PENDING,
-                            'is_paid' => true,
-                        ]);
-
-                        foreach ($items as $item) {
-                            $order->products()->attach($item['product_id'], [
-                                'quantity' => $item['quantity'],
-                                'price' => $item['price'],
-                            ]);
-                        }
-                    });
-
-                    return redirect()->route('user.dashboard')->with('success', 'Votre paiement a été effectué avec succès ! Votre commande est en cours de traitement.');
-                }
+            if (! $order) {
+                return redirect()->route('products.index')->with('error', 'Commande introuvable pour ce paiement.');
             }
 
-            return redirect()->route('products.index')->with('error', 'Le paiement n\'a pas pu être complété.');
-        } catch (\Exception $e) {
+            if ($status === 'complete') {
+                $order->update(['is_paid' => true]);
+
+                return redirect()->route('user.dashboard')->with('success', 'Votre paiement a été effectué avec succès ! Votre commande est en cours de traitement.');
+            }
+
+            return redirect()->route('products.index')->with('error', 'Le paiement n\'a pas pu être complété. Statut actuel : '.($status ?: 'inconnu').'.');
+        } catch (\Throwable $e) {
             return redirect()->route('products.index')->with('error', 'Erreur de vérification du paiement : '.$e->getMessage());
         }
+    }
+
+    private function checkoutValidationRules(): array
+    {
+        return [
+            'payment_channel' => ['required', 'string', 'in:cm.mtn,cm.orange'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'delivery_address' => ['required', 'string', 'max:255'],
+            'phone_number' => ['required', 'string', 'max:20'],
+        ];
+    }
+
+    private function configureNotchPay(): void
+    {
+        $apiKey = config('services.notchpay.public_key');
+        $privateKey = config('services.notchpay.secret_key');
+
+        if (! filled($apiKey)) {
+            throw new \RuntimeException('La clé publique NotchPay est manquante. Configurez NOTCHPAY_PUBLIC_KEY ou NOTCHPAY_API_KEY dans le fichier .env.');
+        }
+
+        NotchPay::setApiKey($apiKey);
+
+        if (filled($privateKey)) {
+            NotchPay::setPrivateKey($privateKey);
+        }
+    }
+
+    private function generateReference(): string
+    {
+        do {
+            $reference = 'ORD-'.strtoupper(Str::random(12));
+        } while (Order::where('order_number', $reference)->exists());
+
+        return $reference;
+    }
+
+    private function createPendingOrder(string $reference, int $userId, array $delivery, array $items): Order
+    {
+        return DB::transaction(function () use ($reference, $userId, $delivery, $items): Order {
+            $order = Order::create([
+                'order_number' => $reference,
+                'user_id' => $userId,
+                'customer_first_name' => $delivery['first_name'],
+                'customer_last_name' => $delivery['last_name'],
+                'delivery_address' => $delivery['delivery_address'],
+                'phone_number' => $delivery['phone_number'],
+                'total_products' => collect($items)->sum('quantity'),
+                'total_price' => $this->itemsTotal($items),
+                'status' => Order::STATUS_PENDING,
+                'is_paid' => false,
+                'payment_method' => $delivery['payment_channel'] ?? null,
+            ]);
+
+            foreach ($items as $item) {
+                $order->products()->attach($item['product_id'], [
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+            }
+
+            return $order;
+        });
+    }
+
+    private function buildPaymentPayload(
+        string $reference,
+        float|string $amount,
+        string $email,
+        string $customerName,
+        string $phoneNumber,
+        string $description,
+        array $items,
+        int $userId,
+        array $delivery,
+        ?string $channel = null,
+    ): array {
+        return $this->withPaymentChannel([
+            'amount' => (int) round((float) $amount),
+            'email' => $email,
+            'phone' => $phoneNumber,
+            'currency' => 'XAF',
+            'reference' => $reference,
+            'callback' => route('payments.callback'),
+            'description' => $description,
+            'customer' => [
+                'name' => $customerName,
+                'email' => $email,
+                'phone' => $phoneNumber,
+            ],
+            'metadata' => [
+                'order_id' => $reference,
+                'user_id' => $userId,
+                'customer_first_name' => $delivery['first_name'],
+                'customer_last_name' => $delivery['last_name'],
+                'delivery_address' => $delivery['delivery_address'],
+                'phone_number' => $phoneNumber,
+                'items' => $items,
+            ],
+        ], $channel);
     }
 
     private function productPrice(Product $product): float
@@ -222,19 +297,6 @@ class PaymentController extends Controller
     private function itemsTotal(array $items): float
     {
         return collect($items)->sum(fn (array $item): float => (float) $item['price'] * (int) $item['quantity']);
-    }
-
-    private function normalizeItems(mixed $items): array
-    {
-        return collect(json_decode(json_encode($items), true) ?: [])
-            ->map(fn (array $item): array => [
-                'product_id' => (int) ($item['product_id'] ?? $item['id']),
-                'quantity' => (int) $item['quantity'],
-                'price' => (float) $item['price'],
-            ])
-            ->filter(fn (array $item): bool => $item['product_id'] > 0 && $item['quantity'] > 0)
-            ->values()
-            ->all();
     }
 
     private function withPaymentChannel(array $payload, ?string $channel): array
@@ -258,14 +320,14 @@ class PaymentController extends Controller
             [
                 'key' => 'mtn',
                 'name' => 'MTN MoMo',
-                'description' => 'Paiement Mobile Money MTN Cameroun.',
+                'description' => 'Paiement via MTN Mobile Money Cameroun sur NotchPay.',
                 'channel' => 'cm.mtn',
                 'image' => '/images/payments/mtn-momo.svg',
             ],
             [
                 'key' => 'orange',
                 'name' => 'Orange Money',
-                'description' => 'Paiement Orange Money Cameroun.',
+                'description' => 'Paiement via Orange Money Cameroun sur NotchPay.',
                 'channel' => 'cm.orange',
                 'image' => '/images/payments/orange-money.svg',
             ],
