@@ -25,11 +25,12 @@
     --amber: #F59E0B;
     --amber-rgb: 245 158 11;
     --border: rgba(91,46,255,0.1);
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    /* Liquid Glass & Mesh Gradients (Warmer) */
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.4);
+    /* Refined Liquid Glass */
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 8px 32px rgba(91, 46, 255, 0.08), inset 0 1px 0 rgba(255,255,255,0.8);
     --mesh-gradient: radial-gradient(at 0% 0%, #5B2EFF 0px, transparent 50%),
                     radial-gradient(at 100% 0%, #FF6B2E 0px, transparent 50%),
                     radial-gradient(at 100% 100%, #FFC107 0px, transparent 50%),
@@ -58,9 +59,10 @@
     --amber-rgb: 251 191 36;
     --border: rgba(142,114,255,0.18);
 
-    /* Liquid Glass & Mesh Gradients Dark (Warmer) */
-    --glass-bg: rgba(30, 23, 48, 0.7);
-    --glass-border: rgba(142, 114, 255, 0.2);
+    /* Refined Liquid Glass Dark */
+    --glass-bg: rgba(30, 23, 48, 0.75);
+    --glass-border: rgba(142, 114, 255, 0.25);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.06);
     --mesh-gradient: radial-gradient(at 0% 0%, #8E72FF 0px, transparent 50%),
                     radial-gradient(at 100% 0%, #FF8E5E 0px, transparent 50%),
                     radial-gradient(at 100% 100%, #7C5FFF 0px, transparent 50%),
@@ -68,40 +70,53 @@
   }
 }
 
-  @layer components {
-    /* Generic button utilities used across templates (btn, btn-primary, btn-danger)
-       These use design tokens so they respond to the .dark theme variables. */
-    .btn {
-      @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 px-3 py-2;
-    }
-
-    .btn-primary {
-      /* Gradient primary with dark fallbacks */
-      @apply bg-gradient-to-r from-primary to-orange text-white shadow hover:opacity-90;
-    }
-
-    .btn-danger {
-      @apply text-destructive hover:text-destructive-foreground;
-    }
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50 px-4 py-2;
   }
 
-    /* Form controls that follow design tokens so they adapt to .dark */
-    .form-input {
-      /* match global TextInput component styles so inputs are consistent across the app */
-      @apply mt-1 block w-full rounded-md border border-input bg-background text-foreground shadow-sm placeholder:text-muted-foreground px-3 py-2 text-sm focus:border-ring focus:ring-ring;
-    }
+  .btn-primary {
+    @apply bg-primary text-white shadow-sm hover:bg-primary/90 active:scale-95;
+  }
 
-    .form-select {
-      @apply mt-1 block w-full rounded-md border border-input bg-background text-foreground text-sm px-3 py-2 focus:border-ring focus:ring-ring appearance-none;
-    }
+  .btn-danger {
+    @apply text-destructive hover:text-destructive-foreground;
+  }
 
-    .form-textarea {
-      @apply mt-1 block w-full rounded-md border border-input bg-background text-foreground text-sm px-3 py-2 focus:border-ring focus:ring-ring;
-    }
+  /* Refined liquid glass card */
+  .glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(20px) saturate(1.8);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    border-radius: 1.5rem;
+  }
 
-    .form-checkbox {
-      @apply rounded text-foreground border border-input bg-background;
-    }
+  /* Section label pill */
+  .section-label {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary;
+  }
+}
+
+/* Form controls */
+.form-input {
+  @apply mt-1 block w-full rounded-2xl border border-input bg-background text-foreground shadow-sm placeholder:text-muted-foreground px-4 py-2.5 text-sm focus:border-ring focus:ring-ring;
+}
+
+.form-select {
+  @apply mt-1 block w-full rounded-2xl border border-input bg-background text-foreground text-sm px-4 py-2.5 focus:border-ring focus:ring-ring appearance-none;
+}
+
+.form-textarea {
+  @apply mt-1 block w-full rounded-2xl border border-input bg-background text-foreground text-sm px-4 py-2.5 focus:border-ring focus:ring-ring;
+}
+
+.form-checkbox {
+  @apply rounded-lg text-foreground border border-input bg-background;
+}
+
+/* ─── Animations ─── */
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
@@ -115,13 +130,141 @@
   100% { transform: translate(0, 0) scale(1); }
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+@keyframes blob-slow {
+  0% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(18px, -14px) scale(1.06); }
+  66% { transform: translate(-12px, 10px) scale(0.97); }
+  100% { transform: translate(0,0) scale(1); }
 }
 
-.animate-blob {
-  animation: blob 8s ease-in-out infinite;
+/* Page enter animation */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+/* Stagger reveal for list items */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Shimmer for skeletons */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-blob { animation: blob 8s ease-in-out infinite; }
+.animate-blob-slow { animation: blob-slow 12s ease-in-out infinite; }
+
+/* Page transition (fallback for browsers without View Transitions) */
+.page-fade-enter-active {
+  animation: page-enter 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.page-fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+.page-fade-enter-from { opacity: 0; }
+.page-fade-leave-to { opacity: 0; }
+
+/* ─── View Transitions API — morph effect ─── */
+
+/* Default cross-fade for the whole page */
+::view-transition-old(root) {
+  animation: 220ms cubic-bezier(0.4, 0, 1, 1) both vt-fade-out;
+}
+::view-transition-new(root) {
+  animation: 320ms cubic-bezier(0, 0, 0.2, 1) 80ms both vt-slide-in;
+}
+
+@keyframes vt-fade-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.97); }
+}
+
+@keyframes vt-slide-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+/* Product image morphs into the detail hero image */
+::view-transition-old(product-hero),
+::view-transition-new(product-hero) {
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Category pill morphs when selected */
+::view-transition-old(category-chip),
+::view-transition-new(category-chip) {
+  animation-duration: 280ms;
+  animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Header bar stays fixed during transition */
+::view-transition-old(topbar),
+::view-transition-new(topbar) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Bottom nav stays fixed too */
+::view-transition-old(bottomnav),
+::view-transition-new(bottomnav) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Reveal utilities */
+.animate-reveal-up {
+  animation: reveal-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-reveal-fade {
+  animation: reveal-fade 0.35s ease both;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, var(--card) 25%, rgba(91,46,255,0.05) 50%, var(--card) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 1rem;
+}
+
+/* ─── Glass ─── */
+
+.shadow-glass {
+  box-shadow: var(--glass-shadow);
+}
+
+.shadow-inner {
+  box-shadow: inset 0 6px 20px rgba(2,6,23,0.45);
+}
+
+.bg-mesh {
+  background-image: var(--mesh-gradient);
+}
+
+/* ─── Base ─── */
 
 @layer base {
   * {
@@ -129,9 +272,15 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Keep browser autofill fields consistent with light/dark theme */
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -149,45 +298,13 @@
 }
 
 @layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-}
-
-@keyframes blob-slow {
-  0% { transform: translate(0,0) scale(1); }
-  33% { transform: translate(18px, -14px) scale(1.06); }
-  66% { transform: translate(-12px, 10px) scale(0.97); }
-  100% { transform: translate(0,0) scale(1); }
-}
-
-.animate-blob-slow {
-  animation: blob-slow 12s ease-in-out infinite;
-}
-
-.shadow-glass {
-  box-shadow: 0 10px 30px rgba(11, 10, 20, 0.45), inset 0 1px 0 rgba(255,255,255,0.03);
-}
-
-.shadow-inner {
-  box-shadow: inset 0 6px 20px rgba(2,6,23,0.45);
-}
-
-.bg-mesh {
-  background-image: var(--mesh-gradient);
-}
-
-.page-fade-enter-active,
-.page-fade-leave-active {
-  transition: opacity 0.18s ease;
-}
-
-.page-fade-enter-from,
-.page-fade-leave-to {
-  opacity: 0;
+  /* Stagger delay utilities */
+  .delay-50  { animation-delay: 50ms; }
+  .delay-100 { animation-delay: 100ms; }
+  .delay-150 { animation-delay: 150ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
 }

@@ -48,6 +48,7 @@ const addProductToCart = () => {
                         :alt="product.name"
                         class="h-full w-full object-cover"
                         loading="lazy"
+                        :style="`view-transition-name: product-img-${product.id}`"
                     />
                     <Link :href="route('products.index')" class="absolute left-3 top-3">
                         <Button variant="ghost" size="icon" class="h-9 w-9 rounded-[12px] bg-white/90 shadow-none">

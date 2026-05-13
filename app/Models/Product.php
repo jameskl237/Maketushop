@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Product extends Model
 {
@@ -56,4 +57,18 @@ class Product extends Model
             ->withPivot('quantity', 'price');
     }
 
+    public function ratings(): MorphMany
+    {
+        return $this->morphMany(Rating::class, 'rateable');
+    }
+
+    public function getAverageRatingAttribute(): float
+    {
+        return round($this->ratings()->avg('score') ?? 0, 1);
+    }
+
+    public function getRatingsCountAttribute(): int
+    {
+        return $this->ratings()->count();
+    }
 }

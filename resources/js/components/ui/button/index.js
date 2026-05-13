@@ -8,17 +8,17 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-gradient-to-r from-primary to-orange text-white shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5",
+          "bg-primary text-white shadow-sm hover:bg-primary/90 active:scale-95",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 active:scale-95",
         outline:
-          "border border-input bg-background/50 backdrop-blur-sm shadow-sm hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-background/70 backdrop-blur-sm shadow-sm hover:bg-accent hover:text-accent-foreground active:scale-95",
         secondary:
-          "bg-secondary/80 backdrop-blur-sm text-secondary-foreground shadow-sm hover:bg-secondary/60",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+          "bg-secondary/80 backdrop-blur-sm text-secondary-foreground shadow-sm hover:bg-secondary/60 active:scale-95",
+        ghost: "hover:bg-accent hover:text-accent-foreground active:scale-95",
         link: "text-primary underline-offset-4 hover:underline",
-        glass: "bg-glass border border-glass-border backdrop-blur-xl text-foreground shadow-xl shadow-black/5 hover:bg-white/40 dark:hover:bg-white/10",
-  mesh: "bg-mesh text-white shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-1",
+        glass: "bg-glass border border-glass-border backdrop-blur-xl text-foreground shadow-[var(--glass-shadow)] hover:bg-white/50 dark:hover:bg-white/10 active:scale-95",
+        mesh: "bg-primary text-white shadow-sm shadow-primary/20 hover:bg-primary/90 active:scale-95",
       },
       size: {
         default: "h-9 px-4 py-2",

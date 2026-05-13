@@ -30,31 +30,37 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|alpha_dash|unique:'.User::class,
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'phone_country_code' => 'required|string|max:4|regex:/^[0-9]{1,4}$/',
-            'phone_number' => 'required|string|max:20|regex:/^[0-9]{4,20}$/',
-            'address' => 'required|string|max:255',
+        $isSupplier = $request->input('account_type') === 'supplier';
+
+        $rules = [
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        ];
 
-        $fullPhoneNumber = preg_replace(
-            '/\D+/',
-            '',
-            $request->phone_country_code.$request->phone_number
-        );
+        if ($isSupplier) {
+            $rules['username']           = 'required|string|max:255|alpha_dash|unique:'.User::class;
+            $rules['phone_country_code'] = 'required|string|max:4|regex:/^[0-9]{1,4}$/';
+            $rules['phone_number']       = 'required|string|max:20|regex:/^[0-9]{4,20}$/';
+            $rules['address']            = 'required|string|max:255';
+        }
 
-        $user = User::create([
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->email,
-            'role' => User::ROLE_SUPPLIER,
-            'phone' => $fullPhoneNumber,
-            'address' => $request->address,
+        $request->validate($rules);
+
+        $data = [
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'role'     => $isSupplier ? User::ROLE_SUPPLIER : User::ROLE_USER,
             'password' => Hash::make($request->password),
-        ]);
+        ];
+
+        if ($isSupplier) {
+            $data['username'] = $request->username;
+            $data['phone']    = preg_replace('/\D+/', '', $request->phone_country_code.$request->phone_number);
+            $data['address']  = $request->address;
+        }
+
+        $user = User::create($data);
 
         event(new Registered($user));
 

@@ -7,10 +7,19 @@ import { createPinia } from 'pinia';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { initTheme } from '@/composables/useTheme';
+import { initViewTransitions } from '@/composables/useViewTransition';
 import { i18n, getI18nLocale, setI18nLocale } from '@/i18n';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 initTheme();
+initViewTransitions();
+
+// Register PWA service worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

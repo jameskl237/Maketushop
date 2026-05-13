@@ -85,7 +85,9 @@ class ProductController extends Controller
                 'shop.user:id,phone',
                 'medias:id,product_id,url,type,is_principal',
             ])
-            ->withCount('orders as sold_count');
+            ->withCount('orders as sold_count')
+            ->withAvg('ratings as average_rating', 'score')
+            ->withCount('ratings as ratings_count');
 
         if ($search = trim((string) $request->input('search', ''))) {
             $query->where(function ($q) use ($search): void {
@@ -343,8 +345,8 @@ class ProductController extends Controller
             'sold_count' => (int) ($product->sold_count ?? 0),
             'is_new' => optional($product->created_at)->gt(now()->subDays(14)) ?? false,
             'is_favorite' => false,
-            'average_rating' => 4.6,
-            'reviews_count' => 0,
+            'average_rating' => $product->average_rating,
+            'ratings_count' => $product->ratings_count,
             'delivery_time' => '24-72h',
             'delivery_cost' => 1000,
             'free_delivery_threshold' => 10000,
@@ -357,7 +359,8 @@ class ProductController extends Controller
                 'id' => $product->shop->id,
                 'name' => $product->shop->name,
                 'logo' => $product->shop->logo_url,
-                'rating' => 4.8,
+                'rating' => $product->shop->average_rating,
+                'ratings_count' => $product->shop->ratings_count,
                 'city' => $product->shop->city,
                 'owner_name' => $withDetails ? $product->shop?->user?->name : null,
                 'owner_phone' => $product->shop->phone ?: $product->shop?->user?->phone,

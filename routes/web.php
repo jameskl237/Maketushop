@@ -8,21 +8,29 @@ use App\Http\Controllers\Backoffice\Admin\ProductController as AdminProductContr
 use App\Http\Controllers\Backoffice\Admin\ShopController as AdminShopController;
 use App\Http\Controllers\Backoffice\Admin\UserController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SupplierController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
+// Home page (app shell — used by PWA, logged-in users, returning visitors)
+Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+// Landing page (marketing — for new/unknown visitors)
+Route::get('/landing', function () {
+    $categories = \App\Models\Category::withCount('products')
+        ->orderByDesc('products_count')
+        ->limit(8)
+        ->get(['id', 'name', 'slug', 'image']);
+
+    return Inertia::render('Landing', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
+        'dynamicCategories' => $categories,
     ]);
-});
+})->name('landing');
 
 Route::get('/about', function () {
     return Inertia::render('About');
@@ -42,6 +50,11 @@ Route::get('/shops', [ProductController::class, 'shops'])->name('shops.index');
 Route::get('/shops/{shop}/{slug?}', [ProductController::class, 'shopShow'])->name('shops.show');
 Route::get('/cart', [ProductController::class, 'cart'])->name('cart.index');
 Route::get('/cart/metadata', [ProductController::class, 'cartMetadata'])->name('cart.metadata');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/products/{product}/rate', [RatingController::class, 'rateProduct'])->name('ratings.product');
+    Route::post('/shops/{shop}/rate', [RatingController::class, 'rateShop'])->name('ratings.shop');
+});
 
 Route::get('/dashboard', function () {
     $user = request()->user();

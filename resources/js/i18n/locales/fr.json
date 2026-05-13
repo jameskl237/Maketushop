@@ -1,6 +1,9 @@
 {
     "language": {
-        "toggle": "Changer de langue"
+        "toggle": "Changer de langue",
+        "fr": "Français",
+        "en": "English",
+        "select": "Langue"
     },
     "common": {
         "dashboard": "Tableau de bord",
@@ -72,7 +75,13 @@
         "exampleUsername": "Ex: jean_supplier",
         "exampleEmail": "Ex: supplier[at]example.com",
         "examplePhone": "695988879",
-        "exampleAddress": "Ville, quartier, repère..."
+        "exampleAddress": "Ville, quartier, repère...",
+        "loginSubtitle": "Ravi de vous revoir !",
+        "passwordPlaceholder": "••••••••",
+        "loading": "Chargement...",
+        "noAccount": "Pas encore de compte ?",
+        "signUp": "S'inscrire",
+        "alreadyHaveAccount": "Déjà un compte ?"
     },
     "profile": {
         "title": "Profil",
@@ -335,7 +344,8 @@
         "faq6Question": "Le support est-il disponible ?",
         "faq6Answer": "Oui, notre équipe support est disponible pour vous accompagner.",
         "popular": "Populaire",
-        "productsCount": "produits"
+        "productsCount": "produits",
+        "categoryItems": "articles"
     },
     "productsPage": {
         "title": "Tous les produits",
@@ -504,5 +514,22 @@
         "facebookValue": "Page Facebook Maketu",
         "networksLabel": "Réseaux",
         "networksValue": "Autres canaux officiels"
+    },
+    "pwa": {
+        "installTitle": "Installer MaketuShop",
+        "installSubtitle": "Accès rapide depuis votre écran d'accueil",
+        "installButton": "Installer l'application",
+        "dismiss": "Fermer",
+        "welcomeTitle": "Bienvenue chez Maketu !",
+        "welcomeDescription": "Trouvez les meilleurs produits locaux en quelques clics.",
+        "sellerTitle": "Devenir vendeur ?",
+        "sellerDescription": "Ouvrez votre boutique gratuitement et commencez à vendre dès aujourd'hui."
+    },
+    "rating": {
+        "beFirst": "Soyez le premier à noter",
+        "yourRating": "Votre note",
+        "title": "Avis & notes",
+        "noRatings": "Aucun avis pour l'instant.",
+        "stars": "étoile(s)"
     }
 }

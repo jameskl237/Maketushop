@@ -1,11 +1,12 @@
 <script setup>
 import FavoriteButton from '@/components/products/shared/FavoriteButton.vue';
+import StarRating from '@/components/StarRating.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCart } from '@/composables/useCart';
 import { Link } from '@inertiajs/vue3';
-import { ShoppingBag, Star } from 'lucide-vue-next';
+import { ShoppingBag } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -40,6 +41,7 @@ const onAddToCart = () => {
                         :alt="product.name"
                         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                         loading="lazy"
+                        :style="`view-transition-name: product-img-${product.id}`"
                     />
                     <!-- Inner Glow Effect -->
                     <div class="absolute inset-0 ring-1 ring-inset ring-white/20"></div>
@@ -71,10 +73,14 @@ const onAddToCart = () => {
                     <p class="line-clamp-1 text-[10px] font-bold uppercase tracking-wider text-shop-light">
                         {{ product.category?.name || t('productsPage.noCategory') }}
                     </p>
-                    <div class="flex items-center gap-1 text-[10px] font-bold text-shop-amber">
-                        <Star class="h-3 w-3 fill-current" />
-                        <span>{{ product.average_rating || '4.8' }}</span>
-                    </div>
+                    <StarRating
+                        :rateable-id="product.id"
+                        rateable-type="product"
+                        :average-rating="product.average_rating || 0"
+                        :ratings-count="product.ratings_count || 0"
+                        :user-rating="product.user_rating || null"
+                        size="sm"
+                    />
                 </div>
 
                 <Link

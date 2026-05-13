@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Storage;
 
 class Shop extends Model
@@ -33,9 +34,23 @@ class Shop extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Une boutique a plusieurs produits
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function ratings(): MorphMany
+    {
+        return $this->morphMany(Rating::class, 'rateable');
+    }
+
+    public function getAverageRatingAttribute(): float
+    {
+        return round($this->ratings()->avg('score') ?? 0, 1);
+    }
+
+    public function getRatingsCountAttribute(): int
+    {
+        return $this->ratings()->count();
     }
 }

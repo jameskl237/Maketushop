@@ -1,6 +1,9 @@
 {
     "language": {
-        "toggle": "Change language"
+        "toggle": "Change language",
+        "fr": "Français",
+        "en": "English",
+        "select": "Language"
     },
     "common": {
         "dashboard": "Dashboard",
@@ -72,7 +75,13 @@
         "exampleUsername": "Ex: john_supplier",
         "exampleEmail": "Ex: supplier[at]example.com",
         "examplePhone": "695988879",
-        "exampleAddress": "City, district, landmark..."
+        "exampleAddress": "City, district, landmark...",
+        "loginSubtitle": "Welcome back!",
+        "passwordPlaceholder": "••••••••",
+        "loading": "Loading...",
+        "noAccount": "Don't have an account?",
+        "signUp": "Sign up",
+        "alreadyHaveAccount": "Already have an account?"
     },
     "profile": {
         "title": "Profile",
@@ -335,7 +344,8 @@
         "faq6Question": "Is support available?",
         "faq6Answer": "Yes, our support team is available to help you.",
         "popular": "Popular",
-        "productsCount": "products"
+        "productsCount": "products",
+        "categoryItems": "items"
     },
     "productsPage": {
         "title": "All products",
@@ -504,5 +514,22 @@
         "facebookValue": "Maketu Facebook page",
         "networksLabel": "Networks",
         "networksValue": "Other official channels"
+    },
+    "pwa": {
+        "installTitle": "Install MaketuShop",
+        "installSubtitle": "Quick access from your home screen",
+        "installButton": "Install the app",
+        "dismiss": "Dismiss",
+        "welcomeTitle": "Welcome to Maketu!",
+        "welcomeDescription": "Find the best local products in a few clicks.",
+        "sellerTitle": "Become a seller?",
+        "sellerDescription": "Open your shop for free and start selling today."
+    },
+    "rating": {
+        "beFirst": "Be the first to rate",
+        "yourRating": "Your rating",
+        "title": "Reviews & ratings",
+        "noRatings": "No reviews yet.",
+        "stars": "star(s)"
     }
 }

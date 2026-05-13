@@ -43,7 +43,7 @@ const goToProducts = () => {
                 </p>
 
                 <!-- Glass CTA Panel -->
-                <div class="mt-8 w-full max-w-3xl rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl shadow-glass">
+                <div class="mt-8 w-full max-w-3xl rounded-3xl border border-white/[0.09] bg-white/[0.04] p-6 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_20px_60px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)]">
                     <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div class="flex-1 text-left">
                             <p class="text-sm text-white/60">Découvrez des artisans locaux et soutenez l'économie de proximité.</p>
@@ -59,7 +59,7 @@ const goToProducts = () => {
                         </div>
 
                         <div class="mt-4 md:mt-0 w-full md:w-80">
-                            <div class="rounded-2xl border border-white/6 bg-gradient-to-br from-white/6 to-white/3 p-4 backdrop-blur-sm shadow-inner">
+                            <div class="rounded-2xl border border-white/[0.07] bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-4 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_-1px_0_rgba(0,0,0,0.1)]">
                                 <div class="grid grid-cols-3 gap-2 text-center">
                                     <template v-for="stat in stats" :key="stat.label">
                                         <div>

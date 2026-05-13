@@ -16,10 +16,12 @@ class Media extends Model
 
     public function getFullUrlAttribute()
     {
-        // Si le fichier existe, retourne une URL complète
-        return $this->url
-            ? asset(Storage::url($this->url))
-            : null;
+        if (!$this->url) return null;
+        // External URLs (Picsum, etc.) returned as-is
+        if (str_starts_with($this->url, 'http://') || str_starts_with($this->url, 'https://')) {
+            return $this->url;
+        }
+        return asset(Storage::url($this->url));
     }
     
     protected $fillable = [
