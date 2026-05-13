@@ -12,7 +12,7 @@ defineProps({
         <!-- Outer ring decoration -->
         <div class="absolute -inset-3 rounded-3xl border border-border/40 opacity-70" />
 
-        <div class="relative overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-[0_4px_24px_-4px_hsl(var(--foreground)/0.06)]">
+        <div class="relative overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-[0_4px_24px_-4px_rgba(15,10,30,0.06)]">
             <img
                 :src="imageSrc"
                 :alt="imageAlt"

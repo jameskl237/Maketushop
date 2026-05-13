@@ -88,95 +88,99 @@ onMounted(async () => {
 
     <AdminLayout :title="'SuperAdmin'" :active-route="'backoffice.superadmin.dashboard'">
         <template #content>
-            <div class="py-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div class="rounded-lg border border-border bg-card p-4">
-                        <div class="text-sm text-muted-foreground">Revenu total</div>
-                        <div class="text-2xl font-bold">{{ formatPrice(props.stats.total_revenue) }}</div>
-                        <div class="text-xs text-muted-foreground">Total des commandes livrées</div>
+            <div class="py-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div class="rounded-lg border border-border bg-card p-3">
+                        <div class="text-xs text-muted-foreground">Revenu total</div>
+                        <div class="text-lg sm:text-2xl font-bold">{{ formatPrice(props.stats.total_revenue) }}</div>
+                        <div class="text-xxs text-muted-foreground">Total des commandes livrées</div>
                     </div>
-                    <div class="rounded-lg border border-border bg-card p-4">
-                        <div class="text-sm text-muted-foreground">Payouts totaux</div>
-                        <div class="text-2xl font-bold">{{ formatPrice(props.stats.total_payouts) }}</div>
-                        <div class="text-xs text-muted-foreground">Montants à verser aux fournisseurs</div>
+                    <div class="rounded-lg border border-border bg-card p-3">
+                        <div class="text-xs text-muted-foreground">Payouts totaux</div>
+                        <div class="text-lg sm:text-2xl font-bold">{{ formatPrice(props.stats.total_payouts) }}</div>
+                        <div class="text-xxs text-muted-foreground">Montants à verser aux fournisseurs</div>
                     </div>
-                    <div class="rounded-lg border border-border bg-card p-4">
-                        <div class="text-sm text-muted-foreground">Frais plateforme</div>
-                        <div class="text-2xl font-bold">{{ formatPrice(props.stats.total_platform_fees) }}</div>
-                        <div class="text-xs text-muted-foreground">Rétention plateforme</div>
+                    <div class="rounded-lg border border-border bg-card p-3">
+                        <div class="text-xs text-muted-foreground">Frais plateforme</div>
+                        <div class="text-lg sm:text-2xl font-bold">{{ formatPrice(props.stats.total_platform_fees) }}</div>
+                        <div class="text-xxs text-muted-foreground">Rétention plateforme</div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 rounded-lg border border-border bg-card p-4">
-                        <h3 class="font-semibold mb-3">Revenu mensuel (6 derniers mois)</h3>
-                        <canvas ref="lineChartRef" class="w-full h-64"></canvas>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="lg:col-span-2 rounded-lg border border-border bg-card p-3">
+                        <h3 class="font-semibold mb-2 text-sm">Revenu mensuel (6 derniers mois)</h3>
+                        <canvas ref="lineChartRef" class="w-full h-40 sm:h-56"></canvas>
                     </div>
 
-                    <div class="space-y-4">
-                        <div class="rounded-lg border border-border bg-card p-4">
-                            <h4 class="font-medium mb-2">Payout vs Fees</h4>
-                            <canvas ref="donutPayoutRef" class="w-full h-48"></canvas>
+                    <div class="space-y-3">
+                        <div class="rounded-lg border border-border bg-card p-3">
+                            <h4 class="font-medium mb-1 text-sm">Payout vs Fees</h4>
+                            <canvas ref="donutPayoutRef" class="w-full h-40 sm:h-48"></canvas>
                         </div>
 
-                            <div class="rounded-lg border border-border bg-card p-4">
-                                <h4 class="font-medium mb-2">Top boutiques (payable)</h4>
-                                <canvas ref="donutTopShopsRef" class="w-full h-48"></canvas>
+                            <div class="rounded-lg border border-border bg-card p-3">
+                                <h4 class="font-medium mb-1 text-sm">Top boutiques (payable)</h4>
+                                <canvas ref="donutTopShopsRef" class="w-full h-40 sm:h-48"></canvas>
                             </div>
 
-                            <div class="rounded-lg border border-border bg-card p-4">
-                                <h4 class="font-medium mb-2">Top fournisseurs (payable)</h4>
-                                <canvas ref="donutTopSuppliersRef" class="w-full h-48"></canvas>
+                            <div class="rounded-lg border border-border bg-card p-3">
+                                <h4 class="font-medium mb-1 text-sm">Top fournisseurs (payable)</h4>
+                                <canvas ref="donutTopSuppliersRef" class="w-full h-40 sm:h-48"></canvas>
                             </div>
                     </div>
                 </div>
 
-                <div class="mt-6 rounded-lg border border-border bg-card p-4">
-                    <h3 class="font-semibold mb-3">Commandes récentes</h3>
-                    <table class="w-full text-left text-sm">
-                        <thead class="text-muted-foreground border-b border-border">
-                            <tr>
-                                <th class="p-2">#</th>
-                                <th class="p-2">Client</th>
-                                <th class="p-2">Total</th>
-                                <th class="p-2">Statut</th>
-                                <th class="p-2">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-border">
-                            <tr v-for="order in props.recent_orders" :key="order.id">
-                                <td class="p-2 font-mono text-xs">{{ order.id }}</td>
-                                <td class="p-2">{{ order.user?.name || 'Client' }}</td>
-                                <td class="p-2 font-bold">{{ formatPrice(order.total_price) }}</td>
-                                <td class="p-2 text-muted-foreground">{{ order.status }}</td>
-                                <td class="p-2 text-muted-foreground">{{ new Date(order.created_at).toLocaleString() }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="mt-4 rounded-lg border border-border bg-card p-3 overflow-x-auto">
+                    <h3 class="font-semibold mb-2 text-sm">Commandes récentes</h3>
+                    <div class="w-full min-w-[640px]">
+                        <table class="w-full text-left text-sm">
+                            <thead class="text-muted-foreground border-b border-border">
+                                <tr>
+                                    <th class="p-2">#</th>
+                                    <th class="p-2">Client</th>
+                                    <th class="p-2">Total</th>
+                                    <th class="p-2">Statut</th>
+                                    <th class="p-2">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border">
+                                <tr v-for="order in props.recent_orders" :key="order.id">
+                                    <td class="p-2 font-mono text-xs">{{ order.id }}</td>
+                                    <td class="p-2">{{ order.user?.name || 'Client' }}</td>
+                                    <td class="p-2 font-bold">{{ formatPrice(order.total_price) }}</td>
+                                    <td class="p-2 text-muted-foreground">{{ order.status }}</td>
+                                    <td class="p-2 text-muted-foreground">{{ new Date(order.created_at).toLocaleString() }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div class="mt-6 rounded-lg border border-border bg-card p-4">
-                    <h3 class="font-semibold mb-3">Soldes par fournisseur</h3>
-                    <table class="w-full text-left text-sm">
-                        <thead class="text-muted-foreground border-b border-border">
-                            <tr>
-                                <th class="p-2">#</th>
-                                <th class="p-2">Fournisseur</th>
-                                <th class="p-2">Ventes</th>
-                                <th class="p-2">Payable</th>
-                                <th class="p-2">Retenu</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-border">
-                            <tr v-for="s in props.supplier_balances" :key="s.id">
-                                <td class="p-2 font-mono text-xs">{{ s.id }}</td>
-                                <td class="p-2">{{ s.name }}</td>
-                                <td class="p-2">{{ formatPrice(s.total_sales) }}</td>
-                                <td class="p-2">{{ formatPrice(s.payable) }}</td>
-                                <td class="p-2">{{ formatPrice(s.withheld) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="mt-4 rounded-lg border border-border bg-card p-3 overflow-x-auto">
+                    <h3 class="font-semibold mb-2 text-sm">Soldes par fournisseur</h3>
+                    <div class="w-full min-w-[640px]">
+                        <table class="w-full text-left text-sm">
+                            <thead class="text-muted-foreground border-b border-border">
+                                <tr>
+                                    <th class="p-2">#</th>
+                                    <th class="p-2">Fournisseur</th>
+                                    <th class="p-2">Ventes</th>
+                                    <th class="p-2">Payable</th>
+                                    <th class="p-2">Retenu</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border">
+                                <tr v-for="s in props.supplier_balances" :key="s.id">
+                                    <td class="p-2 font-mono text-xs">{{ s.id }}</td>
+                                    <td class="p-2">{{ s.name }}</td>
+                                    <td class="p-2">{{ formatPrice(s.total_sales) }}</td>
+                                    <td class="p-2">{{ formatPrice(s.payable) }}</td>
+                                    <td class="p-2">{{ formatPrice(s.withheld) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </template>

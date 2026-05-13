@@ -9,31 +9,34 @@ const { t, locale } = useI18n();
 </script>
 
 <template>
-    <div class="group relative overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-all duration-400 hover:-translate-y-1.5 hover:shadow-[0_16px_40px_-8px_hsl(var(--primary)/0.15)]">
-        <!-- Image with overlay -->
-        <div class="relative h-40 overflow-hidden">
-            <img
-                :src="category.image"
-                :alt="`Illustration catégorie ${category.name}`"
-                loading="lazy"
-                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-foreground/30 via-transparent to-transparent" />
+    <div class="group relative aspect-[4/5] overflow-hidden rounded-[28px] border-none bg-slate-100 shadow-sm transition-all duration-500 hover:shadow-2xl active:scale-95">
+        <!-- Background Image -->
+        <img
+            :src="category.image"
+            :alt="category.name"
+            loading="lazy"
+            class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+
+        <!-- Animated Overlay Gradient -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity group-hover:opacity-90"></div>
+
+        <!-- Glass Content Panel -->
+        <div class="absolute bottom-4 left-4 right-4 flex flex-col gap-1 rounded-[22px] border border-white/20 bg-white/20 p-4 backdrop-blur-xl transition-all duration-300 group-hover:bottom-6">
+            <h3 class="font-display text-[17px] font-black tracking-tight text-white">{{ category.name }}</h3>
+            <div class="flex items-center justify-between">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-white/60">
+                    {{ category.count.toLocaleString(locale === 'en' ? 'en-US' : 'fr-FR') }} items
+                </p>
+                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-white text-black shadow-lg">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            </div>
         </div>
 
-        <!-- Content -->
-        <div class="flex items-center justify-between px-5 py-4">
-            <div>
-                <h3 class="font-display text-[16px] font-semibold text-foreground">{{ category.name }}</h3>
-                <p class="mt-0.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    {{ category.count.toLocaleString(locale === 'en' ? 'en-US' : 'fr-FR') }} {{ t('landing.productsCount') }}
-                </p>
-            </div>
-            <div class="flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-muted text-muted-foreground transition-all duration-200 group-hover:border-primary/40 group-hover:bg-primary/8 group-hover:text-primary">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-            </div>
-        </div>
+        <!-- Inner Shine Effect -->
+        <div class="pointer-events-none absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
     </div>
 </template>

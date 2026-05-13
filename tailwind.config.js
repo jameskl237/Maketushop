@@ -13,9 +13,14 @@ export default {
 
     theme: {
     	extend: {
+            backgroundImage: {
+                'mesh-gradient': 'var(--mesh-gradient)',
+                'glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%)',
+                'glass-gradient-dark': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%)',
+            },
     		fontFamily: {
     			sans: ['DM Sans', ...defaultTheme.fontFamily.sans],
-    			display: ['Cormorant Garamond', ...defaultTheme.fontFamily.serif],
+    			display: ['Bricolage Grotesque', ...defaultTheme.fontFamily.sans],
     		},
     		borderRadius: {
     			lg: 'var(--radius)',
@@ -23,45 +28,59 @@ export default {
     			sm: 'calc(var(--radius) - 4px)'
     		},
     		colors: {
-    			background: 'hsl(var(--background))',
-    			foreground: 'hsl(var(--foreground))',
+    			background: 'rgb(var(--bg-rgb) / <alpha-value>)',
+    			foreground: 'rgb(var(--text-rgb) / <alpha-value>)',
+                glass: {
+                    DEFAULT: 'var(--glass-bg)',
+                    border: 'var(--glass-border)',
+                },
     			card: {
-    				DEFAULT: 'hsl(var(--card))',
-    				foreground: 'hsl(var(--card-foreground))'
+    				DEFAULT: 'rgb(var(--card-rgb) / <alpha-value>)',
+    				foreground: 'rgb(var(--text-rgb) / <alpha-value>)'
     			},
     			popover: {
-    				DEFAULT: 'hsl(var(--popover))',
-    				foreground: 'hsl(var(--popover-foreground))'
+    				DEFAULT: 'rgb(var(--card-rgb) / <alpha-value>)',
+    				foreground: 'rgb(var(--text-rgb) / <alpha-value>)'
     			},
     			primary: {
-    				DEFAULT: 'hsl(var(--primary))',
-    				foreground: 'hsl(var(--primary-foreground))'
+    				DEFAULT: 'rgb(var(--primary-rgb) / <alpha-value>)',
+    				hover: 'rgb(var(--primary-hover-rgb) / <alpha-value>)',
+    				foreground: '#FFFFFF'
     			},
     			secondary: {
-    				DEFAULT: 'hsl(var(--secondary))',
-    				foreground: 'hsl(var(--secondary-foreground))'
+    				DEFAULT: 'rgb(var(--bg-rgb) / <alpha-value>)',
+    				foreground: 'rgb(var(--text-rgb) / <alpha-value>)'
     			},
     			muted: {
-    				DEFAULT: 'hsl(var(--muted))',
-    				foreground: 'hsl(var(--muted-foreground))'
+    				DEFAULT: 'rgb(var(--bg-rgb) / <alpha-value>)',
+    				foreground: 'rgb(var(--text-muted-rgb) / <alpha-value>)'
     			},
     			accent: {
-    				DEFAULT: 'hsl(var(--accent))',
-    				foreground: 'hsl(var(--accent-foreground))'
+    				DEFAULT: 'rgb(var(--bg-rgb) / <alpha-value>)',
+    				foreground: 'rgb(var(--text-rgb) / <alpha-value>)'
     			},
     			destructive: {
-    				DEFAULT: 'hsl(var(--destructive))',
-    				foreground: 'hsl(var(--destructive-foreground))'
+    				DEFAULT: 'rgb(var(--orange-rgb) / <alpha-value>)',
+    				foreground: '#FFFFFF'
     			},
-    			border: 'hsl(var(--border))',
-    			input: 'hsl(var(--input))',
-    			ring: 'hsl(var(--ring))',
+    			border: 'var(--border)',
+    			input: 'var(--border)',
+    			ring: 'var(--primary)',
+    			orange: 'rgb(var(--orange-rgb) / <alpha-value>)',
+    			shop: {
+    				bg: 'rgb(var(--bg-rgb) / <alpha-value>)',
+    				text: 'rgb(var(--text-rgb) / <alpha-value>)',
+    				muted: 'rgb(var(--text-muted-rgb) / <alpha-value>)',
+    				light: 'rgb(var(--text-light-rgb) / <alpha-value>)',
+    				green: 'rgb(var(--green-rgb) / <alpha-value>)',
+    				amber: 'rgb(var(--amber-rgb) / <alpha-value>)'
+    			},
     			chart: {
-    				'1': 'hsl(var(--chart-1))',
-    				'2': 'hsl(var(--chart-2))',
-    				'3': 'hsl(var(--chart-3))',
-    				'4': 'hsl(var(--chart-4))',
-    				'5': 'hsl(var(--chart-5))'
+    				'1': 'var(--primary)',
+    				'2': 'var(--orange)',
+    				'3': 'var(--green)',
+    				'4': 'var(--amber)',
+    				'5': 'var(--text-muted)'
     			}
     		}
     	}

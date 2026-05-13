@@ -18,8 +18,8 @@ const { t } = useI18n();
 
 <template>
     <!-- Exemple: <StatsOverview :stats="stats" :loading="false" /> -->
-    <section :aria-label="t('supplier.statsOverviewAria')">
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section :aria-label="t('supplier.statsOverviewAria')" class="px-2">
+    <div class="grid gap-3 grid-cols-2 md:grid-cols-4">
             <StatCard
                 v-for="(item, index) in stats"
                 :key="`stat-${index}`"

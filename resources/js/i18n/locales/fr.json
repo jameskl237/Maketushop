@@ -406,7 +406,8 @@
         "empty": "Aucune boutique disponible pour le moment.",
         "productsCount": "{count} produit(s)",
         "noDescription": "Cette boutique n'a pas encore de description.",
-        "viewShop": "Voir la boutique"
+        "viewShop": "Voir la boutique",
+        "sellers": "Vendeurs"
     },
     "shopShow": {
         "verified": "Boutique certifiée",

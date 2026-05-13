@@ -55,7 +55,7 @@ Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
     ->middleware('auth')
     ->name('user.dashboard');
 
-Route::middleware(['auth', 'role:admin'])->prefix('backoffice/admin')->group(function () {
+Route::middleware(['auth', 'role:admin,superadmin'])->prefix('backoffice/admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('backoffice.admin.dashboard');
 
     // Admin: gestion des utilisateurs (CRUD)

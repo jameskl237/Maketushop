@@ -406,7 +406,8 @@
         "empty": "No shop available for now.",
         "productsCount": "{count} product(s)",
         "noDescription": "This shop has no description yet.",
-        "viewShop": "View shop"
+        "viewShop": "View shop",
+        "sellers": "Sellers"
     },
     "shopShow": {
         "verified": "Certified shop",

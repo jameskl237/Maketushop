@@ -182,46 +182,46 @@ const confirmDeleteProduct = () => {
                     </Button>
                 </div>
 
-                <div class="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="grid min-w-0 gap-3 grid-cols-2 md:grid-cols-4">
                     <Card>
-                        <CardContent class="p-5">
+                        <CardContent class="p-3">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-muted-foreground">{{ t('supplier.productCount') }}</p>
-                                    <p class="mt-1 text-2xl font-semibold">{{ productsCount }}</p>
+                                    <p class="mt-1 text-xl font-semibold">{{ productsCount }}</p>
                                 </div>
                                 <Package class="h-5 w-5 text-primary" />
                             </div>
                         </CardContent>
                     </Card>
                     <Card>
-                        <CardContent class="p-5">
+                        <CardContent class="p-3">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-muted-foreground">{{ t('supplier.dominantCategory') }}</p>
-                                    <p class="mt-1 text-lg font-semibold">{{ dominantCategory }}</p>
+                                    <p class="mt-1 text-sm font-semibold">{{ dominantCategory }}</p>
                                 </div>
                                 <FolderTree class="h-5 w-5 text-primary" />
                             </div>
                         </CardContent>
                     </Card>
                     <Card>
-                        <CardContent class="p-5">
+                        <CardContent class="p-3">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-muted-foreground">{{ t('supplier.uploadedMedia') }}</p>
-                                    <p class="mt-1 text-2xl font-semibold">{{ mediaCount }}</p>
+                                    <p class="mt-1 text-xl font-semibold">{{ mediaCount }}</p>
                                 </div>
                                 <Boxes class="h-5 w-5 text-primary" />
                             </div>
                         </CardContent>
                     </Card>
                     <Card>
-                        <CardContent class="p-5">
+                        <CardContent class="p-3">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-muted-foreground">{{ t('supplier.shop') }}</p>
-                                    <p class="mt-1 text-lg font-semibold line-clamp-1">{{ shop.name }}</p>
+                                    <p class="mt-1 text-sm font-semibold line-clamp-1">{{ shop.name }}</p>
                                 </div>
                                 <Store class="h-5 w-5 text-primary" />
                             </div>

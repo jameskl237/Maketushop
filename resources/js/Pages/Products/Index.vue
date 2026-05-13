@@ -1,16 +1,14 @@
 <script setup>
-import ActiveFilters from '@/components/products/listing/ActiveFilters.vue';
-import FiltersPanel from '@/components/products/listing/FiltersPanel.vue';
+import ProductCard from '@/components/products/listing/ProductCard.vue';
 import ProductsNavbar from '@/components/products/layout/ProductsNavbar.vue';
-import ProductsGrid from '@/components/products/listing/ProductsGrid.vue';
-import ResultsCount from '@/components/products/listing/ResultsCount.vue';
-import SearchBar from '@/components/products/listing/SearchBar.vue';
-import SortDropdown from '@/components/products/listing/SortDropdown.vue';
+import BottomNav from '@/components/shop/BottomNav.vue';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useFilters } from '@/composables/useFilters';
 import { useSearch } from '@/composables/useSearch';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Filter } from 'lucide-vue-next';
+import { Search, X } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -22,7 +20,6 @@ const props = defineProps({
 });
 
 const loading = ref(false);
-const mobileCategoryDropdownOpen = ref(false);
 const { t } = useI18n();
 
 const state = reactive({
@@ -35,35 +32,13 @@ const state = reactive({
     sort: props.filters.sort || 'newest',
 });
 
-const { hasActiveFilters, toQueryParams } = useFilters(state);
-const { search, isSearching } = useSearch(() => applyFilters(), 500);
+const { toQueryParams } = useFilters(state);
+const { search } = useSearch(() => applyFilters(), 500);
 
-const activeFilterChips = computed(() => {
-    const chips = [];
-    const sortLabelMap = {
-        newest: t('productsPage.sortNewest'),
-        price_asc: t('productsPage.sortPriceAsc'),
-        price_desc: t('productsPage.sortPriceDesc'),
-        popular: t('productsPage.sortPopular'),
-    };
-
-    if (state.search) chips.push({ key: 'search', label: t('productsPage.searchChip', { value: state.search }) });
-    if (state.in_stock) chips.push({ key: 'in_stock', label: t('productsPage.inStockChip') });
-    if (state.price_min) chips.push({ key: 'price_min', label: t('productsPage.priceMinChip', { value: state.price_min }) });
-    if (state.price_max) chips.push({ key: 'price_max', label: t('productsPage.priceMaxChip', { value: state.price_max }) });
-    if (state.sort && state.sort !== 'newest') chips.push({ key: 'sort', label: t('productsPage.sortChip', { value: sortLabelMap[state.sort] || state.sort }) });
-
-    state.categories.forEach((categoryId) => {
-        const category = props.availableCategories.find((item) => item.id === categoryId);
-        chips.push({ key: `category-${categoryId}`, type: 'category', value: categoryId, label: t('productsPage.categoryChip', { value: category?.name || categoryId }) });
-    });
-
-    state.locations.forEach((location) => {
-        chips.push({ key: `location-${location}`, type: 'location', value: location, label: t('productsPage.cityChip', { value: location }) });
-    });
-
-    return chips;
-});
+const categoryChips = computed(() => [
+    { id: 'all', name: 'Tous' },
+    ...props.availableCategories,
+]);
 
 const applyFilters = () => {
     loading.value = true;
@@ -76,183 +51,102 @@ const applyFilters = () => {
     });
 };
 
-watch(
-    () => state.search,
-    () => {
-        search();
-    },
-);
-
-watch(
-    () => [state.sort, state.in_stock, state.price_min, state.price_max],
-    () => {
-        applyFilters();
-    },
-);
-
-watch(
-    () => state.categories,
-    () => {
-        applyFilters();
-    },
-    { deep: true },
-);
-
-watch(
-    () => state.locations,
-    () => {
-        applyFilters();
-    },
-    { deep: true },
-);
+watch(() => state.search, () => search());
+watch(() => state.categories, () => applyFilters(), { deep: true });
 
 const toggleCategory = (categoryId) => {
+    if (categoryId === 'all') {
+        state.categories = [];
+        return;
+    }
+
     if (state.categories.includes(categoryId)) {
         state.categories = state.categories.filter((id) => id !== categoryId);
         return;
     }
-    state.categories.push(categoryId);
-};
 
-const toggleLocation = (city) => {
-    if (state.locations.includes(city)) {
-        state.locations = state.locations.filter((item) => item !== city);
-        return;
-    }
-    state.locations.push(city);
+    state.categories = [categoryId];
 };
 
 const clearSearch = () => {
     state.search = '';
-};
-
-const resetFilters = () => {
-    state.search = '';
-    state.categories = [];
-    state.locations = [];
-    state.price_min = '';
-    state.price_max = '';
-    state.in_stock = false;
-    state.sort = 'newest';
-    applyFilters();
-};
-
-const removeFilter = (filter) => {
-    if (filter.key === 'search') state.search = '';
-    if (filter.key === 'in_stock') state.in_stock = false;
-    if (filter.key === 'price_min') state.price_min = '';
-    if (filter.key === 'price_max') state.price_max = '';
-    if (filter.key === 'sort') state.sort = 'newest';
-    if (filter.type === 'category') state.categories = state.categories.filter((id) => id !== filter.value);
-    if (filter.type === 'location') state.locations = state.locations.filter((city) => city !== filter.value);
 };
 </script>
 
 <template>
     <Head :title="t('productsPage.headTitle')" />
 
-    <div>
+    <div class="min-h-screen bg-shop-bg pb-16 text-foreground">
         <ProductsNavbar />
-        <div class="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-            <div class="flex flex-col gap-4">
-                <div class="flex items-center justify-between gap-3">
-                    <h1 class="text-2xl font-bold">{{ t('productsPage.title') }}</h1>
-                    <Link href="/" class="text-sm text-muted-foreground underline-offset-4 hover:underline">
-                        {{ t('public.backHome') }}
-                    </Link>
-                </div>
-                <SearchBar v-model="state.search" :is-searching="isSearching" @clear="clearSearch" />
-            </div>
 
-            <div class="flex items-center justify-between gap-4">
-                <ResultsCount :total="products.total || 0" />
-                <div class="flex items-center gap-2">
-                    <SortDropdown v-model="state.sort" />
-                    <div class="relative lg:hidden">
-                        <Button type="button" variant="outline" class="gap-2" @click="mobileCategoryDropdownOpen = !mobileCategoryDropdownOpen">
-                            <Filter class="h-4 w-4" />
-                            {{ t('productsPage.filterCategories') }}
-                        </Button>
-
-                        <div
-                            v-if="mobileCategoryDropdownOpen"
-                            class="absolute right-0 top-12 z-50 w-64 rounded-lg border border-border bg-background p-3 shadow-lg"
-                        >
-                            <p class="mb-2 text-sm font-semibold">{{ t('productsPage.filterByCategories') }}</p>
-                            <div class="max-h-64 space-y-2 overflow-y-auto">
-                                <label
-                                    v-for="category in availableCategories"
-                                    :key="category.id"
-                                    class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        class="h-4 w-4 rounded border-input"
-                                        :checked="state.categories.includes(category.id)"
-                                        @change="toggleCategory(category.id)"
-                                    />
-                                    <span>{{ category.name }}</span>
-                                </label>
-                            </div>
-
-                            <div class="mt-3 space-y-2 border-t border-border pt-3">
-                                <p class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{{ t('public.price') }}</p>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input
-                                        v-model="state.price_min"
-                                        type="number"
-                                        min="0"
-                                        :placeholder="t('public.min')"
-                                        class="h-9 rounded-md border border-input bg-background px-2 text-xs"
-                                    />
-                                    <input
-                                        v-model="state.price_max"
-                                        type="number"
-                                        min="0"
-                                        :placeholder="t('public.max')"
-                                        class="h-9 rounded-md border border-input bg-background px-2 text-xs"
-                                    />
-                                </div>
-                            </div>
-
-                            <Button type="button" variant="outline" class="mt-3 w-full" @click="mobileCategoryDropdownOpen = false">
-                                {{ t('public.close') }}
-                            </Button>
+        <Transition name="page-fade" mode="out-in">
+            <main class="mx-auto max-w-7xl space-y-4 py-3">
+                <section class="space-y-3 px-3">
+                    <div class="flex items-end justify-between gap-3">
+                        <div>
+                            <p class="text-[10px] font-semibold uppercase tracking-wide text-shop-light">Marketplace locale</p>
+                            <h1 class="font-display text-[22px] font-extrabold leading-tight">Produits</h1>
                         </div>
+                        <Link :href="route('shops.index')" class="text-[11px] font-bold text-primary">Boutiques</Link>
                     </div>
-                </div>
-            </div>
 
-            <ActiveFilters
-                :filters="activeFilterChips"
-                @remove="removeFilter"
-                @reset="resetFilters"
-            />
+                    <div class="relative">
+                        <Search class="pointer-events-none absolute left-[11px] top-1/2 h-4 w-4 -translate-y-1/2 text-shop-light" />
+                        <Input
+                            v-model="state.search"
+                            type="search"
+                            class="h-[38px] rounded-[12px] border-[1.5px] border-border bg-shop-bg pl-9 pr-9 text-[12px] shadow-none placeholder:text-shop-light"
+                            placeholder="Rechercher un produit, une catégorie..."
+                        />
+                        <Button
+                            v-if="state.search"
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            class="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 rounded-[9px]"
+                            @click="clearSearch"
+                        >
+                            <X class="h-3.5 w-3.5" />
+                        </Button>
+                    </div>
+                </section>
 
-            <div class="grid gap-6 lg:grid-cols-[280px_1fr]">
-                <aside class="hidden rounded-xl border border-border p-4 lg:block">
-                    <FiltersPanel
-                        :categories="availableCategories"
-                        :locations="availableLocations"
-                        :filters="state"
-                        :has-active-filters="hasActiveFilters"
-                        @toggle-category="toggleCategory"
-                        @toggle-location="toggleLocation"
-                        @reset="resetFilters"
-                    />
-                </aside>
+                <ScrollArea class="px-3">
+                    <div class="flex min-w-max gap-2">
+                        <Button
+                            v-for="category in categoryChips"
+                            :key="category.id"
+                            type="button"
+                            variant="outline"
+                            class="h-7 rounded-[20px] px-3 text-[11.5px] font-medium shadow-none"
+                            :class="(category.id === 'all' && !state.categories.length) || state.categories.includes(category.id)
+                                ? 'border-primary bg-primary text-white'
+                                : 'border-border bg-white text-shop-muted'"
+                            @click="toggleCategory(category.id)"
+                        >
+                            {{ category.name }}
+                        </Button>
+                    </div>
+                </ScrollArea>
 
-                <section class="space-y-6">
-                    <ProductsGrid :products="products.data || []" :loading="loading" />
+                <section class="px-3">
+                    <div v-if="loading" class="grid grid-cols-2 gap-2.5">
+                        <div v-for="index in 6" :key="index" class="h-60 animate-pulse rounded-[16px] bg-white" />
+                    </div>
+                    <div v-else-if="products.data?.length" class="grid grid-cols-2 gap-2.5">
+                        <ProductCard v-for="product in products.data" :key="product.id" :product="product" />
+                    </div>
+                    <div v-else class="rounded-[16px] border border-dashed border-border bg-white p-8 text-center text-sm text-shop-muted">
+                        {{ t('productsPage.empty') }}
+                    </div>
 
-                    <div v-if="products.links?.length > 3" class="flex flex-wrap items-center gap-2">
+                    <div v-if="products.links?.length > 3" class="mt-4 flex flex-wrap items-center justify-center gap-2">
                         <Link
                             v-for="(link, index) in products.links"
                             :key="`${link.label}-${index}`"
                             :href="link.url || '#'"
-                            class="rounded-md border px-3 py-1.5 text-sm"
-                            :class="link.active ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-muted-foreground'"
-                            :disabled="!link.url"
+                            class="rounded-[10px] border px-3 py-1.5 text-xs"
+                            :class="link.active ? 'border-primary bg-primary text-white' : 'border-border bg-white text-shop-muted'"
                             preserve-scroll
                             preserve-state
                         >
@@ -260,8 +154,9 @@ const removeFilter = (filter) => {
                         </Link>
                     </div>
                 </section>
-            </div>
-        </div>
+            </main>
+        </Transition>
+
+        <BottomNav />
     </div>
 </template>
-

@@ -2,6 +2,7 @@
 import LandingFooter from '@/components/landing/layout/LandingFooter.vue';
 import LandingHeader from '@/components/landing/layout/LandingHeader.vue';
 import MobileTabBar from '@/components/landing/layout/MobileTabBar.vue';
+import OrientationPopup from '@/components/ui/OrientationPopup.vue';
 import { Head } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import {
@@ -88,38 +89,54 @@ const faqs = computed(() => [
     { question: t('landing.faq5Question'), answer: t('landing.faq5Answer') },
     { question: t('landing.faq6Question'), answer: t('landing.faq6Answer') },
 ]);
-
-// const partnerLogos = [
-//     { name: 'Partner One', src: '/images/Maketu1.png' },
-//     { name: 'Partner Two', src: '/images/Maketu1.png' },
-//     { name: 'Partner Three', src: '/images/Maketu1.png' },
-//     { name: 'Partner Four', src: '/images/Maketu1.png' },
-//     { name: 'Partner Five', src: '/images/Maketu1.png' },
-// ];
 </script>
 
 <template>
     <Head :title="t('landing.metaTitle')" />
 
-    <div id="top" class="min-h-screen bg-background text-foreground pb-16 md:pb-0">
-        <LandingHeader :nav-items="navItems" />
+    <div id="top" class="relative min-h-screen overflow-hidden bg-[#F7F6FF] text-foreground pb-16 md:pb-0 dark:bg-[#0F0A1E]">
+        <!-- Global Background Elements -->
+        <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+            <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-blob"></div>
+            <div class="absolute top-[20%] -right-[5%] w-[35%] h-[35%] bg-orange-500/10 rounded-full blur-[100px] animate-blob [animation-delay:2s]"></div>
+            <div class="absolute bottom-[10%] left-[5%] w-[30%] h-[30%] bg-primary/5 rounded-full blur-[100px] animate-blob [animation-delay:4s]"></div>
+        </div>
 
-        <main>
+        <LandingHeader :nav-items="navItems" class="relative z-50" />
+
+        <main class="relative z-10">
             <HeroSection :stats="heroStats" />
-            <!-- <PartnersSection :logos="partnerLogos" /> -->
             <FeaturesSection :features="features" />
+            <div class="relative py-12">
+                <div class="absolute inset-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+            </div>
             <HowItWorksSection :steps="steps" />
             <CategoriesSection :categories="categories" />
             <CTASplit />
-            <!-- <TestimonialsSection :testimonials="testimonials" /> -->
             <FAQSection :faqs="faqs" />
             <CTASection />
             <NewsletterSection />
         </main>
 
-        <LandingFooter />
+        <OrientationPopup
+            title="Bienvenue chez Maketu !"
+            description="Trouvez les meilleurs produits locaux en quelques clics."
+            storage-key="welcome_popup"
+            :delay="3000"
+        />
+
+        <OrientationPopup
+            title="Devenir vendeur ?"
+            description="Ouvrez votre boutique gratuitement et commencez à vendre dès aujourd'hui."
+            storage-key="seller_popup"
+            :delay="15000"
+        >
+            <template #icon>
+                <Store class="h-5 w-5" />
+            </template>
+        </OrientationPopup>
+
+        <LandingFooter class="relative z-10" />
         <MobileTabBar />
     </div>
 </template>
-
-

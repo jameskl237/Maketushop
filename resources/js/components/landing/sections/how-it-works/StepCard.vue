@@ -6,14 +6,26 @@ defineProps({
 </script>
 
 <template>
-    <div class="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-        <div class="mb-5 flex items-center gap-4">
-            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/6 font-display text-lg font-semibold text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
-                {{ index }}
-            </div>
-            <div class="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
+    <div class="group relative rounded-[32px] border border-white/20 bg-glass/30 p-8 backdrop-blur-xl transition-all duration-500 hover:shadow-2xl hover:shadow-pink/5 hover:-translate-y-2 dark:bg-white/5">
+        <!-- Oversized Background Number -->
+        <div class="absolute -right-4 -top-8 select-none font-display text-[120px] font-black text-primary/5 transition-colors group-hover:text-primary/10">
+            0{{ index }}
         </div>
-        <h3 class="font-display mb-2.5 text-xl font-semibold text-foreground">{{ step.title }}</h3>
-        <p class="text-[13px] leading-relaxed text-muted-foreground">{{ step.description }}</p>
+
+        <div class="relative z-10">
+            <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-mesh-gradient text-white shadow-lg shadow-primary/20">
+                <span class="font-display text-lg font-black">{{ index }}</span>
+            </div>
+
+            <h3 class="font-display text-[22px] font-black leading-tight text-foreground transition-colors group-hover:text-primary">
+                {{ step.title }}
+            </h3>
+            <p class="mt-4 text-[15px] leading-relaxed text-muted-foreground/80">
+                {{ step.description }}
+            </p>
+        </div>
+
+        <!-- Progress Connector (mobile only) -->
+        <div class="mt-6 flex h-1 w-12 rounded-full bg-gradient-to-r from-primary to-transparent md:hidden"></div>
     </div>
 </template>

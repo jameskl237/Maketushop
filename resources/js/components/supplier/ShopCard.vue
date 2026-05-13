@@ -25,33 +25,33 @@ const formatDate = (value) => {
 <template>
     <!-- Exemple: <ShopCard :shop="shop" @view="openShop(shop)" /> -->
     <Card class="h-full border-border/60 transition-all duration-300 hover:shadow-lg">
-        <CardHeader>
-            <div class="mb-2 flex items-center justify-between">
-                <Badge variant="secondary">{{ t('supplier.shopBadge') }}</Badge>
+        <CardHeader class="py-3 px-3">
+            <div class="mb-1 flex items-center justify-between">
+                <Badge class="text-xs py-0.5 px-2" variant="secondary">{{ t('supplier.shopBadge') }}</Badge>
                 <Store class="h-4 w-4 text-muted-foreground" />
             </div>
             <div class="flex items-center justify-between gap-2">
-                <CardTitle class="line-clamp-1">{{ props.shop.name }}</CardTitle>
+                <CardTitle class="line-clamp-1 text-sm">{{ props.shop.name }}</CardTitle>
                 <CopyShopLinkButton :shop-id="props.shop.id" :shop-name="props.shop.name" />
             </div>
-            <CardDescription class="line-clamp-2">
+            <CardDescription class="line-clamp-2 text-sm mt-1">
                 {{ props.shop.description || t('supplier.noShopDescription') }}
             </CardDescription>
         </CardHeader>
-        <CardContent class="space-y-3">
+        <CardContent class="space-y-2 py-2 px-3">
             <div class="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin class="h-4 w-4" />
-                <span>{{ props.shop.city }} - {{ props.shop.district }}</span>
+                <span class="text-sm">{{ props.shop.city }}{{ props.shop.district ? ' - ' + props.shop.district : '' }}</span>
             </div>
             <div class="flex items-center gap-2 text-xs text-muted-foreground">
                 <Calendar class="h-3.5 w-3.5" />
-                <span>{{ t('supplier.createdAt', { date: formatDate(props.shop.created_at) }) }}</span>
+                <span class="text-xs">{{ t('supplier.createdAt', { date: formatDate(props.shop.created_at) }) }}</span>
             </div>
-            <div class="grid grid-cols-2 gap-2">
-                <Button class="w-full" variant="outline" :aria-label="t('supplier.viewShopAria')" @click="$emit('view', props.shop)">
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-2">
+                <Button class="w-full text-sm py-2" variant="outline" :aria-label="t('supplier.viewShopAria')" @click="$emit('view', props.shop)">
                     {{ t('supplier.view') }}
                 </Button>
-                <Button class="w-full" variant="secondary" :aria-label="t('supplier.editShopAria')" @click="$emit('edit', props.shop)">
+                <Button class="w-full text-sm py-2" variant="secondary" :aria-label="t('supplier.editShopAria')" @click="$emit('edit', props.shop)">
                     {{ t('supplier.edit') }}
                 </Button>
             </div>
