@@ -42,7 +42,7 @@ const isAuthenticated = computed(() => !!page.props.auth?.user);
 
                 <ThemeToggle :floating="false" class="h-9 w-9 rounded-2xl bg-glass border border-glass-border backdrop-blur-xl shadow-none" />
 
-                <Link :href="route('cart.index')" class="relative">
+                <Link :href="route('cart.index')" class="relative hidden sm:block">
                     <Button
                         type="button"
                         variant="default"
