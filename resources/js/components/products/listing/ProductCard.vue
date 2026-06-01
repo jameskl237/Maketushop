@@ -74,11 +74,9 @@ const onAddToCart = () => {
                         {{ product.category?.name || t('productsPage.noCategory') }}
                     </p>
                     <StarRating
-                        :rateable-id="product.id"
-                        rateable-type="product"
-                        :average-rating="product.average_rating || 0"
+                        :average-rating="Number(product.average_rating) || 0"
                         :ratings-count="product.ratings_count || 0"
-                        :user-rating="product.user_rating || null"
+                        readonly
                         size="sm"
                     />
                 </div>
