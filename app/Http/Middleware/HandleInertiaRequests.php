@@ -37,6 +37,9 @@ class HandleInertiaRequests extends Middleware
                     && filled(config('services.google.client_secret'))
                     && filled(config('services.google.redirect')),
                 'must_set_phone' => $request->user() && $request->user()->google_id && !$request->user()->phone,
+                'favorite_product_ids' => fn () => $request->user()
+                    ? $request->user()->favoriteProductIds()
+                    : [],
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),

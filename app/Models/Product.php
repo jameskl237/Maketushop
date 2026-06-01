@@ -62,6 +62,11 @@ class Product extends Model
         return $this->morphMany(Rating::class, 'rateable');
     }
 
+    public function favorites(): MorphMany
+    {
+        return $this->morphMany(Favorite::class, 'favoritable');
+    }
+
     public function getAverageRatingAttribute(): float
     {
         return round($this->ratings()->avg('score') ?? 0, 1);

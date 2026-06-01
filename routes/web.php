@@ -7,6 +7,7 @@ use App\Http\Controllers\Backoffice\Admin\OrderController as AdminOrderControlle
 use App\Http\Controllers\Backoffice\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Backoffice\Admin\ShopController as AdminShopController;
 use App\Http\Controllers\Backoffice\Admin\UserController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ProductController;
@@ -54,6 +55,8 @@ Route::get('/cart/metadata', [ProductController::class, 'cartMetadata'])->name('
 Route::middleware('auth')->group(function () {
     Route::post('/products/{product}/rate', [RatingController::class, 'rateProduct'])->name('ratings.product');
     Route::post('/shops/{shop}/rate', [RatingController::class, 'rateShop'])->name('ratings.shop');
+
+    Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
 });
 
 Route::get('/dashboard', function () {

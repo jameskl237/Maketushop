@@ -8,9 +8,17 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * NOTE: La table `ratings` est déjà créée par la migration
+     * 2026_05_13_000001_create_ratings_table. Cette migration (issue d'un merge)
+     * faisait doublon ; on la rend idempotente pour ne pas casser une base fraîche.
      */
     public function up(): void
     {
+        if (Schema::hasTable('ratings')) {
+            return;
+        }
+
         Schema::create('ratings', function (Blueprint $table) {
             $table->id();
             $table->morphs('rateable');
@@ -25,9 +33,12 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
+     *
+     * On ne supprime pas la table ici : elle appartient à la migration
+     * 2026_05_13_000001_create_ratings_table.
      */
     public function down(): void
     {
-        Schema::dropIfExists('ratings');
+        // no-op
     }
 };

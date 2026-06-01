@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -68,5 +69,32 @@ class User extends Authenticatable
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    // ❤️ Un utilisateur peut avoir plusieurs favoris (produits et services)
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function hasFavorited(Model $model): bool
+    {
+        return $this->favorites()
+            ->where('favoritable_type', $model->getMorphClass())
+            ->where('favoritable_id', $model->getKey())
+            ->exists();
+    }
+
+    /**
+     * IDs des produits favoris (pour hydrater le frontend).
+     *
+     * @return array<int, int>
+     */
+    public function favoriteProductIds(): array
+    {
+        return $this->favorites()
+            ->where('favoritable_type', Product::class)
+            ->pluck('favoritable_id')
+            ->all();
     }
 }

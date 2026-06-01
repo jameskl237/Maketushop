@@ -4,69 +4,69 @@
 
 @layer base {
   :root {
-    --primary: #5B2EFF;
-    --primary-rgb: 91 46 255;
-    --primary-hover: #4A20EE;
-    --primary-hover-rgb: 74 32 238;
-    --orange: #FF6B2E;
-    --orange-rgb: 255 107 46;
-    --bg: #F7F6FF;
-    --bg-rgb: 247 246 255;
+    --primary: #F43F5E;
+    --primary-rgb: 244 63 94;
+    --primary-hover: #E11D48;
+    --primary-hover-rgb: 225 29 72;
+    --orange: #FB923C;
+    --orange-rgb: 251 146 60;
+    --bg: #FFF7F8;
+    --bg-rgb: 255 247 248;
     --card: #FFFFFF;
     --card-rgb: 255 255 255;
-    --text: #0F0A1E;
-    --text-rgb: 15 10 30;
-    --text-muted: #6B6880;
-    --text-muted-rgb: 107 104 128;
-    --text-light: #A8A4B8;
-    --text-light-rgb: 168 164 184;
+    --text: #0F172A;
+    --text-rgb: 15 23 42;
+    --text-muted: #64748B;
+    --text-muted-rgb: 100 116 139;
+    --text-light: #94A3B8;
+    --text-light-rgb: 148 163 184;
     --green: #00C48C;
     --green-rgb: 0 196 140;
     --amber: #F59E0B;
     --amber-rgb: 245 158 11;
-    --border: rgba(91,46,255,0.1);
+    --border: rgba(244,63,94,0.1);
     --radius: 1rem;
 
     /* Refined Liquid Glass */
     --glass-bg: rgba(255, 255, 255, 0.72);
     --glass-border: rgba(255, 255, 255, 0.5);
-    --glass-shadow: 0 8px 32px rgba(91, 46, 255, 0.08), inset 0 1px 0 rgba(255,255,255,0.8);
-    --mesh-gradient: radial-gradient(at 0% 0%, #5B2EFF 0px, transparent 50%),
-                    radial-gradient(at 100% 0%, #FF6B2E 0px, transparent 50%),
-                    radial-gradient(at 100% 100%, #FFC107 0px, transparent 50%),
-                    radial-gradient(at 0% 100%, #4A20EE 0px, transparent 50%);
+    --glass-shadow: 0 8px 32px rgba(244, 63, 94, 0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+    --mesh-gradient: radial-gradient(at 0% 0%, #F43F5E 0px, transparent 50%),
+                    radial-gradient(at 100% 0%, #FB923C 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, #FDBA74 0px, transparent 50%),
+                    radial-gradient(at 0% 100%, #E11D48 0px, transparent 50%);
   }
   .dark {
-    --primary: #8E72FF;
-    --primary-rgb: 142 114 255;
-    --primary-hover: #7C5FFF;
-    --primary-hover-rgb: 124 95 255;
-    --orange: #FF8E5E;
-    --orange-rgb: 255 142 94;
-    --bg: #130D22;
-    --bg-rgb: 19 13 34;
-    --card: #1E1730;
-    --card-rgb: 30 23 48;
-    --text: #FBFAFF;
-    --text-rgb: 251 250 255;
-    --text-muted: #C6C0D8;
-    --text-muted-rgb: 198 192 216;
-    --text-light: #9088A8;
-    --text-light-rgb: 144 136 168;
+    --primary: #FB7185;
+    --primary-rgb: 251 113 133;
+    --primary-hover: #F43F5E;
+    --primary-hover-rgb: 244 63 94;
+    --orange: #FDBA74;
+    --orange-rgb: 253 186 116;
+    --bg: #1A1014;
+    --bg-rgb: 26 16 20;
+    --card: #271820;
+    --card-rgb: 39 24 32;
+    --text: #FFF5F7;
+    --text-rgb: 255 245 247;
+    --text-muted: #D6C2C8;
+    --text-muted-rgb: 214 194 200;
+    --text-light: #A8909A;
+    --text-light-rgb: 168 144 154;
     --green: #00D99B;
     --green-rgb: 0 217 155;
     --amber: #FBBF24;
     --amber-rgb: 251 191 36;
-    --border: rgba(142,114,255,0.18);
+    --border: rgba(251,113,133,0.18);
 
     /* Refined Liquid Glass Dark */
-    --glass-bg: rgba(30, 23, 48, 0.75);
-    --glass-border: rgba(142, 114, 255, 0.25);
+    --glass-bg: rgba(39, 24, 32, 0.75);
+    --glass-border: rgba(251, 113, 133, 0.25);
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.06);
-    --mesh-gradient: radial-gradient(at 0% 0%, #8E72FF 0px, transparent 50%),
-                    radial-gradient(at 100% 0%, #FF8E5E 0px, transparent 50%),
-                    radial-gradient(at 100% 100%, #7C5FFF 0px, transparent 50%),
-                    radial-gradient(at 0% 100%, #130D22 0px, transparent 50%);
+    --mesh-gradient: radial-gradient(at 0% 0%, #FB7185 0px, transparent 50%),
+                    radial-gradient(at 100% 0%, #FDBA74 0px, transparent 50%),
+                    radial-gradient(at 100% 100%, #F43F5E 0px, transparent 50%),
+                    radial-gradient(at 0% 100%, #1A1014 0px, transparent 50%);
   }
 }
 
