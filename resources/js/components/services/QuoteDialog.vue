@@ -43,7 +43,7 @@ const buildWhatsappUrl = () => {
     const phone = sanitizePhone(ownerPhone.value);
     if (!phone) return null;
 
-    const serviceUrl = `${publicBaseUrl}/services/${props.service.id}`;
+    const serviceUrl = `${publicBaseUrl}/s/${props.service.id}`;
     const lines = [
         `Bonjour ${props.service.shop?.name ?? ''}`.trim() + ',',
         '',

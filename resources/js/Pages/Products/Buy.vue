@@ -28,7 +28,7 @@ const whatsappPhone = computed(() => {
 });
 
 const whatsappText = computed(() => {
-    const productUrl = `${publicBaseUrl}${route('products.show', { product: props.product.id }, false)}`;
+    const productUrl = `${publicBaseUrl}/p/${props.product.id}`;
     const lines = [
         t('productBuy.waHello'),
         `- ${t('productBuy.waName')}: ${props.product.name}`,

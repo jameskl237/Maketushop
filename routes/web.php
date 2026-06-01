@@ -14,6 +14,7 @@ use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ShareController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierServiceController;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +51,10 @@ Route::get('/products/{product}/buy', [ProductController::class, 'buy'])->name('
 Route::post('/products/{product}/checkout', [PaymentController::class, 'initialize'])->name('payments.checkout');
 Route::get('/payments/callback', [PaymentController::class, 'callback'])->name('payments.callback');
 Route::get('/payments/unavailable', [ProductController::class, 'paymentUnavailable'])->name('payments.unavailable');
+// Liens de partage (vignette WhatsApp / Open Graph) -> redirigent vers la fiche
+Route::get('/p/{product}', [ShareController::class, 'product'])->name('share.product');
+Route::get('/s/{service}', [ShareController::class, 'service'])->name('share.service');
+
 Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
 Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
 Route::get('/services/{service}/buy', [ServiceController::class, 'buy'])->name('services.buy');

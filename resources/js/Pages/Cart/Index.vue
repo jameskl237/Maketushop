@@ -70,7 +70,9 @@ const buildShopOrderMessage = (group) => {
     ];
 
     group.items.forEach((item, index) => {
-        const productUrl = `${publicBaseUrl}${route('products.show', { product: item.id }, false)}`;
+        const productUrl = item.type === 'service'
+            ? `${publicBaseUrl}/s/${item.id}`
+            : `${publicBaseUrl}/p/${item.id}`;
         lines.push(
             `${index + 1}. ${item.name}`,
             `   - ${t('cartPage.waQuantity')}: ${item.quantity}`,

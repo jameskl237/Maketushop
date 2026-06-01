@@ -22,6 +22,13 @@ const quantity = ref(1);
 const { addToCart } = useCart();
 const { t } = useI18n();
 
+const origin = typeof window !== 'undefined' ? window.location.origin : '';
+const ogImage = computed(() => {
+    const img = props.product.main_image || '/images/Maketu_logo.png';
+    if (/^https?:\/\//.test(img)) return img;
+    return `${origin}${img.startsWith('/') ? '' : '/'}${img}`;
+});
+
 const canBuy = computed(() => props.product.stock > 0);
 const price = computed(() => {
     const value = props.product.current_price ?? props.product.price ?? 0;
@@ -39,7 +46,13 @@ const addProductToCart = () => {
 </script>
 
 <template>
-    <Head :title="product.name" />
+    <Head :title="product.name">
+        <meta head-key="og:title" property="og:title" :content="product.name" />
+        <meta head-key="og:description" property="og:description" :content="product.short_description || product.subtitle || 'Découvrez ce produit sur MaketuShop.'" />
+        <meta head-key="og:image" property="og:image" :content="ogImage" />
+        <meta head-key="og:type" property="og:type" content="product" />
+        <meta head-key="twitter:card" name="twitter:card" content="summary_large_image" />
+    </Head>
 
     <div class="min-h-screen bg-shop-bg pb-16 text-foreground">
         <Transition name="page-fade" mode="out-in">

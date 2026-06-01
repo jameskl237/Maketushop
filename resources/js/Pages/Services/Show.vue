@@ -19,6 +19,13 @@ const props = defineProps({
 
 const { addToCart } = useCart();
 
+const origin = typeof window !== 'undefined' ? window.location.origin : '';
+const ogImage = computed(() => {
+    const img = props.service.main_image || '/images/Maketu_logo.png';
+    if (/^https?:\/\//.test(img)) return img;
+    return `${origin}${img.startsWith('/') ? '' : '/'}${img}`;
+});
+
 const isQuoteOnly = computed(() => props.service.quote_only || props.service.current_price == null);
 
 const price = computed(() => {
@@ -36,7 +43,13 @@ const orderService = () => {
 </script>
 
 <template>
-    <Head :title="service.name" />
+    <Head :title="service.name">
+        <meta head-key="og:title" property="og:title" :content="service.name" />
+        <meta head-key="og:description" property="og:description" :content="service.short_description || service.subtitle || 'Découvrez ce service sur MaketuShop.'" />
+        <meta head-key="og:image" property="og:image" :content="ogImage" />
+        <meta head-key="og:type" property="og:type" content="product" />
+        <meta head-key="twitter:card" name="twitter:card" content="summary_large_image" />
+    </Head>
 
     <div class="min-h-screen bg-shop-bg pb-16 text-foreground">
         <Transition name="page-fade" mode="out-in">
