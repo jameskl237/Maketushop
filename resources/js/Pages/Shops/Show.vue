@@ -101,8 +101,14 @@ const shareShop = async () => {
     <div class="min-h-screen bg-shop-bg pb-16 text-foreground">
         <Transition name="page-fade" mode="out-in">
             <main class="mx-auto max-w-3xl">
-                <section class="bg-gradient-to-br from-primary to-pink px-4 pb-9 pt-4 text-white">
-                    <div class="mb-5 flex items-center justify-between">
+                <section class="relative overflow-hidden bg-gradient-to-br from-primary to-orange px-4 pb-9 pt-4 text-white">
+                    <!-- Bannière de la boutique (si configurée) -->
+                    <template v-if="shop.banner_image">
+                        <img :src="shop.banner_image" :alt="shop.name" class="absolute inset-0 h-full w-full object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20"></div>
+                    </template>
+
+                    <div class="relative mb-5 flex items-center justify-between">
                         <Link :href="route('shops.index')">
                             <Button variant="ghost" size="icon" class="h-8 w-8 rounded-[10px] bg-white/20 text-white shadow-none">
                                 <ArrowLeft class="h-4 w-4" />
@@ -111,7 +117,7 @@ const shareShop = async () => {
                         <CopyShopLinkButton :shop-id="shop.id" :shop-name="shop.name" />
                     </div>
 
-                    <div class="flex items-end gap-3">
+                    <div class="relative flex items-end gap-3">
                         <div class="relative">
                             <Avatar class="h-14 w-14 rounded-[18px] bg-white">
                                 <AvatarImage :src="shop.logo_url || shop.logo" :alt="shop.name" />

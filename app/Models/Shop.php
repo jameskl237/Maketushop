@@ -18,14 +18,20 @@ class Shop extends Model
         'district',
         'phone',
         'logo',
+        'banner',
         'user_id',
     ];
 
-    protected $appends = ['logo_url'];
+    protected $appends = ['logo_url', 'banner_url'];
 
     public function getLogoUrlAttribute(): ?string
     {
         return $this->logo ? asset(Storage::url($this->logo)) : null;
+    }
+
+    public function getBannerUrlAttribute(): ?string
+    {
+        return $this->banner ? asset(Storage::url($this->banner)) : null;
     }
 
     // Une boutique appartient à un utilisateur (supplier)

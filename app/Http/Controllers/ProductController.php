@@ -234,7 +234,7 @@ class ProductController extends Controller
                 'city' => $shop->city,
                 'district' => $shop->district,
                 'logo' => $shop->logo_url,
-                'banner_image' => null,
+                'banner_image' => $shop->banner_url,
                 'tagline' => $shop->description ? Str::limit($shop->description, 80) : null,
                 'verified' => true,
                 'products_count' => (int) $shop->products_count,

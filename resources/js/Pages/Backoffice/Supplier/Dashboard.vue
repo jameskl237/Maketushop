@@ -51,6 +51,7 @@ const form = useForm({
     district: '',
     phone: '',
     logo: null,
+    banner: null,
 });
 
 const editForm = useForm({
@@ -60,6 +61,7 @@ const editForm = useForm({
     district: '',
     phone: '',
     logo: null,
+    banner: null,
 });
 
 const stats = computed(() => [
@@ -132,6 +134,10 @@ const onLogoChange = (event) => {
     form.logo = event.target.files?.[0] ?? null;
 };
 
+const onBannerChange = (event) => {
+    form.banner = event.target.files?.[0] ?? null;
+};
+
 const goToShopProducts = (shop) => {
     router.visit(route('backoffice.supplier.shops.show', { shop: shop.id }));
 };
@@ -156,11 +162,16 @@ const openEditDialog = (shop) => {
 
     editForm.phone = shop.phone ?? '';
     editForm.logo = null;
+    editForm.banner = null;
     editShopDialogOpen.value = true;
 };
 
 const onEditLogoChange = (event) => {
     editForm.logo = event.target.files?.[0] ?? null;
+};
+
+const onEditBannerChange = (event) => {
+    editForm.banner = event.target.files?.[0] ?? null;
 };
 
 const submitShopUpdate = () => {
@@ -270,6 +281,13 @@ const submitShopUpdate = () => {
                     <p v-if="form.errors.logo" class="text-sm text-destructive">{{ form.errors.logo }}</p>
                 </div>
 
+                <div class="space-y-2">
+                    <Label for="shop-banner">Bannière de la boutique</Label>
+                    <Input id="shop-banner" type="file" accept="image/*" @change="onBannerChange" />
+                    <p class="text-xs text-muted-foreground">Image large en haut de votre page boutique (format paysage conseillé).</p>
+                    <p v-if="form.errors.banner" class="text-sm text-destructive">{{ form.errors.banner }}</p>
+                </div>
+
                 <DialogFooter class="gap-2 sm:gap-0">
                     <Button type="button" variant="outline" @click="createShopDialogOpen = false">
                         {{ $t('common.cancel') }}
@@ -339,6 +357,16 @@ const submitShopUpdate = () => {
                     <Input id="edit-shop-logo" type="file" accept="image/*" @change="onEditLogoChange" />
                     <p class="text-xs text-muted-foreground">{{ $t('supplier.imageHint') }}</p>
                     <p v-if="editForm.errors.logo" class="text-sm text-destructive">{{ editForm.errors.logo }}</p>
+                </div>
+
+                <div class="space-y-2">
+                    <Label for="edit-shop-banner">Bannière (optionnel)</Label>
+                    <div v-if="shopToEdit?.banner_url" class="overflow-hidden rounded-lg border border-border">
+                        <img :src="shopToEdit.banner_url" alt="Bannière actuelle" class="h-20 w-full object-cover" />
+                    </div>
+                    <Input id="edit-shop-banner" type="file" accept="image/*" @change="onEditBannerChange" />
+                    <p class="text-xs text-muted-foreground">Image large en haut de votre page boutique.</p>
+                    <p v-if="editForm.errors.banner" class="text-sm text-destructive">{{ editForm.errors.banner }}</p>
                 </div>
 
                 <DialogFooter class="gap-2 sm:gap-0">

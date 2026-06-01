@@ -174,11 +174,17 @@ class SupplierController extends Controller
             'district' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:30'],
             'logo' => ['nullable', 'image', 'max:5120'],
+            'banner' => ['nullable', 'image', 'max:8192'],
         ]);
 
         $logoPath = null;
         if ($request->hasFile('logo')) {
             $logoPath = $request->file('logo')->store('shops', 'public');
+        }
+
+        $bannerPath = null;
+        if ($request->hasFile('banner')) {
+            $bannerPath = $request->file('banner')->store('shops/banners', 'public');
         }
 
         $request->user()->shops()->create([
@@ -188,6 +194,7 @@ class SupplierController extends Controller
             'district' => $validated['district'],
             'phone' => $validated['phone'],
             'logo' => $logoPath,
+            'banner' => $bannerPath,
         ]);
 
         return redirect()
@@ -206,6 +213,7 @@ class SupplierController extends Controller
             'district' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:30'],
             'logo' => ['nullable', 'image', 'max:5120'],
+            'banner' => ['nullable', 'image', 'max:8192'],
         ]);
 
         $shopData = [
@@ -221,6 +229,13 @@ class SupplierController extends Controller
                 Storage::disk('public')->delete($shop->logo);
             }
             $shopData['logo'] = $request->file('logo')->store('shops', 'public');
+        }
+
+        if ($request->hasFile('banner')) {
+            if ($shop->banner) {
+                Storage::disk('public')->delete($shop->banner);
+            }
+            $shopData['banner'] = $request->file('banner')->store('shops/banners', 'public');
         }
 
         $shop->update($shopData);
