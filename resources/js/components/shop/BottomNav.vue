@@ -1,7 +1,7 @@
 <script setup>
 import { useCartStore } from '@/stores/cart';
 import { Link, usePage } from '@inertiajs/vue3';
-import { Home, LogIn, ShoppingBag, ShoppingCart, Store } from 'lucide-vue-next';
+import { Briefcase, Home, ShoppingBag, ShoppingCart, Store } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const page = usePage();
@@ -19,7 +19,7 @@ const tabs = computed(() => [
     { label: 'Boutiques', href: route('shops.index'),     icon: Store },
     { label: 'Produits',  href: route('products.index'),  icon: ShoppingBag, primary: true },
     { label: 'Panier',    href: route('cart.index'),      icon: ShoppingCart, badge: cartCount.value },
-    { label: 'Compte',    href: route('login'),           icon: LogIn },
+    { label: 'Services',  href: route('services.index'),  icon: Briefcase },
 ]);
 </script>
 
