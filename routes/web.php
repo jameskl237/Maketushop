@@ -15,6 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\SupplierServiceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -133,6 +134,16 @@ Route::middleware(['auth', 'role:supplier'])->prefix('backoffice/supplier')->gro
     Route::delete('/shops/{shop}/products/{product}', [SupplierController::class, 'destroyProduct'])->name('backoffice.supplier.shops.products.destroy');
     Route::post('/shops/{shop}/products/{product}/medias', [SupplierController::class, 'storeProductMedias'])->name('backoffice.supplier.shops.products.medias.store');
     Route::delete('/shops/{shop}/products/{product}/medias/{media}', [SupplierController::class, 'destroyProductMedia'])->name('backoffice.supplier.shops.products.medias.destroy');
+
+    // Services (prestataire)
+    Route::get('/services', [SupplierServiceController::class, 'index'])->name('backoffice.supplier.services.index');
+    Route::post('/services', [SupplierServiceController::class, 'store'])->name('backoffice.supplier.services.store');
+    Route::put('/services/{service}', [SupplierServiceController::class, 'update'])->name('backoffice.supplier.services.update');
+    Route::delete('/services/{service}', [SupplierServiceController::class, 'destroy'])->name('backoffice.supplier.services.destroy');
+
+    // Demandes de devis reçues
+    Route::get('/quote-requests', [SupplierServiceController::class, 'quoteRequests'])->name('backoffice.supplier.quote-requests.index');
+    Route::patch('/quote-requests/{quoteRequest}/handled', [SupplierServiceController::class, 'markQuoteHandled'])->name('backoffice.supplier.quote-requests.handled');
 });
 
 // SuperAdmin area: financial dashboards and sensitive management (role: superadmin)

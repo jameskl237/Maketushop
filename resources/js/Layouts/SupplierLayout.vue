@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import SupplierSidebar from '@/components/supplier/SupplierSidebar.vue';
 import { Button } from '@/components/ui/button';
 import { Link } from '@inertiajs/vue3';
-import { ChevronDown, ChevronUp, Menu, Package, ShoppingCart, Store } from 'lucide-vue-next';
+import { Briefcase, ChevronDown, ChevronUp, FileText, Menu, Package, ShoppingCart, Store } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 defineProps({
@@ -124,6 +124,28 @@ const toggleMobileSidebar = () => {
                             >
                                 <Package class="h-4 w-4" />
                                 {{ $t('supplier.products') }}
+                            </Link>
+                            <Link
+                                :href="route('backoffice.supplier.services.index')"
+                                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-300"
+                                :class="activeRoute === 'backoffice.supplier.services.index'
+                                    ? 'bg-primary/12 text-primary font-medium'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
+                                @click="mobileSidebarVisible = false"
+                            >
+                                <Briefcase class="h-4 w-4" />
+                                {{ $t('supplier.services') }}
+                            </Link>
+                            <Link
+                                :href="route('backoffice.supplier.quote-requests.index')"
+                                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-300"
+                                :class="activeRoute === 'backoffice.supplier.quote-requests.index'
+                                    ? 'bg-primary/12 text-primary font-medium'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
+                                @click="mobileSidebarVisible = false"
+                            >
+                                <FileText class="h-4 w-4" />
+                                {{ $t('supplier.quoteRequests') }}
                             </Link>
                             <Button
                                 v-if="canCreateShop"

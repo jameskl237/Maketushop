@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BarChart3, Package, ShoppingCart, Sparkles, Store } from 'lucide-vue-next';
+import { BarChart3, Briefcase, FileText, Package, ShoppingCart, Sparkles, Store } from 'lucide-vue-next';
 
 defineProps({
     activeRoute: {
@@ -24,6 +24,8 @@ const navigationItems = [
     { key: 'shops', labelKey: 'supplier.shops', icon: Store, route: 'backoffice.supplier.shops.index', disabled: false },
     { key: 'orders', labelKey: 'supplier.orders', icon: ShoppingCart, route: 'backoffice.supplier.orders.index', disabled: false },
     { key: 'products', labelKey: 'supplier.products', icon: Package, route: 'backoffice.supplier.products.index', disabled: false },
+    { key: 'services', labelKey: 'supplier.services', icon: Briefcase, route: 'backoffice.supplier.services.index', disabled: false },
+    { key: 'quotes', labelKey: 'supplier.quoteRequests', icon: FileText, route: 'backoffice.supplier.quote-requests.index', disabled: false },
 ];
 
 const onNavigate = () => emit('navigate');
