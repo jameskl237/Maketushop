@@ -6,6 +6,7 @@ import { useCart } from '@/composables/useCart';
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
     ArrowRight,
+    Briefcase,
     ChevronLeft,
     ChevronRight,
     Flame,
@@ -157,15 +158,21 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
                  QUICK ACTIONS
             ═══════════════════════════════════════════════ -->
             <section class="px-4 pt-4">
-                <div class="grid grid-cols-4 gap-2">
+                <div class="grid grid-cols-5 gap-2">
                     <Link :href="route('products.index')" class="flex flex-col items-center gap-1.5 rounded-2xl bg-primary/8 p-3 active:scale-95 transition-transform">
                         <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
                             <ShoppingBag class="h-5 w-5" />
                         </div>
                         <span class="text-[10px] font-semibold text-foreground">Produits</span>
                     </Link>
-                    <Link :href="route('shops.index')" class="flex flex-col items-center gap-1.5 rounded-2xl bg-orange/8 p-3 active:scale-95 transition-transform">
+                    <Link :href="route('services.index')" class="flex flex-col items-center gap-1.5 rounded-2xl bg-orange/8 p-3 active:scale-95 transition-transform">
                         <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-orange text-white shadow-sm">
+                            <Briefcase class="h-5 w-5" />
+                        </div>
+                        <span class="text-[10px] font-semibold text-foreground">Services</span>
+                    </Link>
+                    <Link :href="route('shops.index')" class="flex flex-col items-center gap-1.5 rounded-2xl bg-primary/8 p-3 active:scale-95 transition-transform">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
                             <Store class="h-5 w-5" />
                         </div>
                         <span class="text-[10px] font-semibold text-foreground">Boutiques</span>

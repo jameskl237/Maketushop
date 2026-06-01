@@ -40,6 +40,9 @@ class HandleInertiaRequests extends Middleware
                 'favorite_product_ids' => fn () => $request->user()
                     ? $request->user()->favoriteProductIds()
                     : [],
+                'favorite_service_ids' => fn () => $request->user()
+                    ? $request->user()->favoriteServiceIds()
+                    : [],
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),

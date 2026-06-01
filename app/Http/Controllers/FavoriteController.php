@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Favorite;
 use App\Models\Product;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -16,7 +17,7 @@ class FavoriteController extends Controller
      */
     private const FAVORITABLE_TYPES = [
         'product' => Product::class,
-        // 'service' => Service::class, // activé en Phase 3
+        'service' => Service::class,
     ];
 
     public function toggle(Request $request)
@@ -27,6 +28,7 @@ class FavoriteController extends Controller
         ]);
 
         $modelClass = self::FAVORITABLE_TYPES[$data['type']];
+        /** @var \Illuminate\Database\Eloquent\Model $model */
         $model = $modelClass::findOrFail($data['id']);
 
         $favorite = Favorite::where('user_id', $request->user()->id)

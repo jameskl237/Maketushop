@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Rating;
+use App\Models\Service;
 use App\Models\Shop;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -44,6 +45,28 @@ class RatingController extends Controller
                 'user_id' => $request->user()->id,
                 'rateable_id' => $shop->id,
                 'rateable_type' => Shop::class,
+            ],
+            [
+                'score' => $data['score'],
+                'comment' => $data['comment'] ?? null,
+            ]
+        );
+
+        return back()->with('success', 'Note enregistrée.');
+    }
+
+    public function rateService(Request $request, Service $service)
+    {
+        $data = $request->validate([
+            'score' => ['required', 'integer', Rule::in([1, 2, 3, 4, 5])],
+            'comment' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        Rating::updateOrCreate(
+            [
+                'user_id' => $request->user()->id,
+                'rateable_id' => $service->id,
+                'rateable_type' => Service::class,
             ],
             [
                 'score' => $data['score'],

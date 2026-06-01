@@ -6,11 +6,19 @@ import { Heart } from 'lucide-vue-next';
 import { computed, onMounted } from 'vue';
 
 const props = defineProps({
-    productId: { type: Number, required: true },
+    // Rétrocompat : ciblage produit historique
+    productId: { type: Number, default: null },
+    // Ciblage générique (product | service)
+    itemId: { type: Number, default: null },
+    type: { type: String, default: 'product' },
 });
 
 const favoritesStore = useFavoritesStore();
-const isFavorite = computed(() => favoritesStore.has(props.productId));
+
+const resolvedId = computed(() => props.itemId ?? props.productId);
+const resolvedType = computed(() => (props.itemId != null ? props.type : 'product'));
+
+const isFavorite = computed(() => favoritesStore.hasFor(resolvedType.value, resolvedId.value));
 
 onMounted(() => {
     if (!favoritesStore.hydrated) {
@@ -25,7 +33,7 @@ const toggleFavorite = () => {
         return;
     }
 
-    favoritesStore.toggleProduct(props.productId);
+    favoritesStore.toggle(resolvedType.value, resolvedId.value);
 };
 </script>
 

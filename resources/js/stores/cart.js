@@ -29,8 +29,19 @@ export const useCartStore = defineStore('cart', {
             if (typeof window === 'undefined') return;
             window.localStorage.setItem(STORAGE_KEY, JSON.stringify(this.items));
         },
+        // Identifie une ligne de panier. Pour les produits (historique) la clé
+        // reste l'id seul ; les services sont distingués par leur type pour
+        // éviter une collision d'id avec un produit du même numéro.
+        matchesItem(item, id, type) {
+            if (type === 'service') {
+                return item.type === 'service' && item.id === id;
+            }
+            // produit : compatible avec les anciennes lignes sans champ type
+            return (item.type ?? 'product') === 'product' && item.id === id;
+        },
         addItem(product, quantity = 1) {
-            const existing = this.items.find((item) => item.id === product.id);
+            const type = product.type === 'service' ? 'service' : 'product';
+            const existing = this.items.find((item) => this.matchesItem(item, product.id, type));
 
             if (existing) {
                 existing.quantity += quantity;
@@ -47,6 +58,7 @@ export const useCartStore = defineStore('cart', {
 
             this.items.push({
                 id: product.id,
+                type,
                 name: product.name,
                 price: product.current_price,
                 image: product.main_image,
@@ -60,16 +72,16 @@ export const useCartStore = defineStore('cart', {
             });
             this.persist();
         },
-        removeItem(productId) {
-            this.items = this.items.filter((item) => item.id !== productId);
+        removeItem(productId, type = 'product') {
+            this.items = this.items.filter((item) => !this.matchesItem(item, productId, type));
             this.persist();
         },
-        updateQuantity(productId, quantity) {
-            const existing = this.items.find((item) => item.id === productId);
+        updateQuantity(productId, quantity, type = 'product') {
+            const existing = this.items.find((item) => this.matchesItem(item, productId, type));
             if (!existing) return;
 
             if (quantity <= 0) {
-                this.removeItem(productId);
+                this.removeItem(productId, type);
                 return;
             }
 

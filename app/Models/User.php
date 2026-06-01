@@ -97,4 +97,17 @@ class User extends Authenticatable
             ->pluck('favoritable_id')
             ->all();
     }
+
+    /**
+     * IDs des services favoris (pour hydrater le frontend).
+     *
+     * @return array<int, int>
+     */
+    public function favoriteServiceIds(): array
+    {
+        return $this->favorites()
+            ->where('favoritable_type', Service::class)
+            ->pluck('favoritable_id')
+            ->all();
+    }
 }

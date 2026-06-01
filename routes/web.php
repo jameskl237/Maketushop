@@ -9,9 +9,11 @@ use App\Http\Controllers\Backoffice\Admin\ShopController as AdminShopController;
 use App\Http\Controllers\Backoffice\Admin\UserController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\QuoteRequestController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -47,14 +49,23 @@ Route::get('/products/{product}/buy', [ProductController::class, 'buy'])->name('
 Route::post('/products/{product}/checkout', [PaymentController::class, 'initialize'])->name('payments.checkout');
 Route::get('/payments/callback', [PaymentController::class, 'callback'])->name('payments.callback');
 Route::get('/payments/unavailable', [ProductController::class, 'paymentUnavailable'])->name('payments.unavailable');
+Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
+Route::get('/services/{service}/buy', [ServiceController::class, 'buy'])->name('services.buy');
+
 Route::get('/shops', [ProductController::class, 'shops'])->name('shops.index');
 Route::get('/shops/{shop}/{slug?}', [ProductController::class, 'shopShow'])->name('shops.show');
 Route::get('/cart', [ProductController::class, 'cart'])->name('cart.index');
 Route::get('/cart/metadata', [ProductController::class, 'cartMetadata'])->name('cart.metadata');
 
+// Demande de devis : accessible aux invités comme aux clients connectés
+// (user_id est enregistré si l'utilisateur est connecté)
+Route::post('/services/{service}/quote', [QuoteRequestController::class, 'store'])->name('services.quote');
+
 Route::middleware('auth')->group(function () {
     Route::post('/products/{product}/rate', [RatingController::class, 'rateProduct'])->name('ratings.product');
     Route::post('/shops/{shop}/rate', [RatingController::class, 'rateShop'])->name('ratings.shop');
+    Route::post('/services/{service}/rate', [RatingController::class, 'rateService'])->name('ratings.service');
 
     Route::post('/favorites/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
 });

@@ -4,20 +4,22 @@ import { defineStore } from 'pinia';
 export const useFavoritesStore = defineStore('favorites', {
     state: () => ({
         productIds: [],
+        serviceIds: [],
         hydrated: false,
     }),
     getters: {
         has: (state) => (productId) => state.productIds.includes(productId),
+        hasService: (state) => (serviceId) => state.serviceIds.includes(serviceId),
     },
     actions: {
         /**
-         * Hydrate depuis les IDs partagés par Inertia (auth.favorite_product_ids).
+         * Hydrate depuis les IDs partagés par Inertia.
          * Idempotent : on resynchronise à chaque navigation.
          */
         hydrate() {
             const page = usePage();
-            const ids = page.props?.auth?.favorite_product_ids ?? [];
-            this.productIds = [...ids];
+            this.productIds = [...(page.props?.auth?.favorite_product_ids ?? [])];
+            this.serviceIds = [...(page.props?.auth?.favorite_service_ids ?? [])];
             this.hydrated = true;
         },
 
@@ -25,37 +27,51 @@ export const useFavoritesStore = defineStore('favorites', {
             return !!usePage().props?.auth?.user;
         },
 
+        listFor(type) {
+            return type === 'service' ? this.serviceIds : this.productIds;
+        },
+
+        hasFor(type, id) {
+            return this.listFor(type).includes(id);
+        },
+
         /**
-         * Bascule un produit en favori. Met à jour l'état localement (optimiste)
-         * puis persiste côté serveur. Retourne le nouvel état (true = favori).
+         * Bascule un favori (produit ou service). Optimiste + persistance serveur.
+         * Retourne le nouvel état (true = favori).
          */
-        toggleProduct(productId) {
-            const wasFavorite = this.productIds.includes(productId);
+        toggle(type, id) {
+            const isService = type === 'service';
+            const list = isService ? 'serviceIds' : 'productIds';
+            const wasFavorite = this[list].includes(id);
 
             if (wasFavorite) {
-                this.productIds = this.productIds.filter((id) => id !== productId);
+                this[list] = this[list].filter((x) => x !== id);
             } else {
-                this.productIds.push(productId);
+                this[list].push(id);
             }
 
             router.post(
                 route('favorites.toggle'),
-                { type: 'product', id: productId },
+                { type, id },
                 {
                     preserveScroll: true,
                     preserveState: true,
                     onError: () => {
-                        // rollback en cas d'échec
                         if (wasFavorite) {
-                            this.productIds.push(productId);
+                            this[list].push(id);
                         } else {
-                            this.productIds = this.productIds.filter((id) => id !== productId);
+                            this[list] = this[list].filter((x) => x !== id);
                         }
                     },
                 },
             );
 
             return !wasFavorite;
+        },
+
+        // Rétrocompat : ancien appel ciblant les produits
+        toggleProduct(productId) {
+            return this.toggle('product', productId);
         },
     },
 });
