@@ -156,4 +156,39 @@ class ServiceModuleTest extends TestCase
         $response = $this->post('/favorites/toggle', ['type' => 'product', 'id' => 1]);
         $response->assertRedirect('/login');
     }
+
+    public function test_client_dashboard_aggregates_orders_favorites_and_quotes(): void
+    {
+        [$supplier, $shop] = $this->makeSupplierWithShop();
+        $service = Service::create([
+            'code' => 'SVC-D', 'title' => 'Service favori', 'price' => null,
+            'quote_only' => true, 'is_active' => true,
+            'user_id' => $supplier->id, 'shop_id' => $shop->id,
+        ]);
+        $client = User::factory()->create(['role' => User::ROLE_USER]);
+
+        // un favori service
+        Favorite::create([
+            'user_id' => $client->id,
+            'favoritable_type' => Service::class,
+            'favoritable_id' => $service->id,
+        ]);
+        // un devis envoyé
+        QuoteRequest::create([
+            'service_id' => $service->id,
+            'user_id' => $client->id,
+            'customer_name' => $client->name,
+            'status' => QuoteRequest::STATUS_PENDING,
+        ]);
+
+        $response = $this->actingAs($client)->get('/user/dashboard');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Dashboard')
+            ->has('favorites', 1)
+            ->has('quoteRequests', 1)
+            ->where('favorites.0.type', 'service')
+        );
+    }
 }
