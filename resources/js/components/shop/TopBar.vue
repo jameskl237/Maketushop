@@ -20,11 +20,11 @@ const isAuthenticated = computed(() => !!page.props.auth?.user);
 <template>
     <header class="sticky top-0 z-50 h-14 border-b border-white/10 bg-white/65 backdrop-blur-2xl backdrop-saturate-150 dark:bg-[#130D22]/70 dark:border-white/5" style="view-transition-name: topbar">
         <div class="mx-auto flex h-full max-w-7xl items-center justify-between px-4">
-            <Link :href="showBackHome ? '/' : route('products.index')" class="group flex items-center gap-2">
-                <div class="flex h-8 w-8 items-center justify-center rounded-2xl bg-primary text-white shadow-sm transition-transform group-active:scale-95">
-                    <span class="font-display text-sm font-black">M</span>
+            <Link :href="showBackHome ? '/' : route('products.index')" class="group flex items-center gap-1.5">
+                <div class="flex h-7 w-7 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition-transform group-active:scale-95">
+                    <span class="font-display text-[13px] font-black">M</span>
                 </div>
-                <span class="font-display text-[17px] font-extrabold tracking-tight text-foreground">
+                <span class="font-display text-[14px] font-extrabold tracking-tight text-foreground">
                     Maketu<span class="text-primary">Shop</span>
                 </span>
             </Link>
