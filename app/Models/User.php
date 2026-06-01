@@ -29,6 +29,8 @@ class User extends Authenticatable
         'email',
         'google_id',
         'role',
+        'is_vendeur',
+        'is_prestataire',
         'phone',
         'address',
         'password',
@@ -41,7 +43,27 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_vendeur' => 'boolean',
+        'is_prestataire' => 'boolean',
     ];
+
+    /**
+     * Compte professionnel (vendeur et/ou prestataire).
+     */
+    public function isPro(): bool
+    {
+        return $this->role === self::ROLE_SUPPLIER;
+    }
+
+    public function isVendeur(): bool
+    {
+        return $this->isPro() && (bool) $this->is_vendeur;
+    }
+
+    public function isPrestataire(): bool
+    {
+        return $this->isPro() && (bool) $this->is_prestataire;
+    }
 
     public function dashboardRouteName(): string
     {

@@ -2,9 +2,13 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import SupplierSidebar from '@/components/supplier/SupplierSidebar.vue';
 import { Button } from '@/components/ui/button';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { Briefcase, ChevronDown, ChevronUp, ExternalLink, FileText, Menu, Package, ShoppingCart, Store } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+
+const page = usePage();
+const isVendeur = computed(() => !!page.props.auth?.is_vendeur);
+const isPrestataire = computed(() => !!page.props.auth?.is_prestataire);
 
 defineProps({
     title: {
@@ -121,6 +125,7 @@ const toggleMobileSidebar = () => {
                                 {{ $t('supplier.orders') }}
                             </Link>
                             <Link
+                                v-if="isVendeur"
                                 :href="route('backoffice.supplier.products.index')"
                                 class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-300"
                                 :class="activeRoute === 'backoffice.supplier.products.index'
@@ -132,6 +137,7 @@ const toggleMobileSidebar = () => {
                                 {{ $t('supplier.products') }}
                             </Link>
                             <Link
+                                v-if="isPrestataire"
                                 :href="route('backoffice.supplier.services.index')"
                                 class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-300"
                                 :class="activeRoute === 'backoffice.supplier.services.index'
@@ -143,6 +149,7 @@ const toggleMobileSidebar = () => {
                                 {{ $t('supplier.services') }}
                             </Link>
                             <Link
+                                v-if="isPrestataire"
                                 :href="route('backoffice.supplier.quote-requests.index')"
                                 class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-300"
                                 :class="activeRoute === 'backoffice.supplier.quote-requests.index'

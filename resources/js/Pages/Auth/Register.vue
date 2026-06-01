@@ -2,9 +2,9 @@
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
-import { Eye, EyeOff, Lock, Mail, MapPin, Phone, ShoppingBag, Store, User } from 'lucide-vue-next';
+import { Briefcase, Eye, EyeOff, Lock, Mail, MapPin, Phone, ShoppingBag, Sparkles, Store, User } from 'lucide-vue-next';
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -30,8 +30,23 @@ const phoneCountryCodes = buildPhoneCountryCodes();
 const page = usePage();
 const isGoogleOAuthConfigured = Boolean(page.props.auth?.google_oauth_configured ?? false);
 
-// 'client' | 'supplier'
+// 'client' | 'vendeur' | 'prestataire' | 'both'
 const accountType = ref(null);
+
+const isPro = computed(() => ['vendeur', 'prestataire', 'both'].includes(accountType.value));
+
+const accountTitle = computed(() => {
+    switch (accountType.value) {
+        case 'vendeur': return 'Compte vendeur';
+        case 'prestataire': return 'Compte prestataire';
+        case 'both': return 'Compte vendeur & prestataire';
+        default: return 'Compte client';
+    }
+});
+
+const accountSubtitle = computed(() =>
+    isPro.value ? 'Remplissez vos informations professionnelles' : 'Quelques infos pour commencer',
+);
 
 const form = useForm({
     account_type: '',
@@ -54,7 +69,7 @@ const selectType = (type) => {
 };
 
 const submit = () => {
-    if (form.account_type === 'supplier') {
+    if (isPro.value) {
         form.phone_number = form.phone_number.replace(/\D/g, '');
     }
     form.post(route('register'), {
@@ -95,18 +110,54 @@ const inputClass = 'h-11 w-full rounded-[14px] border border-border bg-shop-bg p
                     </svg>
                 </button>
 
-                <!-- Supplier -->
+                <!-- Vendeur -->
                 <button
                     type="button"
-                    class="group flex w-full items-center gap-4 rounded-[18px] border-2 border-border bg-shop-bg p-4 text-left transition hover:border-primary hover:bg-primary/5 active:scale-[0.98] dark:bg-white/5"
-                    @click="selectType('supplier')"
+                    class="group flex w-full items-center gap-4 rounded-[18px] border-2 border-border bg-shop-bg p-4 text-left transition hover:border-orange hover:bg-orange/5 active:scale-[0.98] dark:bg-white/5"
+                    @click="selectType('vendeur')"
                 >
                     <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-orange/10 text-orange group-hover:bg-orange group-hover:text-white transition">
                         <Store class="h-5 w-5" />
                     </div>
                     <div>
-                        <p class="text-[14px] font-bold text-foreground">Je veux vendre</p>
+                        <p class="text-[14px] font-bold text-foreground">Je veux vendre des produits</p>
                         <p class="text-[11px] text-shop-muted">Créez votre boutique et vendez vos produits</p>
+                    </div>
+                    <svg class="ml-auto h-4 w-4 text-shop-light group-hover:text-orange transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+
+                <!-- Prestataire -->
+                <button
+                    type="button"
+                    class="group flex w-full items-center gap-4 rounded-[18px] border-2 border-border bg-shop-bg p-4 text-left transition hover:border-orange hover:bg-orange/5 active:scale-[0.98] dark:bg-white/5"
+                    @click="selectType('prestataire')"
+                >
+                    <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-orange/10 text-orange group-hover:bg-orange group-hover:text-white transition">
+                        <Briefcase class="h-5 w-5" />
+                    </div>
+                    <div>
+                        <p class="text-[14px] font-bold text-foreground">Je propose des services</p>
+                        <p class="text-[11px] text-shop-muted">Proposez vos prestations et recevez des demandes</p>
+                    </div>
+                    <svg class="ml-auto h-4 w-4 text-shop-light group-hover:text-orange transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+
+                <!-- Les deux -->
+                <button
+                    type="button"
+                    class="group flex w-full items-center gap-4 rounded-[18px] border-2 border-border bg-shop-bg p-4 text-left transition hover:border-primary hover:bg-primary/5 active:scale-[0.98] dark:bg-white/5"
+                    @click="selectType('both')"
+                >
+                    <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition">
+                        <Sparkles class="h-5 w-5" />
+                    </div>
+                    <div>
+                        <p class="text-[14px] font-bold text-foreground">Les deux</p>
+                        <p class="text-[11px] text-shop-muted">Vendez des produits ET proposez des services</p>
                     </div>
                     <svg class="ml-auto h-4 w-4 text-shop-light group-hover:text-primary transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -131,16 +182,16 @@ const inputClass = 'h-11 w-full rounded-[14px] border border-border bg-shop-bg p
                     Retour
                 </button>
                 <div class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl" :class="accountType === 'supplier' ? 'bg-orange/10 text-orange' : 'bg-primary/10 text-primary'">
-                        <Store v-if="accountType === 'supplier'" class="h-5 w-5" />
+                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl" :class="isPro ? 'bg-orange/10 text-orange' : 'bg-primary/10 text-primary'">
+                        <Store v-if="isPro" class="h-5 w-5" />
                         <ShoppingBag v-else class="h-5 w-5" />
                     </div>
                     <div>
                         <h1 class="font-display text-[18px] font-extrabold text-foreground">
-                            {{ accountType === 'supplier' ? 'Compte vendeur' : 'Compte client' }}
+                            {{ accountTitle }}
                         </h1>
                         <p class="text-[11px] text-shop-muted">
-                            {{ accountType === 'supplier' ? 'Remplissez vos informations boutique' : 'Quelques infos pour commencer' }}
+                            {{ accountSubtitle }}
                         </p>
                     </div>
                 </div>
@@ -150,7 +201,7 @@ const inputClass = 'h-11 w-full rounded-[14px] border border-border bg-shop-bg p
 
                 <!-- Client fields: name + email -->
                 <!-- Supplier fields: name + username -->
-                <div :class="accountType === 'supplier' ? 'grid grid-cols-2 gap-3' : ''">
+                <div :class="isPro ? 'grid grid-cols-2 gap-3' : ''">
                     <div class="space-y-1">
                         <label for="name" class="text-[11px] font-semibold text-foreground">{{ t('auth.fullName') }}</label>
                         <div class="relative">
@@ -169,7 +220,7 @@ const inputClass = 'h-11 w-full rounded-[14px] border border-border bg-shop-bg p
                         <InputError :message="form.errors.name" />
                     </div>
 
-                    <div v-if="accountType === 'supplier'" class="space-y-1">
+                    <div v-if="isPro" class="space-y-1">
                         <label for="username" class="text-[11px] font-semibold text-foreground">{{ t('auth.username') }}</label>
                         <div class="relative">
                             <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] font-medium text-shop-light">@</span>
@@ -206,7 +257,7 @@ const inputClass = 'h-11 w-full rounded-[14px] border border-border bg-shop-bg p
                 </div>
 
                 <!-- Phone (supplier only) -->
-                <div v-if="accountType === 'supplier'" class="space-y-1">
+                <div v-if="isPro" class="space-y-1">
                     <label for="phone" class="text-[11px] font-semibold text-foreground">{{ t('auth.phone') }}</label>
                     <div class="grid grid-cols-[120px_1fr] gap-2">
                         <div class="relative">
@@ -238,7 +289,7 @@ const inputClass = 'h-11 w-full rounded-[14px] border border-border bg-shop-bg p
                 </div>
 
                 <!-- Address (supplier only) -->
-                <div v-if="accountType === 'supplier'" class="space-y-1">
+                <div v-if="isPro" class="space-y-1">
                     <label for="address" class="text-[11px] font-semibold text-foreground">{{ t('auth.address') }}</label>
                     <div class="relative">
                         <MapPin class="absolute left-3 top-3 h-3.5 w-3.5 text-shop-light" />
@@ -302,7 +353,7 @@ const inputClass = 'h-11 w-full rounded-[14px] border border-border bg-shop-bg p
                     type="submit"
                     :disabled="form.processing"
                     class="mt-1 h-11 w-full rounded-[14px] text-[13px] font-bold text-white shadow-sm transition active:scale-95 disabled:opacity-60"
-                    :class="accountType === 'supplier' ? 'bg-orange shadow-orange/30' : 'bg-primary shadow-primary/30'"
+                    :class="isPro ? 'bg-orange shadow-orange/30' : 'bg-primary shadow-primary/30'"
                 >
                     <span v-if="form.processing" class="flex items-center justify-center gap-2">
                         <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -312,7 +363,7 @@ const inputClass = 'h-11 w-full rounded-[14px] border border-border bg-shop-bg p
                         Création...
                     </span>
                     <span v-else>
-                        {{ accountType === 'supplier' ? t('auth.createSupplierAccountButton') : 'Créer mon compte' }}
+                        {{ isPro ? t('auth.createSupplierAccountButton') : 'Créer mon compte' }}
                     </span>
                 </button>
 

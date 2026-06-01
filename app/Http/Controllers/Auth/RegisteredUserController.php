@@ -30,7 +30,12 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $isSupplier = $request->input('account_type') === 'supplier';
+        // account_type : 'client' | 'vendeur' | 'prestataire' | 'both'
+        // (rétrocompat : 'supplier' = vendeur + prestataire)
+        $accountType = $request->input('account_type');
+        $isVendeur = in_array($accountType, ['vendeur', 'both', 'supplier'], true);
+        $isPrestataire = in_array($accountType, ['prestataire', 'both', 'supplier'], true);
+        $isPro = $isVendeur || $isPrestataire;
 
         $rules = [
             'name'     => 'required|string|max:255',
@@ -38,7 +43,7 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];
 
-        if ($isSupplier) {
+        if ($isPro) {
             $rules['username']           = 'required|string|max:255|alpha_dash|unique:'.User::class;
             $rules['phone_country_code'] = 'required|string|max:4|regex:/^[0-9]{1,4}$/';
             $rules['phone_number']       = 'required|string|max:20|regex:/^[0-9]{4,20}$/';
@@ -48,13 +53,15 @@ class RegisteredUserController extends Controller
         $request->validate($rules);
 
         $data = [
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'role'     => $isSupplier ? User::ROLE_SUPPLIER : User::ROLE_USER,
-            'password' => Hash::make($request->password),
+            'name'           => $request->name,
+            'email'          => $request->email,
+            'role'           => $isPro ? User::ROLE_SUPPLIER : User::ROLE_USER,
+            'is_vendeur'     => $isVendeur,
+            'is_prestataire' => $isPrestataire,
+            'password'       => Hash::make($request->password),
         ];
 
-        if ($isSupplier) {
+        if ($isPro) {
             $data['username'] = $request->username;
             $data['phone']    = preg_replace('/\D+/', '', $request->phone_country_code.$request->phone_number);
             $data['address']  = $request->address;

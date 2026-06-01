@@ -89,8 +89,23 @@ class UserController extends Controller
             'address' => 'nullable|string|max:255',
             'email_verified' => 'nullable|boolean',
             'role' => 'required|in:'.implode(',', [User::ROLE_ADMIN, User::ROLE_SUPPLIER, User::ROLE_USER]),
+            'is_vendeur' => 'nullable|boolean',
+            'is_prestataire' => 'nullable|boolean',
             'password' => ['nullable', 'confirmed'],
         ]);
+
+        // Les capacités vendeur/prestataire n'ont de sens que pour un compte pro (supplier)
+        if ($data['role'] === User::ROLE_SUPPLIER) {
+            $data['is_vendeur'] = (bool) ($data['is_vendeur'] ?? false);
+            $data['is_prestataire'] = (bool) ($data['is_prestataire'] ?? false);
+            // Un pro doit avoir au moins une capacité
+            if (! $data['is_vendeur'] && ! $data['is_prestataire']) {
+                $data['is_vendeur'] = true;
+            }
+        } else {
+            $data['is_vendeur'] = false;
+            $data['is_prestataire'] = false;
+        }
 
         if (! empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);

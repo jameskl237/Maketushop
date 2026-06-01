@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link, usePage } from '@inertiajs/vue3';
 import { BarChart3, Briefcase, FileText, Package, ShoppingCart, Sparkles, Store } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 defineProps({
     activeRoute: {
@@ -19,15 +20,27 @@ defineProps({
 const emit = defineEmits(['navigate', 'create-shop']);
 const page = usePage();
 
-const navigationItems = [
-    { key: 'dashboard', labelKey: 'common.dashboard', icon: BarChart3, route: 'backoffice.supplier.dashboard', soon: false },
-    { key: 'shops', labelKey: 'supplier.shops', icon: Store, route: 'backoffice.supplier.shops.index', soon: false },
-    { key: 'products', labelKey: 'supplier.products', icon: Package, route: 'backoffice.supplier.products.index', soon: false },
-    { key: 'services', labelKey: 'supplier.services', icon: Briefcase, route: 'backoffice.supplier.services.index', soon: false },
-    { key: 'quotes', labelKey: 'supplier.quoteRequests', icon: FileText, route: 'backoffice.supplier.quote-requests.index', soon: false },
+const isVendeur = computed(() => !!page.props.auth?.is_vendeur);
+const isPrestataire = computed(() => !!page.props.auth?.is_prestataire);
+
+// cap : 'vendeur' (produits), 'prestataire' (services/devis), null (toujours visible)
+const allItems = [
+    { key: 'dashboard', labelKey: 'common.dashboard', icon: BarChart3, route: 'backoffice.supplier.dashboard', soon: false, cap: null },
+    { key: 'shops', labelKey: 'supplier.shops', icon: Store, route: 'backoffice.supplier.shops.index', soon: false, cap: null },
+    { key: 'products', labelKey: 'supplier.products', icon: Package, route: 'backoffice.supplier.products.index', soon: false, cap: 'vendeur' },
+    { key: 'services', labelKey: 'supplier.services', icon: Briefcase, route: 'backoffice.supplier.services.index', soon: false, cap: 'prestataire' },
+    { key: 'quotes', labelKey: 'supplier.quoteRequests', icon: FileText, route: 'backoffice.supplier.quote-requests.index', soon: false, cap: 'prestataire' },
     // Commandes en ligne : visibles mais marquées "bientôt" (paiement plateforme pas encore actif)
-    { key: 'orders', labelKey: 'supplier.orders', icon: ShoppingCart, route: 'backoffice.supplier.orders.index', soon: true },
+    { key: 'orders', labelKey: 'supplier.orders', icon: ShoppingCart, route: 'backoffice.supplier.orders.index', soon: true, cap: null },
 ];
+
+const navigationItems = computed(() =>
+    allItems.filter((item) => {
+        if (item.cap === 'vendeur') return isVendeur.value;
+        if (item.cap === 'prestataire') return isPrestataire.value;
+        return true;
+    }),
+);
 
 const onNavigate = () => emit('navigate');
 </script>
