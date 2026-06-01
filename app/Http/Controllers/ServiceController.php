@@ -122,14 +122,18 @@ class ServiceController extends Controller
         ]);
     }
 
-    public function show(Service $service): Response
+    public function show(Request $request, Service $service): Response
     {
         $service->load([
             'category:id,name,slug',
             'shop:id,name,city,phone,logo,user_id',
             'shop.user:id,name,phone',
             'medias:id,service_id,url,type,is_principal',
-        ])->loadCount('orders as sold_count');
+            'ratings' => fn ($q) => $q->with('user:id,name')->latest(),
+        ])
+            ->loadCount('orders as sold_count')
+            ->loadAvg('ratings as average_rating', 'score')
+            ->loadCount('ratings as ratings_count');
 
         $relatedServices = Service::query()
             ->where('is_active', true)
@@ -148,8 +152,25 @@ class ServiceController extends Controller
             ->map(fn (Service $related) => $this->transformService($related))
             ->values();
 
+        $payload = $this->transformService($service, true);
+        $payload['reviews'] = $service->ratings
+            ->map(fn ($rating) => [
+                'id' => $rating->id,
+                'score' => (int) $rating->score,
+                'comment' => $rating->comment,
+                'author' => $rating->user?->name ?? 'Client',
+                'created_at' => optional($rating->created_at)->toDateString(),
+            ])
+            ->values()
+            ->all();
+
+        $userId = $request->user()?->id;
+        $payload['user_rating'] = $userId
+            ? (int) ($service->ratings->firstWhere('user_id', $userId)?->score ?? 0) ?: null
+            : null;
+
         return Inertia::render('Services/Show', [
-            'service' => $this->transformService($service, true),
+            'service' => $payload,
             'relatedServices' => $relatedServices,
         ]);
     }

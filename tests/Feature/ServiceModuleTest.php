@@ -157,6 +157,40 @@ class ServiceModuleTest extends TestCase
         $response->assertRedirect('/login');
     }
 
+    public function test_client_can_rate_a_service_and_review_appears_on_show(): void
+    {
+        [$supplier, $shop] = $this->makeSupplierWithShop();
+        $service = Service::create([
+            'code' => 'SVC-R', 'title' => 'Service noté', 'price' => '5000',
+            'quote_only' => false, 'is_active' => true,
+            'user_id' => $supplier->id, 'shop_id' => $shop->id,
+        ]);
+        $client = User::factory()->create(['role' => User::ROLE_USER]);
+
+        // Le client note le service
+        $this->actingAs($client)
+            ->post("/services/{$service->id}/rate", ['score' => 4, 'comment' => 'Très bon service'])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('ratings', [
+            'user_id' => $client->id,
+            'rateable_type' => Service::class,
+            'rateable_id' => $service->id,
+            'score' => 4,
+        ]);
+
+        // La page show renvoie l'avis + la note de l'utilisateur courant
+        $this->actingAs($client)->get("/services/{$service->id}")
+            ->assertInertia(fn ($page) => $page
+                ->component('Services/Show')
+                ->where('service.average_rating', fn ($v) => (float) $v === 4.0)
+                ->where('service.ratings_count', 1)
+                ->where('service.user_rating', 4)
+                ->has('service.reviews', 1)
+                ->where('service.reviews.0.comment', 'Très bon service')
+            );
+    }
+
     public function test_client_dashboard_aggregates_orders_favorites_and_quotes(): void
     {
         [$supplier, $shop] = $this->makeSupplierWithShop();

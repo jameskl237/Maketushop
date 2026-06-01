@@ -1,13 +1,15 @@
 <script setup>
+import ReviewsSection from '@/components/reviews/ReviewsSection.vue';
 import ServiceCard from '@/components/services/ServiceCard.vue';
 import QuoteDialog from '@/components/services/QuoteDialog.vue';
 import BottomNav from '@/components/shop/BottomNav.vue';
+import StarRating from '@/components/StarRating.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/composables/useCart';
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft, MapPin, ShoppingBag, Star } from 'lucide-vue-next';
+import { ArrowLeft, MapPin, ShoppingBag } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -76,11 +78,14 @@ const orderService = () => {
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-1 text-[10px] text-shop-amber">
-                        <Star class="h-3.5 w-3.5 fill-current" />
-                        <span>{{ service.average_rating || '0.0' }}</span>
-                        <span class="text-shop-light">({{ service.ratings_count || 0 }} avis)</span>
-                    </div>
+                    <StarRating
+                        :rateable-id="service.id"
+                        rateable-type="service"
+                        :average-rating="Number(service.average_rating) || 0"
+                        :ratings-count="service.ratings_count || 0"
+                        :user-rating="service.user_rating || null"
+                        size="md"
+                    />
 
                     <div class="pt-1">
                         <QuoteDialog v-if="isQuoteOnly" :service="service" />
@@ -133,6 +138,15 @@ const orderService = () => {
                         </Link>
                     </div>
                 </section>
+
+                <ReviewsSection
+                    rateable-type="service"
+                    :rateable-id="service.id"
+                    :reviews="service.reviews || []"
+                    :average-rating="Number(service.average_rating) || 0"
+                    :ratings-count="service.ratings_count || 0"
+                    :user-rating="service.user_rating || null"
+                />
 
                 <section v-if="relatedServices.length" class="space-y-3 px-3 py-4">
                     <h2 class="font-display text-[17px] font-extrabold">Services similaires</h2>

@@ -1,13 +1,15 @@
 <script setup>
 import QuantitySelector from '@/components/products/detail/QuantitySelector.vue';
 import ProductCard from '@/components/products/listing/ProductCard.vue';
+import ReviewsSection from '@/components/reviews/ReviewsSection.vue';
 import BottomNav from '@/components/shop/BottomNav.vue';
+import StarRating from '@/components/StarRating.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/composables/useCart';
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft, Heart, ShoppingBag, Star } from 'lucide-vue-next';
+import { ArrowLeft, Heart, ShoppingBag } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -77,11 +79,14 @@ const addProductToCart = () => {
                         </Badge>
                     </div>
 
-                    <div class="flex items-center gap-1 text-[10px] text-shop-amber">
-                        <Star class="h-3.5 w-3.5 fill-current" />
-                        <span>{{ product.average_rating || '4.8' }}</span>
-                        <span class="text-shop-light">({{ product.reviews_count || 0 }} avis)</span>
-                    </div>
+                    <StarRating
+                        :rateable-id="product.id"
+                        rateable-type="product"
+                        :average-rating="Number(product.average_rating) || 0"
+                        :ratings-count="product.ratings_count || 0"
+                        :user-rating="product.user_rating || null"
+                        size="md"
+                    />
 
                     <div class="[&_>div]:rounded-[12px] [&_>div]:border-border [&_>div]:bg-shop-bg [&_button]:h-9 [&_input]:h-9">
                         <p class="mb-1.5 text-[11px] font-medium text-shop-muted">{{ t('productShow.quantity') }}</p>
@@ -129,6 +134,15 @@ const addProductToCart = () => {
                         </Link>
                     </div>
                 </section>
+
+                <ReviewsSection
+                    rateable-type="product"
+                    :rateable-id="product.id"
+                    :reviews="product.reviews || []"
+                    :average-rating="Number(product.average_rating) || 0"
+                    :ratings-count="product.ratings_count || 0"
+                    :user-rating="product.user_rating || null"
+                />
 
                 <section v-if="relatedProducts.length" class="space-y-3 px-3 py-4">
                     <h2 class="font-display text-[17px] font-extrabold">{{ t('productShow.relatedProducts') }}</h2>

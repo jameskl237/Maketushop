@@ -74,8 +74,9 @@ const onAddToCart = () => {
                         {{ service.category?.name || 'Service' }}
                     </p>
                     <StarRating
-                        :average-rating="service.average_rating || 0"
+                        :average-rating="Number(service.average_rating) || 0"
                         :ratings-count="service.ratings_count || 0"
+                        readonly
                         size="sm"
                     />
                 </div>

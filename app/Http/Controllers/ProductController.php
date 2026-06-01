@@ -255,14 +255,18 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show(Product $product): Response
+    public function show(Request $request, Product $product): Response
     {
         $product->load([
             'category:id,name,slug',
             'shop:id,name,city,phone,logo,user_id',
             'shop.user:id,name,phone',
             'medias:id,product_id,url,type,is_principal',
-        ])->loadCount('orders as sold_count');
+            'ratings' => fn ($q) => $q->with('user:id,name')->latest(),
+        ])
+            ->loadCount('orders as sold_count')
+            ->loadAvg('ratings as average_rating', 'score')
+            ->loadCount('ratings as ratings_count');
 
         $relatedProducts = Product::query()
             ->where('category_id', $product->category_id)
@@ -280,10 +284,44 @@ class ProductController extends Controller
             ->map(fn (Product $related) => $this->transformProduct($related))
             ->values();
 
+        $payload = $this->transformProduct($product, true);
+        $payload['reviews'] = $this->mapReviews($product->ratings);
+        $payload['user_rating'] = $this->userRatingFor($request, $product);
+
         return Inertia::render('Products/Show', [
-            'product' => $this->transformProduct($product, true),
+            'product' => $payload,
             'relatedProducts' => $relatedProducts,
         ]);
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Rating>  $ratings
+     * @return array<int, array<string, mixed>>
+     */
+    private function mapReviews($ratings): array
+    {
+        return $ratings
+            ->map(fn ($rating) => [
+                'id' => $rating->id,
+                'score' => (int) $rating->score,
+                'comment' => $rating->comment,
+                'author' => $rating->user?->name ?? 'Client',
+                'created_at' => optional($rating->created_at)->toDateString(),
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function userRatingFor(Request $request, Product $product): ?int
+    {
+        $userId = $request->user()?->id;
+        if (! $userId) {
+            return null;
+        }
+
+        $rating = $product->ratings->firstWhere('user_id', $userId);
+
+        return $rating ? (int) $rating->score : null;
     }
 
     public function buy(Product $product): Response
