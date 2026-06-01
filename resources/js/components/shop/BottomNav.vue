@@ -1,12 +1,14 @@
 <script setup>
 import { useCartStore } from '@/stores/cart';
 import { Link, usePage } from '@inertiajs/vue3';
-import { Briefcase, Home, ShoppingBag, ShoppingCart, Store } from 'lucide-vue-next';
+import { Briefcase, LogIn, ShoppingBag, ShoppingCart, Store, User as UserIcon } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const page = usePage();
 const cartStore = useCartStore();
 const cartCount = computed(() => cartStore.itemsCount);
+
+const isAuthenticated = computed(() => !!page.props.auth?.user);
 
 const isActive = (href) => {
     if (!href) return false;
@@ -14,8 +16,16 @@ const isActive = (href) => {
     return page.url === href || page.url.startsWith(href + '/') || page.url.startsWith(href + '?');
 };
 
+// Onglet Compte dynamique : "Connexion" si invité, "Mon compte" si connecté.
+// (L'accueil reste accessible via le logo MaketuShop dans le TopBar.)
+const accountTab = computed(() =>
+    isAuthenticated.value
+        ? { label: 'Mon compte', href: route('dashboard'), icon: UserIcon }
+        : { label: 'Connexion', href: route('login'), icon: LogIn },
+);
+
 const tabs = computed(() => [
-    { label: 'Accueil',   href: '/',                      icon: Home },
+    accountTab.value,
     { label: 'Boutiques', href: route('shops.index'),     icon: Store },
     { label: 'Produits',  href: route('products.index'),  icon: ShoppingBag, primary: true },
     { label: 'Panier',    href: route('cart.index'),      icon: ShoppingCart, badge: cartCount.value },
