@@ -226,6 +226,40 @@ class ProductController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'slug']);
 
+        // Services actifs de la boutique (séparés des produits)
+        $services = \App\Models\Service::query()
+            ->where('shop_id', $shop->id)
+            ->where('is_active', true)
+            ->with([
+                'category:id,name,slug',
+                'shop:id,name,city,phone,logo,user_id',
+                'shop.user:id,phone',
+                'medias:id,service_id,url,type,is_principal',
+            ])
+            ->withAvg('ratings as average_rating', 'score')
+            ->withCount('ratings as ratings_count')
+            ->latest()
+            ->get()
+            ->map(fn ($service) => $this->transformShopService($service))
+            ->values();
+
+        $userRating = $request->user()
+            ? (int) ($shop->ratings()->where('user_id', $request->user()->id)->value('score') ?? 0) ?: null
+            : null;
+
+        $shopReviews = $shop->ratings()
+            ->with('user:id,name')
+            ->latest()
+            ->get()
+            ->map(fn ($rating) => [
+                'id' => $rating->id,
+                'score' => (int) $rating->score,
+                'comment' => $rating->comment,
+                'author' => $rating->user?->name ?? 'Client',
+                'created_at' => optional($rating->created_at)->toDateString(),
+            ])
+            ->values();
+
         return Inertia::render('Shops/Show', [
             'shop' => [
                 'id' => $shop->id,
@@ -238,12 +272,16 @@ class ProductController extends Controller
                 'tagline' => $shop->description ? Str::limit($shop->description, 80) : null,
                 'verified' => true,
                 'products_count' => (int) $shop->products_count,
-                'rating' => 4.8,
-                'reviews_count' => 0,
+                'services_count' => $services->count(),
+                'rating' => $shop->average_rating,
+                'reviews_count' => $shop->ratings_count,
+                'user_rating' => $userRating,
+                'reviews' => $shopReviews,
                 'response_time' => '< 1h',
                 'phone' => $shop->phone,
             ],
             'products' => $products,
+            'services' => $services,
             'filters' => [
                 'search' => (string) $request->input('search', ''),
                 'categories' => $categories,
@@ -253,6 +291,47 @@ class ProductController extends Controller
             ],
             'availableCategories' => $availableCategories,
         ]);
+    }
+
+    /**
+     * Transformation légère d'un service pour l'affichage en ServiceCard
+     * sur la page boutique.
+     */
+    private function transformShopService(\App\Models\Service $service): array
+    {
+        $images = $service->medias
+            ->where('type', 'image')
+            ->values()
+            ->map(fn ($media) => [
+                'id' => $media->id,
+                'url' => $media->full_url ?? null,
+                'is_main' => (bool) $media->is_principal,
+            ])
+            ->values();
+
+        $mainImage = optional($images->firstWhere('is_main', true))['url']
+            ?? optional($images->first())['url'];
+
+        $quoteOnly = (bool) $service->quote_only || $service->price === null;
+
+        return [
+            'id' => $service->id,
+            'name' => $service->title,
+            'current_price' => $quoteOnly ? null : (float) $service->price,
+            'quote_only' => $quoteOnly,
+            'average_rating' => $service->average_rating,
+            'ratings_count' => $service->ratings_count,
+            'city' => $service->city,
+            'is_new' => optional($service->created_at)->gt(now()->subDays(14)) ?? false,
+            'category' => $service->category ? ['id' => $service->category->id, 'name' => $service->category->name] : null,
+            'shop' => $service->shop ? [
+                'id' => $service->shop->id,
+                'name' => $service->shop->name,
+                'owner_phone' => $service->shop->phone ?: $service->shop?->user?->phone,
+            ] : null,
+            'main_image' => $mainImage,
+            'images' => $images,
+        ];
     }
 
     public function show(Request $request, Product $product): Response

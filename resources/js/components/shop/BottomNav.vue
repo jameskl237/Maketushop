@@ -25,9 +25,9 @@ const tabs = computed(() => [
 
 <template>
     <!-- Spacer so content isn't hidden behind the bar -->
-    <div class="h-24 md:hidden" />
+    <div class="h-24" />
 
-    <div class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 w-[calc(100%-32px)] max-w-sm md:hidden" style="view-transition-name: bottomnav">
+    <div class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 w-[calc(100%-32px)] max-w-sm" style="view-transition-name: bottomnav">
         <nav class="relative flex h-16 items-end justify-around rounded-[26px] border border-black/8 bg-white/95 px-3 pb-2 pt-3 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)] dark:border-white/10 dark:bg-[#100B22]/95 dark:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)]">
 
             <template v-for="tab in tabs" :key="tab.label">

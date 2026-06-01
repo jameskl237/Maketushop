@@ -157,6 +157,43 @@ class ServiceModuleTest extends TestCase
         $response->assertRedirect('/login');
     }
 
+    public function test_shop_page_separates_products_and_services_and_exposes_reviews(): void
+    {
+        [$supplier, $shop] = $this->makeSupplierWithShop();
+        Service::create([
+            'code' => 'SVC-SH', 'title' => 'Service boutique', 'price' => '3000',
+            'quote_only' => false, 'is_active' => true,
+            'user_id' => $supplier->id, 'shop_id' => $shop->id,
+        ]);
+
+        $this->get("/shops/{$shop->id}")
+            ->assertStatus(200)
+            ->assertInertia(fn ($page) => $page
+                ->component('Shops/Show')
+                ->has('products')
+                ->has('services', 1)
+                ->where('shop.services_count', 1)
+                ->has('shop.reviews')
+            );
+    }
+
+    public function test_client_can_rate_a_shop(): void
+    {
+        [$supplier, $shop] = $this->makeSupplierWithShop();
+        $client = User::factory()->create(['role' => User::ROLE_USER]);
+
+        $this->actingAs($client)
+            ->post("/shops/{$shop->id}/rate", ['score' => 5, 'comment' => 'Top boutique'])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('ratings', [
+            'user_id' => $client->id,
+            'rateable_type' => \App\Models\Shop::class,
+            'rateable_id' => $shop->id,
+            'score' => 5,
+        ]);
+    }
+
     public function test_client_can_rate_a_service_and_review_appears_on_show(): void
     {
         [$supplier, $shop] = $this->makeSupplierWithShop();

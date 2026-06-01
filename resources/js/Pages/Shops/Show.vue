@@ -1,5 +1,7 @@
 <script setup>
 import ProductCard from '@/components/products/listing/ProductCard.vue';
+import ReviewsSection from '@/components/reviews/ReviewsSection.vue';
+import ServiceCard from '@/components/services/ServiceCard.vue';
 import BottomNav from '@/components/shop/BottomNav.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSearch } from '@/composables/useSearch';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowLeft, Check, MessageCircle, Search, Star } from 'lucide-vue-next';
+import { ArrowLeft, Briefcase, Check, MessageCircle, Search, ShoppingBag } from 'lucide-vue-next';
 import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -16,9 +18,12 @@ import { useI18n } from 'vue-i18n';
 const props = defineProps({
     shop: { type: Object, required: true },
     products: { type: Object, required: true },
+    services: { type: Array, default: () => [] },
     filters: { type: Object, required: true },
     availableCategories: { type: Array, default: () => [] },
 });
+
+const activeTab = ref('products');
 
 const loading = ref(false);
 const { t } = useI18n();
@@ -51,9 +56,9 @@ const whatsappUrl = computed(() => {
 
 const stats = computed(() => [
     { label: 'Produits', value: props.shop.products_count || 0 },
-    { label: 'Note', value: props.shop.rating || '4.8' },
+    { label: 'Services', value: props.shop.services_count || 0 },
+    { label: 'Note', value: (Number(props.shop.rating) || 0).toFixed(1) },
     { label: 'Avis', value: props.shop.reviews_count || 0 },
-    { label: 'Ville', value: props.shop.city || '-' },
 ]);
 
 const applyFilters = () => {
@@ -150,50 +155,95 @@ const shareShop = async () => {
 
                 <section class="space-y-3 px-3 py-4">
                     <a v-if="whatsappUrl" :href="whatsappUrl" target="_blank" rel="noopener noreferrer">
-                        <Button class="h-10 w-full rounded-[14px] bg-gradient-to-r from-primary to-pink text-[12px] font-bold text-white shadow-none">
+                        <Button class="h-10 w-full rounded-[14px] bg-gradient-to-r from-primary to-orange text-[12px] font-bold text-white shadow-none">
                             <MessageCircle class="h-4 w-4" />
                             {{ t('shopShow.contact') }}
                         </Button>
                     </a>
 
-                    <div class="relative">
-                        <Search class="pointer-events-none absolute left-[11px] top-1/2 h-4 w-4 -translate-y-1/2 text-shop-light" />
-                        <Input
-                            v-model="state.search"
-                            type="search"
-                            class="h-[38px] rounded-[12px] border-[1.5px] border-border bg-white pl-9 text-[12px] shadow-none placeholder:text-shop-light"
-                            :placeholder="t('shopShow.searchPlaceholder')"
-                        />
+                    <!-- Onglets Produits / Services -->
+                    <div class="flex gap-1 rounded-2xl border border-border bg-white p-1">
+                        <button
+                            type="button"
+                            class="flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-bold transition-colors"
+                            :class="activeTab === 'products' ? 'bg-primary text-white' : 'text-shop-muted'"
+                            @click="activeTab = 'products'"
+                        >
+                            <ShoppingBag class="h-4 w-4" />
+                            Produits ({{ shop.products_count || 0 }})
+                        </button>
+                        <button
+                            type="button"
+                            class="flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-bold transition-colors"
+                            :class="activeTab === 'services' ? 'bg-orange text-white' : 'text-shop-muted'"
+                            @click="activeTab = 'services'"
+                        >
+                            <Briefcase class="h-4 w-4" />
+                            Services ({{ shop.services_count || 0 }})
+                        </button>
                     </div>
 
-                    <ScrollArea>
-                        <div class="flex min-w-max gap-2">
-                            <Button
-                                v-for="category in categoryChips"
-                                :key="category.id"
-                                type="button"
-                                variant="outline"
-                                class="h-7 rounded-[20px] px-3 text-[11.5px] font-medium shadow-none"
-                                :class="(category.id === 'all' && !state.categories.length) || state.categories.includes(category.id)
-                                    ? 'border-primary bg-primary text-white'
-                                    : 'border-border bg-white text-shop-muted'"
-                                @click="toggleCategory(category.id)"
-                            >
-                                {{ category.name }}
-                            </Button>
+                    <!-- Section PRODUITS -->
+                    <template v-if="activeTab === 'products'">
+                        <div class="relative">
+                            <Search class="pointer-events-none absolute left-[11px] top-1/2 h-4 w-4 -translate-y-1/2 text-shop-light" />
+                            <Input
+                                v-model="state.search"
+                                type="search"
+                                class="h-[38px] rounded-[12px] border-[1.5px] border-border bg-white pl-9 text-[12px] shadow-none placeholder:text-shop-light"
+                                :placeholder="t('shopShow.searchPlaceholder')"
+                            />
                         </div>
-                    </ScrollArea>
 
-                    <div v-if="loading" class="grid grid-cols-2 gap-2.5">
-                        <div v-for="index in 4" :key="index" class="h-60 animate-pulse rounded-[16px] bg-white" />
-                    </div>
-                    <div v-else-if="products.data?.length" class="grid grid-cols-2 gap-2.5">
-                        <ProductCard v-for="product in products.data" :key="product.id" :product="product" />
-                    </div>
-                    <div v-else class="rounded-[16px] border border-dashed border-border bg-white p-8 text-center text-sm text-shop-muted">
-                        {{ t('shopShow.emptyProducts') }}
-                    </div>
+                        <ScrollArea>
+                            <div class="flex min-w-max gap-2">
+                                <Button
+                                    v-for="category in categoryChips"
+                                    :key="category.id"
+                                    type="button"
+                                    variant="outline"
+                                    class="h-7 rounded-[20px] px-3 text-[11.5px] font-medium shadow-none"
+                                    :class="(category.id === 'all' && !state.categories.length) || state.categories.includes(category.id)
+                                        ? 'border-primary bg-primary text-white'
+                                        : 'border-border bg-white text-shop-muted'"
+                                    @click="toggleCategory(category.id)"
+                                >
+                                    {{ category.name }}
+                                </Button>
+                            </div>
+                        </ScrollArea>
+
+                        <div v-if="loading" class="grid grid-cols-2 gap-2.5">
+                            <div v-for="index in 4" :key="index" class="h-60 animate-pulse rounded-[16px] bg-white" />
+                        </div>
+                        <div v-else-if="products.data?.length" class="grid grid-cols-2 gap-2.5">
+                            <ProductCard v-for="product in products.data" :key="product.id" :product="product" />
+                        </div>
+                        <div v-else class="rounded-[16px] border border-dashed border-border bg-white p-8 text-center text-sm text-shop-muted">
+                            {{ t('shopShow.emptyProducts') }}
+                        </div>
+                    </template>
+
+                    <!-- Section SERVICES -->
+                    <template v-else>
+                        <div v-if="services.length" class="grid grid-cols-2 gap-2.5">
+                            <ServiceCard v-for="service in services" :key="service.id" :service="service" />
+                        </div>
+                        <div v-else class="rounded-[16px] border border-dashed border-border bg-white p-8 text-center text-sm text-shop-muted">
+                            Cette boutique ne propose pas encore de services.
+                        </div>
+                    </template>
                 </section>
+
+                <!-- Avis de la boutique -->
+                <ReviewsSection
+                    rateable-type="shop"
+                    :rateable-id="shop.id"
+                    :reviews="shop.reviews || []"
+                    :average-rating="Number(shop.rating) || 0"
+                    :ratings-count="shop.reviews_count || 0"
+                    :user-rating="shop.user_rating || null"
+                />
             </main>
         </Transition>
 

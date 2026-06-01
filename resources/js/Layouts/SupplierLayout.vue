@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import SupplierSidebar from '@/components/supplier/SupplierSidebar.vue';
 import { Button } from '@/components/ui/button';
 import { Link } from '@inertiajs/vue3';
-import { Briefcase, ChevronDown, ChevronUp, FileText, Menu, Package, ShoppingCart, Store } from 'lucide-vue-next';
+import { Briefcase, ChevronDown, ChevronUp, ExternalLink, FileText, Menu, Package, ShoppingCart, Store } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 defineProps({
@@ -47,6 +47,12 @@ const toggleMobileSidebar = () => {
                     <h2 class="text-xl font-semibold leading-tight text-foreground sm:text-2xl">{{ title }}</h2>
                     <p v-if="subtitle" class="mt-1 text-sm text-muted-foreground">{{ subtitle }}</p>
                 </div>
+                <Link :href="route('home')">
+                    <Button variant="outline" size="sm" class="gap-1.5">
+                        <ExternalLink class="h-4 w-4" />
+                        <span class="hidden sm:inline">Voir la plateforme</span>
+                    </Button>
+                </Link>
                 <!-- <Button
                     variant="outline"
                     size="icon"

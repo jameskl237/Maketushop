@@ -1,7 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import AdminSidebar from '@/components/admin/AdminSidebar.vue';
-import { usePage } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
+import { Link, usePage } from '@inertiajs/vue3';
+import { ExternalLink } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 
 const props = defineProps({
@@ -38,6 +40,12 @@ const mobileSidebarVisible = ref(false);
                         {{ currentUser.role }}
                     </div>
                 </div>
+                <Link :href="route('home')">
+                    <Button variant="outline" size="sm" class="gap-1.5">
+                        <ExternalLink class="h-4 w-4" />
+                        <span class="hidden sm:inline">Voir la plateforme</span>
+                    </Button>
+                </Link>
             </div>
         </template>
 
