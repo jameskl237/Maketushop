@@ -3,7 +3,7 @@ import ProductsNavbar from '@/components/products/layout/ProductsNavbar.vue';
 import PriceDisplay from '@/components/products/shared/PriceDisplay.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -11,6 +11,8 @@ const props = defineProps({
     product: { type: Object, required: true },
 });
 const { t } = useI18n();
+const page = usePage();
+const payOnlineEnabled = computed(() => Boolean(page.props?.features?.pay_online_enabled));
 
 const handlePlatformBuy = () => {
     router.visit(route('payments.product.method', { product: props.product.id }));
@@ -93,12 +95,21 @@ const whatsappUrl = computed(() => {
                             </Button>
                         </a>
 
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            v-if="payOnlineEnabled"
+                            variant="outline"
                             class="w-full"
                             @click="handlePlatformBuy"
                         >
                             {{ t('productBuy.platformBuy') }}
+                        </Button>
+                        <Button
+                            v-else
+                            variant="outline"
+                            class="w-full cursor-not-allowed opacity-60"
+                            disabled
+                        >
+                            Paiement en ligne — bientôt disponible
                         </Button>
                     </div>
 

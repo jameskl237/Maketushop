@@ -20,12 +20,13 @@ const emit = defineEmits(['navigate', 'create-shop']);
 const page = usePage();
 
 const navigationItems = [
-    { key: 'dashboard', labelKey: 'common.dashboard', icon: BarChart3, route: 'backoffice.supplier.dashboard', disabled: false },
-    { key: 'shops', labelKey: 'supplier.shops', icon: Store, route: 'backoffice.supplier.shops.index', disabled: false },
-    { key: 'orders', labelKey: 'supplier.orders', icon: ShoppingCart, route: 'backoffice.supplier.orders.index', disabled: false },
-    { key: 'products', labelKey: 'supplier.products', icon: Package, route: 'backoffice.supplier.products.index', disabled: false },
-    { key: 'services', labelKey: 'supplier.services', icon: Briefcase, route: 'backoffice.supplier.services.index', disabled: false },
-    { key: 'quotes', labelKey: 'supplier.quoteRequests', icon: FileText, route: 'backoffice.supplier.quote-requests.index', disabled: false },
+    { key: 'dashboard', labelKey: 'common.dashboard', icon: BarChart3, route: 'backoffice.supplier.dashboard', soon: false },
+    { key: 'shops', labelKey: 'supplier.shops', icon: Store, route: 'backoffice.supplier.shops.index', soon: false },
+    { key: 'products', labelKey: 'supplier.products', icon: Package, route: 'backoffice.supplier.products.index', soon: false },
+    { key: 'services', labelKey: 'supplier.services', icon: Briefcase, route: 'backoffice.supplier.services.index', soon: false },
+    { key: 'quotes', labelKey: 'supplier.quoteRequests', icon: FileText, route: 'backoffice.supplier.quote-requests.index', soon: false },
+    // Commandes en ligne : visibles mais marquées "bientôt" (paiement plateforme pas encore actif)
+    { key: 'orders', labelKey: 'supplier.orders', icon: ShoppingCart, route: 'backoffice.supplier.orders.index', soon: true },
 ];
 
 const onNavigate = () => emit('navigate');
@@ -66,6 +67,9 @@ const onNavigate = () => emit('navigate');
                         >
                             <component :is="item.icon" class="h-4 w-4" />
                             <span>{{ $t(item.labelKey) }}</span>
+                            <Badge v-if="item.soon" variant="outline" class="ml-auto text-[9px] font-semibold text-amber-600">
+                                Bientôt
+                            </Badge>
                         </Link>
 
                         <button

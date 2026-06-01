@@ -4,6 +4,7 @@ import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Head } from '@inertiajs/vue3';
+import { Clock } from 'lucide-vue-next';
 
 defineProps({
     orders: {
@@ -25,6 +26,19 @@ const formatDate = (value) => new Date(value).toLocaleDateString('fr-FR');
         :can-create-shop="false"
     >
         <template #content>
+            <!-- Les commandes internes (paiement plateforme) ne sont pas encore actives :
+                 pour l'instant tout passe par WhatsApp / hors plateforme -->
+            <div class="mb-4 flex items-start gap-3 rounded-xl border border-amber-300/40 bg-amber-50 p-4 text-sm dark:bg-amber-500/10">
+                <Clock class="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
+                <div>
+                    <p class="font-semibold text-amber-700 dark:text-amber-400">Commandes en ligne — bientôt disponible</p>
+                    <p class="mt-1 text-muted-foreground">
+                        Les commandes via paiement sur la plateforme arrivent bientôt. Pour l'instant, vos ventes
+                        se font directement avec vos clients via WhatsApp.
+                    </p>
+                </div>
+            </div>
+
             <Card>
                 <CardHeader>
                     <CardTitle>{{ $t('supplier.receivedOrders') }}</CardTitle>

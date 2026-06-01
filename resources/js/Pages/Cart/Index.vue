@@ -109,6 +109,7 @@ const page = usePage();
 const showLoginPrompt = ref(false);
 
 const isAuthenticated = computed(() => Boolean(page.props?.auth?.user));
+const payOnlineEnabled = computed(() => Boolean(page.props?.features?.pay_online_enabled));
 
 const checkoutOnPlatform = () => {
     if (isAuthenticated.value) {
@@ -278,9 +279,23 @@ onMounted(() => {
                             <MessageCircle class="mr-2 h-4 w-4" />
                             {{ t('cartPage.orderAll') }}
                         </Button>
-                        <Button variant="outline" class="w-full" @click="checkoutOnPlatform">
+                        <Button
+                            v-if="payOnlineEnabled"
+                            variant="outline"
+                            class="w-full"
+                            @click="checkoutOnPlatform"
+                        >
                             <CreditCard class="mr-2 h-4 w-4" />
                             {{ t('cartPage.platformPay') }}
+                        </Button>
+                        <Button
+                            v-else
+                            variant="outline"
+                            class="w-full cursor-not-allowed opacity-60"
+                            disabled
+                        >
+                            <CreditCard class="mr-2 h-4 w-4" />
+                            Paiement en ligne — bientôt disponible
                         </Button>
                     </CardContent>
                 </Card>

@@ -56,8 +56,22 @@ class PaymentController extends Controller
         }
     }
 
+    /**
+     * Le paiement en ligne est-il activé ? (clés NotchPay + flag explicite)
+     */
+    private function payOnlineEnabled(): bool
+    {
+        return filled(config('services.notchpay.public_key'))
+            && filled(config('services.notchpay.secret_key'))
+            && (bool) env('PAY_ONLINE_ENABLED', false);
+    }
+
     public function productMethod(Product $product)
     {
+        if (! $this->payOnlineEnabled()) {
+            return redirect()->route('payments.unavailable');
+        }
+
         $product->load([
             'shop:id,name',
             'medias:id,product_id,url,type,is_principal',
@@ -83,6 +97,10 @@ class PaymentController extends Controller
 
     public function cartMethod()
     {
+        if (! $this->payOnlineEnabled()) {
+            return redirect()->route('payments.unavailable');
+        }
+
         return Inertia::render('Payments/Method', [
             'context' => 'cart',
             'product' => null,
