@@ -11,6 +11,7 @@ import {
     Package,
     ShoppingBag,
     Sparkles,
+    Star,
     User as UserIcon,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -120,37 +121,55 @@ const favoriteLink = (fav) =>
                     <div
                         v-for="order in orders"
                         :key="order.id"
-                        class="flex flex-col gap-3 rounded-2xl border border-border p-4 md:flex-row md:items-center md:justify-between"
+                        class="space-y-3 rounded-2xl border border-border p-4"
                     >
-                        <div class="flex items-start gap-3">
-                            <div class="rounded-full bg-primary/10 p-2 text-primary">
-                                <ShoppingBag class="h-5 w-5" />
-                            </div>
-                            <div class="space-y-1">
-                                <p class="font-bold text-foreground">{{ order.order_number }}</p>
-                                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground">
-                                    <span class="flex items-center gap-1"><Calendar class="h-3 w-3" />{{ formatDate(order.created_at) }}</span>
-                                    <span class="flex items-center gap-1"><Package class="h-3 w-3" />{{ order.total_products }} article(s)</span>
+                        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                            <div class="flex items-start gap-3">
+                                <div class="rounded-full bg-primary/10 p-2 text-primary">
+                                    <ShoppingBag class="h-5 w-5" />
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="font-bold text-foreground">{{ order.order_number }}</p>
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground">
+                                        <span class="flex items-center gap-1"><Calendar class="h-3 w-3" />{{ formatDate(order.created_at) }}</span>
+                                        <span class="flex items-center gap-1"><Package class="h-3 w-3" />{{ order.total_products }} article(s)</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="flex items-center justify-between gap-3 border-t pt-3 md:border-t-0 md:pt-0">
-                            <div class="text-right">
-                                <p class="text-lg font-bold text-foreground">{{ formatPrice(order.total_price) }}</p>
-                                <Badge variant="outline" :class="statusBadgeClass(order.status)">
-                                    {{ order.status === 'delivered' ? 'Livrée' : 'En attente' }}
-                                </Badge>
+                            <div class="flex items-center justify-between gap-3 border-t pt-3 md:border-t-0 md:pt-0">
+                                <div class="text-right">
+                                    <p class="text-lg font-bold text-foreground">{{ formatPrice(order.total_price) }}</p>
+                                    <Badge variant="outline" :class="statusBadgeClass(order.status)">
+                                        {{ order.status === 'delivered' ? 'Livrée' : 'En attente' }}
+                                    </Badge>
+                                </div>
+                                <Button
+                                    v-if="order.status === 'pending'"
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    @click="markAsDelivered(order)"
+                                >
+                                    <CheckCircle class="mr-1 h-4 w-4" />
+                                    Reçue
+                                </Button>
                             </div>
-                            <Button
-                                v-if="order.status === 'pending'"
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                @click="markAsDelivered(order)"
-                            >
-                                <CheckCircle class="mr-1 h-4 w-4" />
-                                Reçue
-                            </Button>
+                        </div>
+
+                        <!-- Commande livrée : inviter à noter les produits -->
+                        <div v-if="order.status === 'delivered' && order.products?.length" class="border-t border-border pt-3">
+                            <p class="mb-2 text-[11px] font-semibold text-muted-foreground">Donnez votre avis :</p>
+                            <div class="flex flex-wrap gap-2">
+                                <Link
+                                    v-for="product in order.products"
+                                    :key="product.id"
+                                    :href="route('products.show', { product: product.id })"
+                                    class="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[11px] font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+                                >
+                                    <Star class="h-3 w-3 text-amber-400" />
+                                    {{ product.name }}
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
