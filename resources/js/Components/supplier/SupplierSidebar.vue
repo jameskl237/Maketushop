@@ -1,0 +1,108 @@
+<script setup>
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Link, usePage } from '@inertiajs/vue3';
+import { BarChart3, Briefcase, FileText, Package, ShoppingCart, Sparkles, Store } from 'lucide-vue-next';
+import { computed } from 'vue';
+
+defineProps({
+    activeRoute: {
+        type: String,
+        default: 'backoffice.supplier.dashboard',
+    },
+    canCreateShop: {
+        type: Boolean,
+        default: true,
+    },
+});
+
+const emit = defineEmits(['navigate', 'create-shop']);
+const page = usePage();
+
+const isVendeur = computed(() => !!page.props.auth?.is_vendeur);
+const isPrestataire = computed(() => !!page.props.auth?.is_prestataire);
+
+// cap : 'vendeur' (produits), 'prestataire' (services/devis), null (toujours visible)
+const allItems = [
+    { key: 'dashboard', labelKey: 'common.dashboard', icon: BarChart3, route: 'backoffice.supplier.dashboard', soon: false, cap: null },
+    { key: 'shops', labelKey: 'supplier.shops', icon: Store, route: 'backoffice.supplier.shops.index', soon: false, cap: null },
+    { key: 'products', labelKey: 'supplier.products', icon: Package, route: 'backoffice.supplier.products.index', soon: false, cap: 'vendeur' },
+    { key: 'services', labelKey: 'supplier.services', icon: Briefcase, route: 'backoffice.supplier.services.index', soon: false, cap: 'prestataire' },
+    { key: 'quotes', labelKey: 'supplier.quoteRequests', icon: FileText, route: 'backoffice.supplier.quote-requests.index', soon: false, cap: 'prestataire' },
+    // Commandes en ligne : visibles mais marquées "bientôt" (paiement plateforme pas encore actif)
+    { key: 'orders', labelKey: 'supplier.orders', icon: ShoppingCart, route: 'backoffice.supplier.orders.index', soon: true, cap: null },
+];
+
+const navigationItems = computed(() =>
+    allItems.filter((item) => {
+        if (item.cap === 'vendeur') return isVendeur.value;
+        if (item.cap === 'prestataire') return isPrestataire.value;
+        return true;
+    }),
+);
+
+const onNavigate = () => emit('navigate');
+</script>
+
+<template>
+    <!-- Exemple: <SupplierSidebar @create-shop="openDialog = true" /> -->
+    <div class="space-y-4">
+        <Card class="border-border/60">
+            <CardContent class="p-4">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary">
+                        {{ page.props.auth.user.name.charAt(0) }}
+                    </div>
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-semibold text-foreground">{{ page.props.auth.user.name }}</p>
+                        <Badge variant="secondary" class="mt-1">
+                            <Sparkles class="mr-1 h-3 w-3" />
+                            {{ $t('supplier.role') }}
+                        </Badge>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+
+        <Card class="border-border/60">
+            <CardContent class="p-3">
+                <nav class="space-y-1" :aria-label="$t('supplier.navigation')">
+                    <template v-for="item in navigationItems" :key="item.key">
+                        <Link
+                            v-if="item.route"
+                            :href="route(item.route)"
+                            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-300"
+                            :class="activeRoute === item.route
+                                ? 'bg-primary/12 text-primary font-medium'
+                                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
+                            @click="onNavigate"
+                        >
+                            <component :is="item.icon" class="h-4 w-4" />
+                            <span>{{ $t(item.labelKey) }}</span>
+                            <Badge v-if="item.soon" variant="outline" class="ml-auto text-[9px] font-semibold text-amber-600">
+                                Bientôt
+                            </Badge>
+                        </Link>
+
+                        <button
+                            v-else
+                            type="button"
+                            class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground opacity-70 transition-all duration-300"
+                            aria-disabled="true"
+                            disabled
+                        >
+                            <component :is="item.icon" class="h-4 w-4" />
+                            <span>{{ $t(item.labelKey) }}</span>
+                        </button>
+                    </template>
+                </nav>
+            </CardContent>
+        </Card>
+
+        <Button v-if="canCreateShop" class="w-full" @click="$emit('create-shop')">
+            {{ $t('supplier.createShop') }}
+        </Button>
+    </div>
+</template>
+
