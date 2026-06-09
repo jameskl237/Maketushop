@@ -223,15 +223,15 @@ const submitShopUpdate = () => {
     </SupplierLayout>
 
     <Dialog :open="createShopDialogOpen" @update:open="createShopDialogOpen = $event">
-        <DialogContent class="sm:max-w-lg">
+        <DialogScrollContent class="sm:max-w-lg">
             <DialogHeader>
                 <DialogTitle>{{ $t('supplier.createShopTitle') }}</DialogTitle>
                 <DialogDescription>
                     {{ $t('supplier.createShopDescription') }}
                 </DialogDescription>
             </DialogHeader>
-
-            <form class="space-y-4" @submit.prevent="submitShop">
+                <div class="max-h-[70vh] overflow-y-auto pr-2">
+                    <form class="space-y-4" @submit.prevent="submitShop">
                 <div class="space-y-2">
                     <Label for="shop-name">{{ $t('supplier.shopName') }}</Label>
                     <Input id="shop-name" v-model="form.name" type="text" required />
@@ -288,7 +288,10 @@ const submitShopUpdate = () => {
                     <p v-if="form.errors.banner" class="text-sm text-destructive">{{ form.errors.banner }}</p>
                 </div>
 
-                <DialogFooter class="gap-2 sm:gap-0">
+                </form>
+            </div>
+
+            <DialogFooter class="gap-2 sm:gap-0">
                     <Button type="button" variant="outline" @click="createShopDialogOpen = false">
                         {{ $t('common.cancel') }}
                     </Button>
@@ -296,20 +299,19 @@ const submitShopUpdate = () => {
                         {{ form.processing ? $t('common.saving') : $t('supplier.createShop') }}
                     </Button>
                 </DialogFooter>
-            </form>
-        </DialogContent>
+        </DialogScrollContent>
     </Dialog>
 
     <Dialog :open="editShopDialogOpen" @update:open="editShopDialogOpen = $event">
-        <DialogContent class="sm:max-w-lg">
+        <DialogScrollContent class="sm:max-w-lg">
             <DialogHeader>
                 <DialogTitle>{{ $t('supplier.editShopTitle') }}</DialogTitle>
                 <DialogDescription>
                     {{ $t('supplier.editShopDescription') }}
                 </DialogDescription>
             </DialogHeader>
-
-            <form class="space-y-4" @submit.prevent="submitShopUpdate">
+            <div class="max-h-[70vh] overflow-y-auto pr-2">
+                <form class="space-y-4" @submit.prevent="submitShopUpdate">
                 <div class="space-y-2">
                     <Label for="edit-shop-name">{{ $t('supplier.shopName') }}</Label>
                     <Input id="edit-shop-name" v-model="editForm.name" type="text" required />
@@ -369,7 +371,10 @@ const submitShopUpdate = () => {
                     <p v-if="editForm.errors.banner" class="text-sm text-destructive">{{ editForm.errors.banner }}</p>
                 </div>
 
-                <DialogFooter class="gap-2 sm:gap-0">
+                </form>
+            </div>
+
+            <DialogFooter class="gap-2 sm:gap-0">
                     <Button type="button" variant="outline" @click="editShopDialogOpen = false">
                         {{ $t('common.cancel') }}
                     </Button>
@@ -377,7 +382,6 @@ const submitShopUpdate = () => {
                         {{ editForm.processing ? $t('common.saving') : $t('supplier.updateShop') }}
                     </Button>
                 </DialogFooter>
-            </form>
-        </DialogContent>
+        </DialogScrollContent>
     </Dialog>
 </template>
