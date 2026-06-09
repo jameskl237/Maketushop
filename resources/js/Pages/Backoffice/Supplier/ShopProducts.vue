@@ -6,7 +6,7 @@ import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
-    DialogContent,
+    DialogScrollContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
@@ -316,7 +316,7 @@ const confirmDeleteProduct = () => {
     </SupplierLayout>
 
     <Dialog :open="addProductDialogOpen" @update:open="addProductDialogOpen = $event">
-        <DialogContent class="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+        <DialogScrollContent class="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
             <DialogHeader>
                 <DialogTitle>{{ t('supplier.addProductTitle') }}</DialogTitle>
                 <DialogDescription>
@@ -435,11 +435,11 @@ const confirmDeleteProduct = () => {
                     </Button>
                 </DialogFooter>
             </form>
-        </DialogContent>
+    </DialogScrollContent>
     </Dialog>
 
     <Dialog :open="deleteProductDialogOpen" @update:open="deleteProductDialogOpen = $event">
-        <DialogContent class="sm:max-w-md">
+        <DialogScrollContent class="sm:max-w-md">
             <DialogHeader>
                 <DialogTitle>{{ t('supplier.deleteConfirmTitle') }}</DialogTitle>
                 <DialogDescription>
@@ -463,6 +463,6 @@ const confirmDeleteProduct = () => {
                     {{ t('common.delete') }}
                 </Button>
             </DialogFooter>
-        </DialogContent>
+    </DialogScrollContent>
     </Dialog>
 </template>

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
-    DialogContent,
+    DialogScrollContent,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
@@ -150,7 +150,7 @@ const destroy = (service) => {
             </Card>
 
             <Dialog v-model:open="dialogOpen">
-                <DialogContent class="max-h-[90vh] overflow-y-auto rounded-2xl">
+                <DialogScrollContent class="max-h-[90vh] overflow-y-auto rounded-2xl">
                     <DialogHeader>
                         <DialogTitle>{{ editingId ? 'Modifier le service' : 'Nouveau service' }}</DialogTitle>
                     </DialogHeader>
@@ -212,7 +212,7 @@ const destroy = (service) => {
                     <Button :disabled="form.processing" class="mt-2 w-full" @click="submit">
                         {{ editingId ? 'Enregistrer' : 'Créer le service' }}
                     </Button>
-                </DialogContent>
+                </DialogScrollContent>
             </Dialog>
         </template>
     </SupplierLayout>

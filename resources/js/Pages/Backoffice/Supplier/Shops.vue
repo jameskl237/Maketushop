@@ -4,7 +4,7 @@ import CopyShopLinkButton from '@/components/supplier/CopyShopLinkButton.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogScrollContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -95,7 +95,7 @@ const submit = () => {
 
     <!-- Dialog création de boutique -->
     <Dialog :open="showCreateDialog" @update:open="showCreateDialog = $event">
-        <DialogContent class="sm:max-w-lg">
+        <DialogScrollContent class="sm:max-w-lg">
             <DialogHeader>
                 <DialogTitle>{{ $t('supplier.createShop') }}</DialogTitle>
                 <DialogDescription>{{ $t('supplier.createShopDescription') }}</DialogDescription>
@@ -177,6 +177,6 @@ const submit = () => {
                     </Button>
                 </DialogFooter>
             </form>
-        </DialogContent>
+    </DialogScrollContent>
     </Dialog>
 </template>

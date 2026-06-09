@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
-    DialogContent,
+    DialogScrollContent,
     DialogDescription,
     DialogHeader,
     DialogTitle,
@@ -93,7 +93,7 @@ const submit = () => {
                 Demander un devis
             </Button>
         </DialogTrigger>
-        <DialogContent class="rounded-2xl">
+    <DialogScrollContent class="rounded-2xl">
             <DialogHeader>
                 <DialogTitle>Demander un devis</DialogTitle>
                 <DialogDescription>
@@ -128,6 +128,6 @@ const submit = () => {
                 <Send class="h-4 w-4" />
                 {{ submitting ? 'Envoi...' : 'Envoyer via WhatsApp' }}
             </Button>
-        </DialogContent>
+    </DialogScrollContent>
     </Dialog>
 </template>
