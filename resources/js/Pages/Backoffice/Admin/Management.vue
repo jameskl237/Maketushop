@@ -2,14 +2,14 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import Pagination from '@/Components/Pagination.vue';
-import DeleteConfirmationModal from '@/Components/DeleteConfirmationModal.vue';
-import Modal from '@/Components/Modal.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import TextInput from '@/Components/TextInput.vue';
-import InputError from '@/Components/InputError.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
+import Pagination from '@/components/Pagination.vue';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.vue';
+import Modal from '@/components/Modal.vue';
+import InputLabel from '@/components/InputLabel.vue';
+import TextInput from '@/components/TextInput.vue';
+import InputError from '@/components/InputError.vue';
+import PrimaryButton from '@/components/PrimaryButton.vue';
+import SecondaryButton from '@/components/SecondaryButton.vue';
 import { countries } from '@/lib/countries';
 
 const props = defineProps({

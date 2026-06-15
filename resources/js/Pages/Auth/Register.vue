@@ -1,6 +1,6 @@
 <script setup>
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
+import InputError from '@/components/InputError.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { Briefcase, Eye, EyeOff, Lock, Mail, MapPin, Phone, ShoppingBag, Sparkles, Store, User } from 'lucide-vue-next';
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js';

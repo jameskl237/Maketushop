@@ -1,6 +1,6 @@
 <script setup>
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
+import InputError from '@/components/InputError.vue';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/vue3';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-vue-next';
 import { ref } from 'vue';

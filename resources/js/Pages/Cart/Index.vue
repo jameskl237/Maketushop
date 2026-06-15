@@ -1,5 +1,5 @@
 <script setup>
-import ProductsNavbar from '@/Components/products/layout/ProductsNavbar.vue';
+import ProductsNavbar from '@/components/products/layout/ProductsNavbar.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
