@@ -3,6 +3,9 @@ import { useCartStore } from '@/stores/cart';
 import { Link, usePage } from '@inertiajs/vue3';
 import { Briefcase, LogIn, ShoppingBag, ShoppingCart, Store, User as UserIcon } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const page = usePage();
 const cartStore = useCartStore();
@@ -20,16 +23,16 @@ const isActive = (href) => {
 // (L'accueil reste accessible via le logo MaketuShop dans le TopBar.)
 const accountTab = computed(() =>
     isAuthenticated.value
-        ? { label: 'Mon compte', href: route('dashboard'), icon: UserIcon }
-        : { label: 'Connexion', href: route('login'), icon: LogIn },
+        ? { label: t('shopChrome.tabs.account'), href: route('dashboard'), icon: UserIcon }
+        : { label: t('shopChrome.tabs.login'), href: route('login'), icon: LogIn },
 );
 
 const tabs = computed(() => [
     accountTab.value,
-    { label: 'Boutiques', href: route('shops.index'),     icon: Store },
-    { label: 'Produits',  href: route('products.index'),  icon: ShoppingBag, primary: true },
-    { label: 'Panier',    href: route('cart.index'),      icon: ShoppingCart, badge: cartCount.value },
-    { label: 'Services',  href: route('services.index'),  icon: Briefcase },
+    { label: t('shopChrome.tabs.shops'),    href: route('shops.index'),     icon: Store },
+    { label: t('shopChrome.tabs.products'), href: route('products.index'),  icon: ShoppingBag, primary: true },
+    { label: t('shopChrome.tabs.cart'),     href: route('cart.index'),      icon: ShoppingCart, badge: cartCount.value },
+    { label: t('shopChrome.tabs.services'), href: route('services.index'),  icon: Briefcase },
 ]);
 </script>
 

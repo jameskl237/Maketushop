@@ -30,6 +30,13 @@ class GoogleAuthController extends Controller
             request()->session()->put('auth_google_redirect', $redirect);
         }
 
+        // Preserve the account type chosen on the registration form (client/vendeur/prestataire/both),
+        // so a brand-new account created via Google gets the role the user actually asked for.
+        $accountType = request()->query('account_type');
+        if ($accountType) {
+            request()->session()->put('auth_google_account_type', $accountType);
+        }
+
         return Socialite::driver('google')->redirect();
     }
 
@@ -68,18 +75,17 @@ class GoogleAuthController extends Controller
             ->orWhere('email', $email)
             ->first();
 
+        // Compte choisi sur le formulaire d'inscription (client/vendeur/prestataire/both),
+        // absent si l'utilisateur est arrivé par le bouton Google générique (page de connexion).
+        $accountType = $request->session()->pull('auth_google_account_type');
+
         if ($user) {
-            $updates = [
+            // Un compte existant conserve son rôle et ses capacités : on ne fait que
+            // rattacher google_id / confirmer l'email, sans jamais écraser le rôle.
+            $user->forceFill([
                 'google_id' => $user->google_id ?: $googleUser->getId(),
                 'email_verified_at' => $user->email_verified_at ?: now(),
-            ];
-
-            // Si l'utilisateur n'est pas un admin, l'enregistrer comme supplier
-            if ($user->role !== User::ROLE_ADMIN) {
-                $updates['role'] = User::ROLE_SUPPLIER;
-            }
-
-            $user->forceFill($updates)->save();
+            ])->save();
         } else {
             $baseUsername = Str::slug($googleUser->getName() ?: Str::before($email, '@'), '_');
             $username = $this->buildUniqueUsername($baseUsername !== '' ? $baseUsername : 'user');
@@ -89,10 +95,9 @@ class GoogleAuthController extends Controller
                 'username' => $username,
                 'email' => $email,
                 'google_id' => $googleUser->getId(),
-                // Par défaut, un utilisateur créé via Google doit être un fournisseur
-                'role' => User::ROLE_SUPPLIER,
                 'password' => Hash::make(Str::random(32)),
                 'email_verified_at' => now(),
+                ...$this->resolveNewAccountAttributes($accountType),
             ]);
         }
 
@@ -107,6 +112,35 @@ class GoogleAuthController extends Controller
 
     // Default: redirect to the dashboard adapted to the role
     return redirect()->route($user->dashboardRouteName());
+    }
+
+    /**
+     * Détermine role/is_vendeur/is_prestataire pour un compte créé via Google.
+     *
+     * - 'client' | 'vendeur' | 'prestataire' | 'both' : rôle explicitement choisi
+     *   sur le formulaire d'inscription (même mapping que RegisteredUserController).
+     * - Aucun account_type (bouton Google générique, ex. page de connexion) : compte
+     *   mixte pouvant vendre, proposer des services, et commander comme un client.
+     */
+    private function resolveNewAccountAttributes(?string $accountType): array
+    {
+        if (! $accountType) {
+            return [
+                'role' => User::ROLE_SUPPLIER,
+                'is_vendeur' => true,
+                'is_prestataire' => true,
+            ];
+        }
+
+        $isVendeur = in_array($accountType, ['vendeur', 'both', 'supplier'], true);
+        $isPrestataire = in_array($accountType, ['prestataire', 'both', 'supplier'], true);
+        $isPro = $isVendeur || $isPrestataire;
+
+        return [
+            'role' => $isPro ? User::ROLE_SUPPLIER : User::ROLE_USER,
+            'is_vendeur' => $isVendeur,
+            'is_prestataire' => $isPrestataire,
+        ];
     }
 
     private function buildUniqueUsername(string $base): string

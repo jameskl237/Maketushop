@@ -9,6 +9,7 @@ import { useSearch } from '@/composables/useSearch';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Search, X } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     services: { type: Object, required: true },
@@ -18,6 +19,7 @@ const props = defineProps({
 });
 
 const loading = ref(false);
+const { t } = useI18n();
 
 const state = reactive({
     search: props.filters.search || '',
@@ -32,15 +34,15 @@ const state = reactive({
 const { search } = useSearch(() => applyFilters(), 500);
 
 const categoryChips = computed(() => [
-    { id: 'all', name: 'Tous' },
+    { id: 'all', name: t('servicesPage.allCategories') },
     ...props.availableCategories,
 ]);
 
-const ratingChips = [
-    { value: '', label: 'Toutes notes' },
-    { value: '4', label: '4★ et +' },
-    { value: '3', label: '3★ et +' },
-];
+const ratingChips = computed(() => [
+    { value: '', label: t('servicesPage.ratingAll') },
+    { value: '4', label: t('servicesPage.rating4Plus') },
+    { value: '3', label: t('servicesPage.rating3Plus') },
+]);
 
 const toQueryParams = () => ({
     search: state.search || undefined,
@@ -85,7 +87,7 @@ const clearSearch = () => {
 </script>
 
 <template>
-    <Head title="Services" />
+    <Head :title="t('servicesPage.headTitle')" />
 
     <div class="min-h-screen bg-shop-bg pb-16 text-foreground">
         <ProductsNavbar />
@@ -95,10 +97,10 @@ const clearSearch = () => {
                 <section class="space-y-3 px-3">
                     <div class="flex items-end justify-between gap-3">
                         <div>
-                            <p class="text-[10px] font-semibold uppercase tracking-wide text-shop-light">Prestataires locaux</p>
-                            <h1 class="font-display text-[22px] font-extrabold leading-tight">Services</h1>
+                            <p class="text-[10px] font-semibold uppercase tracking-wide text-shop-light">{{ t('servicesPage.subtitle') }}</p>
+                            <h1 class="font-display text-[22px] font-extrabold leading-tight">{{ t('servicesPage.title') }}</h1>
                         </div>
-                        <Link :href="route('products.index')" class="text-[11px] font-bold text-primary">Produits</Link>
+                        <Link :href="route('products.index')" class="text-[11px] font-bold text-primary">{{ t('public.products') }}</Link>
                     </div>
 
                     <div class="relative">
@@ -107,7 +109,7 @@ const clearSearch = () => {
                             v-model="state.search"
                             type="search"
                             class="h-[38px] rounded-[12px] border-[1.5px] border-border bg-shop-bg pl-9 pr-9 text-[12px] shadow-none placeholder:text-shop-light"
-                            placeholder="Rechercher un service, une catégorie..."
+                            :placeholder="t('servicesPage.searchPlaceholder')"
                         />
                         <Button
                             v-if="state.search"
@@ -166,7 +168,7 @@ const clearSearch = () => {
                         <ServiceCard v-for="service in services.data" :key="service.id" :service="service" />
                     </div>
                     <div v-else class="rounded-[16px] border border-dashed border-border bg-white p-8 text-center text-sm text-shop-muted">
-                        Aucun service ne correspond à votre recherche.
+                        {{ t('servicesPage.emptyDescription') }}
                     </div>
 
                     <div v-if="services.links?.length > 3" class="mt-4 flex flex-wrap items-center justify-center gap-2">

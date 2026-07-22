@@ -14,11 +14,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { router, usePage } from '@inertiajs/vue3';
 import { FileText, Send } from 'lucide-vue-next';
 import { computed, reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     service: { type: Object, required: true },
 });
 
+const { t } = useI18n();
 const page = usePage();
 const open = ref(false);
 const submitting = ref(false);
@@ -45,16 +47,16 @@ const buildWhatsappUrl = () => {
 
     const serviceUrl = `${publicBaseUrl}/s/${props.service.id}`;
     const lines = [
-        `Bonjour ${props.service.shop?.name ?? ''}`.trim() + ',',
+        t('quoteDialog.waHello', { shop: props.service.shop?.name ?? '' }).trim() + ',',
         '',
-        `Je souhaite un devis pour le service : ${props.service.name}`,
+        t('quoteDialog.waIntent', { service: props.service.name }),
         serviceUrl,
         '',
-        form.budget ? `Budget estimé : ${form.budget}` : null,
-        form.message ? `Détails : ${form.message}` : null,
+        form.budget ? t('quoteDialog.waBudget', { budget: form.budget }) : null,
+        form.message ? t('quoteDialog.waDetails', { details: form.message }) : null,
         '',
-        form.customer_name ? `De la part de : ${form.customer_name}` : null,
-        form.customer_phone ? `Téléphone : ${form.customer_phone}` : null,
+        form.customer_name ? t('quoteDialog.waFrom', { name: form.customer_name }) : null,
+        form.customer_phone ? t('quoteDialog.waPhone', { phone: form.customer_phone }) : null,
     ].filter((line) => line !== null);
 
     return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`;
@@ -90,12 +92,12 @@ const submit = () => {
         <DialogTrigger as-child>
             <Button variant="default" class="h-12 w-full rounded-2xl text-sm font-bold">
                 <FileText class="h-4 w-4" />
-                Demander un devis
+                {{ t('servicesPage.requestQuote') }}
             </Button>
         </DialogTrigger>
     <DialogScrollContent class="rounded-2xl">
             <DialogHeader>
-                <DialogTitle>Demander un devis</DialogTitle>
+                <DialogTitle>{{ t('servicesPage.requestQuote') }}</DialogTitle>
                 <DialogDescription>
                     {{ service.name }} — {{ service.shop?.name }}
                 </DialogDescription>
@@ -103,30 +105,30 @@ const submit = () => {
 
             <div class="space-y-3">
                 <div class="space-y-1.5">
-                    <Label for="quote_name">Votre nom</Label>
-                    <Input id="quote_name" v-model="form.customer_name" placeholder="Nom complet" />
+                    <Label for="quote_name">{{ t('quoteDialog.nameLabel') }}</Label>
+                    <Input id="quote_name" v-model="form.customer_name" :placeholder="t('quoteDialog.namePlaceholder')" />
                 </div>
                 <div class="space-y-1.5">
-                    <Label for="quote_phone">Téléphone</Label>
-                    <Input id="quote_phone" v-model="form.customer_phone" placeholder="6XX XX XX XX" />
+                    <Label for="quote_phone">{{ t('quoteDialog.phoneLabel') }}</Label>
+                    <Input id="quote_phone" v-model="form.customer_phone" :placeholder="t('quoteDialog.phonePlaceholder')" />
                 </div>
                 <div class="space-y-1.5">
-                    <Label for="quote_budget">Budget estimé (optionnel)</Label>
-                    <Input id="quote_budget" v-model="form.budget" placeholder="ex : 50 000 FCFA" />
+                    <Label for="quote_budget">{{ t('quoteDialog.budgetLabel') }}</Label>
+                    <Input id="quote_budget" v-model="form.budget" :placeholder="t('quoteDialog.budgetPlaceholder')" />
                 </div>
                 <div class="space-y-1.5">
-                    <Label for="quote_message">Décrivez votre besoin</Label>
-                    <Textarea id="quote_message" v-model="form.message" rows="3" placeholder="Détaillez ce que vous souhaitez..." />
+                    <Label for="quote_message">{{ t('quoteDialog.messageLabel') }}</Label>
+                    <Textarea id="quote_message" v-model="form.message" rows="3" :placeholder="t('quoteDialog.messagePlaceholder')" />
                 </div>
 
                 <p v-if="!ownerPhone" class="text-[11px] text-destructive">
-                    Le contact WhatsApp de ce prestataire n'est pas disponible. Votre demande sera tout de même enregistrée.
+                    {{ t('quoteDialog.phoneUnavailable') }}
                 </p>
             </div>
 
             <Button :disabled="submitting" class="mt-2 h-11 w-full rounded-xl font-bold" @click="submit">
                 <Send class="h-4 w-4" />
-                {{ submitting ? 'Envoi...' : 'Envoyer via WhatsApp' }}
+                {{ submitting ? t('quoteDialog.sending') : t('quoteDialog.sendButton') }}
             </Button>
     </DialogScrollContent>
     </Dialog>

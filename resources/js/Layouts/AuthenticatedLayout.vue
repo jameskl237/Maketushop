@@ -7,7 +7,6 @@ import NavLink from '@/components/NavLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
-import PhoneVerificationModal from '@/components/PhoneVerificationModal.vue';
 import { Link } from '@inertiajs/vue3';
 
 defineProps({
@@ -67,12 +66,12 @@ const showingNavigationDropdown = ref(false);
                                         <span class="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-transparent px-3 py-2 text-sm font-medium leading-4 text-muted-foreground transition duration-150 ease-in-out hover:text-foreground focus:outline-none"
+                                                class="inline-flex max-w-[10rem] items-center rounded-md border border-transparent bg-transparent px-3 py-2 text-sm font-medium leading-4 text-muted-foreground transition duration-150 ease-in-out hover:text-foreground focus:outline-none lg:max-w-xs"
                                             >
-                                                {{ $page.props.auth.user.name }}
+                                                <span class="truncate">{{ $page.props.auth.user.name }}</span>
 
                                                 <svg
-                                                    class="-me-0.5 ms-2 h-4 w-4"
+                                                    class="-me-0.5 ms-2 h-4 w-4 shrink-0"
                                                     xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 20 20"
                                                     fill="currentColor"
@@ -223,8 +222,6 @@ const showingNavigationDropdown = ref(false);
             <main>
                 <slot />
             </main>
-
-            <PhoneVerificationModal />
         </div>
     </div>
 </template>

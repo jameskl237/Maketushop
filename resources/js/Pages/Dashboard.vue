@@ -15,6 +15,7 @@ import {
     User as UserIcon,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     orders: { type: Array, default: () => [] },
@@ -24,17 +25,18 @@ const props = defineProps({
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+const { t, locale } = useI18n();
 
-const tabs = [
-    { key: 'orders', label: 'Commandes', icon: ShoppingBag },
-    { key: 'favorites', label: 'Favoris', icon: Heart },
-    { key: 'quotes', label: 'Devis', icon: FileText },
-    { key: 'profile', label: 'Profil', icon: UserIcon },
-];
+const tabs = computed(() => [
+    { key: 'orders', label: t('dashboard.client.orders'), icon: ShoppingBag },
+    { key: 'favorites', label: t('dashboard.client.favorites'), icon: Heart },
+    { key: 'quotes', label: t('dashboard.client.quotes'), icon: FileText },
+    { key: 'profile', label: t('profile.title'), icon: UserIcon },
+]);
 const activeTab = ref('orders');
 
 const formatDate = (dateString) =>
-    new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+    new Date(dateString).toLocaleDateString(locale.value === 'en' ? 'en-US' : 'fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
 
 const formatPrice = (price) =>
     new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(price ?? 0);
@@ -55,19 +57,19 @@ const favoriteLink = (fav) =>
 </script>
 
 <template>
-    <Head title="Mon compte" />
+    <Head :title="$t('dashboard.client.title')" />
 
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-2xl font-bold tracking-tight text-foreground">Mon compte</h2>
-                    <p class="text-muted-foreground">Bonjour {{ user.name }}, gérez vos commandes, favoris et devis.</p>
+                    <h2 class="text-2xl font-bold tracking-tight text-foreground">{{ $t('dashboard.client.title') }}</h2>
+                    <p class="text-muted-foreground">{{ $t('dashboard.client.subtitle', { name: user.name }) }}</p>
                 </div>
                 <Link :href="route('products.index')" class="hidden sm:block">
                     <Button>
                         <ShoppingBag class="mr-2 h-4 w-4" />
-                        Boutique
+                        {{ $t('dashboard.client.shopButton') }}
                     </Button>
                 </Link>
             </div>
@@ -76,21 +78,21 @@ const favoriteLink = (fav) =>
         <div class="py-6">
             <div class="mx-auto max-w-5xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <!-- Stats -->
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="rounded-2xl border border-border bg-primary/5 p-4">
+                <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                    <div class="rounded-2xl border border-border bg-primary/5 p-3 sm:p-4">
                         <ShoppingBag class="h-5 w-5 text-primary" />
-                        <p class="mt-2 text-2xl font-extrabold">{{ orders.length }}</p>
-                        <p class="text-[11px] text-muted-foreground">Commandes</p>
+                        <p class="mt-2 text-xl font-extrabold sm:text-2xl">{{ orders.length }}</p>
+                        <p class="truncate text-[11px] text-muted-foreground">{{ $t('dashboard.client.orders') }}</p>
                     </div>
-                    <div class="rounded-2xl border border-border bg-orange/5 p-4">
+                    <div class="rounded-2xl border border-border bg-orange/5 p-3 sm:p-4">
                         <Heart class="h-5 w-5 text-orange" />
-                        <p class="mt-2 text-2xl font-extrabold">{{ favorites.length }}</p>
-                        <p class="text-[11px] text-muted-foreground">Favoris</p>
+                        <p class="mt-2 text-xl font-extrabold sm:text-2xl">{{ favorites.length }}</p>
+                        <p class="truncate text-[11px] text-muted-foreground">{{ $t('dashboard.client.favorites') }}</p>
                     </div>
-                    <div class="rounded-2xl border border-border bg-primary/5 p-4">
+                    <div class="rounded-2xl border border-border bg-primary/5 p-3 sm:p-4">
                         <FileText class="h-5 w-5 text-primary" />
-                        <p class="mt-2 text-2xl font-extrabold">{{ quoteRequests.length }}</p>
-                        <p class="text-[11px] text-muted-foreground">Devis</p>
+                        <p class="mt-2 text-xl font-extrabold sm:text-2xl">{{ quoteRequests.length }}</p>
+                        <p class="truncate text-[11px] text-muted-foreground">{{ $t('dashboard.client.quotes') }}</p>
                     </div>
                 </div>
 
@@ -113,9 +115,9 @@ const favoriteLink = (fav) =>
                 <div v-if="activeTab === 'orders'" class="space-y-3">
                     <div v-if="orders.length === 0" class="rounded-2xl border-2 border-dashed border-border py-12 text-center">
                         <ShoppingBag class="mx-auto mb-3 h-10 w-10 text-muted-foreground opacity-20" />
-                        <p class="text-muted-foreground">Aucune commande pour l'instant.</p>
+                        <p class="text-muted-foreground">{{ $t('dashboard.client.noOrders') }}</p>
                         <Link :href="route('products.index')" class="mt-3 inline-block">
-                            <Button variant="outline">Découvrir la boutique</Button>
+                            <Button variant="outline">{{ $t('dashboard.client.discoverShop') }}</Button>
                         </Link>
                     </div>
                     <div
@@ -132,7 +134,7 @@ const favoriteLink = (fav) =>
                                     <p class="font-bold text-foreground">{{ order.order_number }}</p>
                                     <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-muted-foreground">
                                         <span class="flex items-center gap-1"><Calendar class="h-3 w-3" />{{ formatDate(order.created_at) }}</span>
-                                        <span class="flex items-center gap-1"><Package class="h-3 w-3" />{{ order.total_products }} article(s)</span>
+                                        <span class="flex items-center gap-1"><Package class="h-3 w-3" />{{ $t('dashboard.client.items', { count: order.total_products }) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -140,7 +142,7 @@ const favoriteLink = (fav) =>
                                 <div class="text-right">
                                     <p class="text-lg font-bold text-foreground">{{ formatPrice(order.total_price) }}</p>
                                     <Badge variant="outline" :class="statusBadgeClass(order.status)">
-                                        {{ order.status === 'delivered' ? 'Livrée' : 'En attente' }}
+                                        {{ order.status === 'delivered' ? $t('dashboard.client.delivered') : $t('dashboard.client.pending') }}
                                     </Badge>
                                 </div>
                                 <Button
@@ -151,14 +153,14 @@ const favoriteLink = (fav) =>
                                     @click="markAsDelivered(order)"
                                 >
                                     <CheckCircle class="mr-1 h-4 w-4" />
-                                    Reçue
+                                    {{ $t('dashboard.client.receivedButton') }}
                                 </Button>
                             </div>
                         </div>
 
                         <!-- Commande livrée : inviter à noter les produits -->
                         <div v-if="order.status === 'delivered' && order.products?.length" class="border-t border-border pt-3">
-                            <p class="mb-2 text-[11px] font-semibold text-muted-foreground">Donnez votre avis :</p>
+                            <p class="mb-2 text-[11px] font-semibold text-muted-foreground">{{ $t('dashboard.client.reviewPrompt') }}</p>
                             <div class="flex flex-wrap gap-2">
                                 <Link
                                     v-for="product in order.products"
@@ -178,7 +180,7 @@ const favoriteLink = (fav) =>
                 <div v-else-if="activeTab === 'favorites'" class="space-y-3">
                     <div v-if="favorites.length === 0" class="rounded-2xl border-2 border-dashed border-border py-12 text-center">
                         <Heart class="mx-auto mb-3 h-10 w-10 text-muted-foreground opacity-20" />
-                        <p class="text-muted-foreground">Aucun favori pour l'instant.</p>
+                        <p class="text-muted-foreground">{{ $t('dashboard.client.noFavorites') }}</p>
                     </div>
                     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
                         <Link
@@ -187,17 +189,18 @@ const favoriteLink = (fav) =>
                             :href="favoriteLink(fav)"
                             class="overflow-hidden rounded-2xl border border-border bg-card transition-transform active:scale-95"
                         >
-                            <div class="aspect-square overflow-hidden bg-gradient-to-br from-[#FFE9EE] to-[#FFF1E6]">
-                                <img :src="fav.image || '/images/Maketu1.png'" :alt="fav.name" class="h-full w-full object-cover" loading="lazy" />
+                            <div class="flex aspect-square items-center justify-center overflow-hidden bg-gradient-to-br from-[#FFE9EE] to-[#FFF1E6]">
+                                <img v-if="fav.image" :src="fav.image" :alt="fav.name" class="h-full w-full object-cover" loading="lazy" />
+                                <component :is="fav.type === 'service' ? Sparkles : Package" v-else class="h-8 w-8 text-primary/30" />
                             </div>
                             <div class="space-y-1 p-2.5">
                                 <Badge v-if="fav.type === 'service'" class="bg-orange/90 text-[9px] text-white">
-                                    <Sparkles class="mr-0.5 h-2.5 w-2.5" /> Service
+                                    <Sparkles class="mr-0.5 h-2.5 w-2.5" /> {{ $t('dashboard.client.serviceBadge') }}
                                 </Badge>
                                 <p class="line-clamp-1 text-[12px] font-bold text-foreground">{{ fav.name }}</p>
                                 <p class="text-[11px] text-muted-foreground">{{ fav.shop }}</p>
                                 <p class="text-[12px] font-extrabold text-primary">
-                                    {{ fav.price == null ? 'Sur devis' : formatPrice(fav.price) }}
+                                    {{ fav.price == null ? $t('dashboard.client.onQuote') : formatPrice(fav.price) }}
                                 </p>
                             </div>
                         </Link>
@@ -208,7 +211,7 @@ const favoriteLink = (fav) =>
                 <div v-else-if="activeTab === 'quotes'" class="space-y-3">
                     <div v-if="quoteRequests.length === 0" class="rounded-2xl border-2 border-dashed border-border py-12 text-center">
                         <FileText class="mx-auto mb-3 h-10 w-10 text-muted-foreground opacity-20" />
-                        <p class="text-muted-foreground">Vous n'avez envoyé aucune demande de devis.</p>
+                        <p class="text-muted-foreground">{{ $t('dashboard.client.noQuoteRequests') }}</p>
                     </div>
                     <div
                         v-for="quote in quoteRequests"
@@ -218,13 +221,13 @@ const favoriteLink = (fav) =>
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <Link :href="route('services.show', { service: quote.service_id })" class="font-semibold text-foreground hover:text-primary">
-                                    {{ quote.service_title || 'Service' }}
+                                    {{ quote.service_title || $t('dashboard.client.serviceBadge') }}
                                 </Link>
-                                <p v-if="quote.budget" class="mt-1 text-[12px] text-muted-foreground">Budget : {{ quote.budget }}</p>
+                                <p v-if="quote.budget" class="mt-1 text-[12px] text-muted-foreground">{{ $t('dashboard.client.budgetLabel', { budget: quote.budget }) }}</p>
                                 <p v-if="quote.message" class="mt-1 line-clamp-2 text-[12px] text-muted-foreground">{{ quote.message }}</p>
                             </div>
                             <Badge variant="outline" :class="quote.status === 'traite' ? statusBadgeClass('delivered') : statusBadgeClass('pending')">
-                                {{ quote.status === 'traite' ? 'Traité' : 'En attente' }}
+                                {{ quote.status === 'traite' ? $t('dashboard.client.quoteTreated') : $t('dashboard.client.pending') }}
                             </Badge>
                         </div>
                         <p class="mt-2 text-[11px] text-muted-foreground">{{ formatDate(quote.created_at) }}</p>
@@ -245,7 +248,7 @@ const favoriteLink = (fav) =>
                             </div>
                         </div>
                         <Link :href="route('profile.edit')" class="mt-4 block">
-                            <Button variant="outline" class="w-full">Modifier mon profil</Button>
+                            <Button variant="outline" class="w-full">{{ $t('dashboard.client.editProfile') }}</Button>
                         </Link>
                     </div>
                 </div>

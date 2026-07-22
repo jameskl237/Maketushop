@@ -129,7 +129,7 @@ const submit = () => {
                             <p v-if="form.errors.description" class="mt-1 text-xs text-destructive">{{ form.errors.description }}</p>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid gap-3 sm:grid-cols-2">
                             <div>
                                 <Label for="shop-city">{{ $t('supplier.city') }} *</Label>
                                 <Input

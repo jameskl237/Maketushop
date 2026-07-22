@@ -166,16 +166,14 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
                         <ShoppingBag class="h-7 w-7" />
                         <p class="mt-3 font-display text-[15px] font-extrabold">Produits</p>
                         <p class="text-[11px] text-white/80">Achetez près de chez vous</p>
-                        <div class="absolute -right-4 -bottom-4 h-20 w-20 rounded-full bg-white/10" />
                     </Link>
                     <Link
                         :href="route('services.index')"
-                        class="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-orange to-amber p-4 text-white shadow-lg shadow-orange/20 active:scale-[0.98] transition-transform"
+                        class="relative overflow-hidden rounded-[20px] bg-orange p-4 text-white shadow-lg shadow-orange/20 active:scale-[0.98] transition-transform"
                     >
                         <Briefcase class="h-7 w-7" />
                         <p class="mt-3 font-display text-[15px] font-extrabold">Services</p>
                         <p class="text-[11px] text-white/80">Trouvez un prestataire</p>
-                        <div class="absolute -right-4 -bottom-4 h-20 w-20 rounded-full bg-white/10" />
                     </Link>
                 </div>
             </section>

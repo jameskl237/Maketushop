@@ -2,6 +2,7 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Pagination from '@/components/Pagination.vue';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal.vue';
 import Modal from '@/components/Modal.vue';
@@ -23,6 +24,8 @@ const props = defineProps({
     all_categories: Array,
 });
 
+const { t } = useI18n();
+
 const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'users');
 
 const setActiveTab = (tab) => {
@@ -34,9 +37,9 @@ const setActiveTab = (tab) => {
 };
 
 const orderStatusLabel = (status) => ({
-    pending: 'En cours',
-    delivered: 'Livrée',
-}[status] || 'En cours');
+    pending: t('admin.management.orderPending'),
+    delivered: t('admin.management.orderDelivered'),
+}[status] || t('admin.management.orderPending'));
 
 const orderStatusClass = (status) => status === 'delivered'
     ? 'border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-400'
@@ -226,23 +229,23 @@ const submitForm = (type) => {
 </script>
 
 <template>
-    <Head title="Gestion du Catalogue" />
+    <Head :title="$t('admin.management.pageTitle')" />
 
-    <AdminLayout title="Gestion du Catalogue" subtitle="Gérez les utilisateurs, boutiques, produits et catégories.">
+    <AdminLayout :title="$t('admin.management.pageTitle')" :subtitle="$t('admin.management.pageSubtitle')">
         <template #content>
             <div class="space-y-6">
                 <!-- Tabs -->
-                <div class="border-b border-border">
-                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <div class="border-b border-border overflow-x-auto no-scrollbar">
+                    <nav class="-mb-px flex space-x-4 sm:space-x-8" :aria-label="$t('admin.management.tabsAriaLabel')">
                         <button v-for="tab in ['users', 'shops', 'products', 'categories', 'orders']" :key="tab"
                             @click="setActiveTab(tab)"
                             :class="[
                                 activeTab === tab
                                     ? 'border-primary text-primary font-semibold'
                                     : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border',
-                                'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm capitalize transition-colors'
+                                'shrink-0 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm capitalize transition-colors'
                             ]">
-                            {{ tab === 'users' ? 'Utilisateurs' : (tab === 'shops' ? 'Boutiques' : (tab === 'products' ? 'Produits' : (tab === 'categories' ? 'Catégories' : 'Commandes'))) }}
+                            {{ $t(`admin.management.tabs.${tab}`) }}
                         </button>
                     </nav>
                 </div>
@@ -250,10 +253,10 @@ const submitForm = (type) => {
                 <!-- Action Bar -->
                 <div class="flex justify-between items-center">
                     <h3 class="text-xl font-bold text-foreground">
-                        {{ activeTab === 'users' ? 'Utilisateurs' : (activeTab === 'shops' ? 'Boutiques' : (activeTab === 'products' ? 'Produits' : (activeTab === 'categories' ? 'Catégories' : 'Commandes'))) }}
+                        {{ $t(`admin.management.tabs.${activeTab}`) }}
                     </h3>
                     <PrimaryButton v-if="activeTab !== 'orders'" @click="openModal(activeTab.slice(0, -1))">
-                        Ajouter {{ activeTab === 'users' ? 'un utilisateur' : (activeTab === 'shops' ? 'une boutique' : (activeTab === 'products' ? 'un produit' : 'une catégorie')) }}
+                        {{ activeTab === 'users' ? $t('admin.management.addUser') : (activeTab === 'shops' ? $t('admin.management.addShop') : (activeTab === 'products' ? $t('admin.management.addProduct') : $t('admin.management.addCategory'))) }}
                     </PrimaryButton>
                 </div>
 
@@ -264,11 +267,11 @@ const submitForm = (type) => {
                     <table v-if="activeTab === 'users'" class="w-full text-left text-sm">
                         <thead class="bg-muted/50 text-muted-foreground border-b border-border">
                             <tr>
-                                <th class="p-4 font-medium">ID</th>
-                                <th class="p-4 font-medium">Utilisateur</th>
-                                <th class="p-4 font-medium">Contact</th>
-                                <th class="p-4 font-medium">Rôle</th>
-                                <th class="p-4 font-medium text-right">Actions</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.id') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.user') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.contact') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.role') }}</th>
+                                <th class="p-4 font-medium text-right">{{ $t('admin.management.table.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-border">
@@ -280,20 +283,20 @@ const submitForm = (type) => {
                                 </td>
                                 <td class="p-4">
                                     <div class="text-foreground">{{ user.email }}</div>
-                                    <div class="text-xs text-muted-foreground">{{ user.phone || 'Pas de téléphone' }}</div>
+                                    <div class="text-xs text-muted-foreground">{{ user.phone || $t('admin.management.noPhone') }}</div>
                                 </td>
                                 <td class="p-4">
                                     <span :class="[
                                         'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize',
-                                        user.role === 'admin' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' : 
+                                        user.role === 'admin' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' :
                                         (user.role === 'supplier' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400')
                                     ]">
                                         {{ user.role }}
                                     </span>
                                 </td>
                                 <td class="p-4 text-right space-x-2">
-                                    <button @click="openModal('user', user)" class="text-primary hover:underline font-medium">Éditer</button>
-                                    <button @click="confirmDelete(user, 'user')" class="text-destructive hover:underline font-medium">Supprimer</button>
+                                    <button @click="openModal('user', user)" class="text-primary hover:underline font-medium">{{ $t('admin.management.edit') }}</button>
+                                    <button @click="confirmDelete(user, 'user')" class="text-destructive hover:underline font-medium">{{ $t('admin.management.delete') }}</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -303,11 +306,11 @@ const submitForm = (type) => {
                     <table v-if="activeTab === 'shops'" class="w-full text-left text-sm">
                         <thead class="bg-muted/50 text-muted-foreground border-b border-border">
                             <tr>
-                                <th class="p-4 font-medium">ID</th>
-                                <th class="p-4 font-medium">Boutique</th>
-                                <th class="p-4 font-medium">Localisation</th>
-                                <th class="p-4 font-medium">Vendeur</th>
-                                <th class="p-4 font-medium text-right">Actions</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.id') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.shop') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.location') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.seller') }}</th>
+                                <th class="p-4 font-medium text-right">{{ $t('admin.management.table.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-border">
@@ -321,10 +324,10 @@ const submitForm = (type) => {
                                     <div class="text-foreground">{{ shop.city }}</div>
                                     <div class="text-xs text-muted-foreground">{{ shop.district }}</div>
                                 </td>
-                                <td class="p-4 text-muted-foreground">{{ shop.user?.name || 'N/A' }}</td>
+                                <td class="p-4 text-muted-foreground">{{ shop.user?.name || $t('admin.management.notAvailable') }}</td>
                                 <td class="p-4 text-right space-x-2">
-                                    <button @click="openModal('shop', shop)" class="text-primary hover:underline font-medium">Éditer</button>
-                                    <button @click="confirmDelete(shop, 'shop')" class="text-destructive hover:underline font-medium">Supprimer</button>
+                                    <button @click="openModal('shop', shop)" class="text-primary hover:underline font-medium">{{ $t('admin.management.edit') }}</button>
+                                    <button @click="confirmDelete(shop, 'shop')" class="text-destructive hover:underline font-medium">{{ $t('admin.management.delete') }}</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -334,12 +337,12 @@ const submitForm = (type) => {
                     <table v-if="activeTab === 'products'" class="w-full text-left text-sm">
                         <thead class="bg-muted/50 text-muted-foreground border-b border-border">
                             <tr>
-                                <th class="p-4 font-medium">ID</th>
-                                <th class="p-4 font-medium">Produit</th>
-                                <th class="p-4 font-medium">Prix</th>
-                                <th class="p-4 font-medium">Stock</th>
-                                <th class="p-4 font-medium">Catégorie / Boutique</th>
-                                <th class="p-4 font-medium text-right">Actions</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.id') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.product') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.price') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.stock') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.categoryShop') }}</th>
+                                <th class="p-4 font-medium text-right">{{ $t('admin.management.table.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-border">
@@ -347,28 +350,28 @@ const submitForm = (type) => {
                                 <td class="p-4 font-mono text-xs">{{ product.id }}</td>
                                 <td class="p-4">
                                     <div class="font-medium text-foreground">{{ product.name }}</div>
-                                    <div class="text-xs text-muted-foreground">Code: {{ product.code || 'N/A' }}</div>
+                                    <div class="text-xs text-muted-foreground">{{ $t('admin.management.code') }}: {{ product.code || $t('admin.management.notAvailable') }}</div>
                                 </td>
                                 <td class="p-4">
                                     <div class="font-bold text-foreground">{{ product.price }} FCFA</div>
-                                    <div v-if="product.promotion_price" class="text-xs text-green-600">Promo: {{ product.promotion_price }}</div>
+                                    <div v-if="product.promotion_price" class="text-xs text-green-600">{{ $t('admin.management.promo') }}: {{ product.promotion_price }}</div>
                                 </td>
                                 <td class="p-4">
                                     <span :class="[
                                         'px-2 py-0.5 rounded text-xs font-medium',
                                         product.in_stock ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                                     ]">
-                                        {{ product.in_stock ? 'En Stock' : 'Rupture' }}
+                                        {{ product.in_stock ? $t('admin.management.inStock') : $t('admin.management.outOfStock') }}
                                     </span>
-                                    <div class="text-xs text-muted-foreground mt-1">Qté: {{ product.quantity }}</div>
+                                    <div class="text-xs text-muted-foreground mt-1">{{ $t('admin.management.qty') }}: {{ product.quantity }}</div>
                                 </td>
                                 <td class="p-4">
-                                    <div class="text-foreground">{{ product.category?.name || 'Sans catégorie' }}</div>
-                                    <div class="text-xs text-muted-foreground">{{ product.shop?.name || 'Sans boutique' }}</div>
+                                    <div class="text-foreground">{{ product.category?.name || $t('admin.management.noCategory') }}</div>
+                                    <div class="text-xs text-muted-foreground">{{ product.shop?.name || $t('admin.management.noShop') }}</div>
                                 </td>
                                 <td class="p-4 text-right space-x-2">
-                                    <button @click="openModal('product', product)" class="text-primary hover:underline font-medium">Éditer</button>
-                                    <button @click="confirmDelete(product, 'product')" class="text-destructive hover:underline font-medium">Supprimer</button>
+                                    <button @click="openModal('product', product)" class="text-primary hover:underline font-medium">{{ $t('admin.management.edit') }}</button>
+                                    <button @click="confirmDelete(product, 'product')" class="text-destructive hover:underline font-medium">{{ $t('admin.management.delete') }}</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -378,11 +381,11 @@ const submitForm = (type) => {
                     <table v-if="activeTab === 'categories'" class="w-full text-left text-sm">
                         <thead class="bg-muted/50 text-muted-foreground border-b border-border">
                             <tr>
-                                <th class="p-4 font-medium">ID</th>
-                                <th class="p-4 font-medium">Nom</th>
-                                <th class="p-4 font-medium">Slug</th>
-                                <th class="p-4 font-medium">Description</th>
-                                <th class="p-4 font-medium text-right">Actions</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.id') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.name') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.slug') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.description') }}</th>
+                                <th class="p-4 font-medium text-right">{{ $t('admin.management.table.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-border">
@@ -392,8 +395,8 @@ const submitForm = (type) => {
                                 <td class="p-4 text-muted-foreground">{{ category.slug }}</td>
                                 <td class="p-4 text-muted-foreground truncate max-w-xs">{{ category.description }}</td>
                                 <td class="p-4 text-right space-x-2">
-                                    <button @click="openModal('category', category)" class="text-primary hover:underline font-medium">Éditer</button>
-                                    <button @click="confirmDelete(category, 'category')" class="text-destructive hover:underline font-medium">Supprimer</button>
+                                    <button @click="openModal('category', category)" class="text-primary hover:underline font-medium">{{ $t('admin.management.edit') }}</button>
+                                    <button @click="confirmDelete(category, 'category')" class="text-destructive hover:underline font-medium">{{ $t('admin.management.delete') }}</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -403,20 +406,20 @@ const submitForm = (type) => {
                     <table v-if="activeTab === 'orders'" class="w-full text-left text-sm">
                         <thead class="bg-muted/50 text-muted-foreground border-b border-border">
                             <tr>
-                                <th class="p-4 font-medium">ID</th>
-                                <th class="p-4 font-medium">Numéro</th>
-                                <th class="p-4 font-medium">Client</th>
-                                <th class="p-4 font-medium">Articles</th>
-                                <th class="p-4 font-medium">Total</th>
-                                <th class="p-4 font-medium">Statut</th>
-                                <th class="p-4 font-medium text-right">Actions</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.id') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.number') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.client') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.items') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.total') }}</th>
+                                <th class="p-4 font-medium">{{ $t('admin.management.table.status') }}</th>
+                                <th class="p-4 font-medium text-right">{{ $t('admin.management.table.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-border">
                             <tr v-for="order in props.orders.data" :key="order.id" class="hover:bg-muted/30 transition-colors">
                                 <td class="p-4 font-mono text-xs">{{ order.id }}</td>
                                 <td class="p-4 font-bold text-foreground">{{ order.order_number }}</td>
-                                <td class="p-4 text-muted-foreground">{{ order.user?.name || 'Client inconnu' }}</td>
+                                <td class="p-4 text-muted-foreground">{{ order.user?.name || $t('admin.management.unknownClient') }}</td>
                                 <td class="p-4 text-foreground">{{ order.total_products }}</td>
                                 <td class="p-4 font-bold text-primary">{{ order.total_price }} FCFA</td>
                                 <td class="p-4">
@@ -425,7 +428,7 @@ const submitForm = (type) => {
                                     </span>
                                 </td>
                                 <td class="p-4 text-right">
-                                    <button @click="confirmDelete(order, 'order')" class="text-destructive hover:underline font-medium">Annuler / Suppr</button>
+                                    <button @click="confirmDelete(order, 'order')" class="text-destructive hover:underline font-medium">{{ $t('admin.management.cancelDelete') }}</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -443,62 +446,62 @@ const submitForm = (type) => {
             <!-- User Modal -->
             <Modal :show="modalOpen.user" @close="modalOpen.user = false">
                 <form @submit.prevent="submitForm('user')" class="p-6">
-                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.user ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}</h2>
+                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.user ? $t('admin.management.editUserTitle') : $t('admin.management.newUserTitle') }}</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <InputLabel for="name" value="Nom Complet" />
+                            <InputLabel for="name" :value="$t('admin.management.fullName')" />
                             <TextInput id="name" type="text" class="mt-1 block w-full" v-model="userForm.name" required />
                             <InputError :message="userForm.errors.name" class="mt-2" />
                         </div>
                         <div>
-                            <InputLabel for="username" value="Nom d'utilisateur" />
+                            <InputLabel for="username" :value="$t('admin.management.username')" />
                             <TextInput id="username" type="text" class="mt-1 block w-full" v-model="userForm.username" required />
                             <InputError :message="userForm.errors.username" class="mt-2" />
                         </div>
                         <div>
-                            <InputLabel for="email" value="Email" />
+                            <InputLabel for="email" :value="$t('admin.management.email')" />
                             <TextInput id="email" type="email" class="mt-1 block w-full" v-model="userForm.email" required />
                             <InputError :message="userForm.errors.email" class="mt-2" />
                         </div>
                         <div>
-                            <InputLabel for="phone" value="Téléphone" />
+                            <InputLabel for="phone" :value="$t('admin.management.phone')" />
                             <TextInput id="phone" type="text" class="mt-1 block w-full" v-model="userForm.phone" />
                             <InputError :message="userForm.errors.phone" class="mt-2" />
                         </div>
                         <div class="md:col-span-2">
-                            <InputLabel for="address" value="Adresse" />
+                            <InputLabel for="address" :value="$t('admin.management.address')" />
                             <TextInput id="address" type="text" class="mt-1 block w-full" v-model="userForm.address" />
                             <InputError :message="userForm.errors.address" class="mt-2" />
                         </div>
                         <div>
-                            <InputLabel for="role" value="Rôle" />
+                            <InputLabel for="role" :value="$t('admin.management.table.role')" />
                             <select id="role" v-model="userForm.role" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm">
-                                <option value="user">Utilisateur / Client</option>
-                                <option value="supplier">Vendeur / Supplier</option>
-                                <option value="admin">Administrateur</option>
+                                <option value="user">{{ $t('admin.management.roleUser') }}</option>
+                                <option value="supplier">{{ $t('admin.management.roleSupplier') }}</option>
+                                <option value="admin">{{ $t('admin.management.roleAdmin') }}</option>
                             </select>
                             <InputError :message="userForm.errors.role" class="mt-2" />
                         </div>
                         <div class="flex items-center pt-6">
                             <label class="flex items-center">
                                 <input type="checkbox" v-model="userForm.email_verified" class="rounded border-gray-300 text-primary shadow-sm focus:ring-primary" />
-                                <span class="ms-2 text-sm text-muted-foreground">Email vérifié</span>
+                                <span class="ms-2 text-sm text-muted-foreground">{{ $t('admin.management.emailVerified') }}</span>
                             </label>
                         </div>
                         <template v-if="!isEditing.user">
                             <div>
-                                <InputLabel for="password" value="Mot de passe" />
+                                <InputLabel for="password" :value="$t('admin.management.password')" />
                                 <TextInput id="password" type="password" class="mt-1 block w-full" v-model="userForm.password" required />
                             </div>
                             <div>
-                                <InputLabel for="password_confirmation" value="Confirmation" />
+                                <InputLabel for="password_confirmation" :value="$t('admin.management.passwordConfirmation')" />
                                 <TextInput id="password_confirmation" type="password" class="mt-1 block w-full" v-model="userForm.password_confirmation" required />
                             </div>
                         </template>
                     </div>
                     <div class="mt-6 flex justify-end space-x-3">
-                        <SecondaryButton @click="modalOpen.user = false">Annuler</SecondaryButton>
-                        <PrimaryButton :disabled="userForm.processing">Enregistrer</PrimaryButton>
+                        <SecondaryButton @click="modalOpen.user = false">{{ $t('admin.management.cancel') }}</SecondaryButton>
+                        <PrimaryButton :disabled="userForm.processing">{{ $t('admin.management.save') }}</PrimaryButton>
                     </div>
                 </form>
             </Modal>
@@ -506,30 +509,30 @@ const submitForm = (type) => {
             <!-- Shop Modal -->
             <Modal :show="modalOpen.shop" @close="modalOpen.shop = false">
                 <form @submit.prevent="submitForm('shop')" class="p-6">
-                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.shop ? 'Modifier la boutique' : 'Nouvelle boutique' }}</h2>
+                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.shop ? $t('admin.management.editShopTitle') : $t('admin.management.newShopTitle') }}</h2>
                     <div class="space-y-4">
                         <div>
-                            <InputLabel for="shop_name" value="Nom de la boutique" />
+                            <InputLabel for="shop_name" :value="$t('admin.management.shopName')" />
                             <TextInput id="shop_name" type="text" class="mt-1 block w-full" v-model="shopForm.name" required />
                             <InputError :message="shopForm.errors.name" class="mt-2" />
                         </div>
                         <div>
-                            <InputLabel for="shop_desc" value="Description" />
+                            <InputLabel for="shop_desc" :value="$t('admin.management.table.description')" />
                             <textarea id="shop_desc" v-model="shopForm.description" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm" rows="3"></textarea>
                             <InputError :message="shopForm.errors.description" class="mt-2" />
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <InputLabel for="shop_city" value="Ville" />
+                                <InputLabel for="shop_city" :value="$t('admin.management.city')" />
                                 <TextInput id="shop_city" type="text" class="mt-1 block w-full" v-model="shopForm.city" />
                             </div>
                             <div>
-                                <InputLabel for="shop_district" value="Quartier" />
+                                <InputLabel for="shop_district" :value="$t('admin.management.district')" />
                                 <TextInput id="shop_district" type="text" class="mt-1 block w-full" v-model="shopForm.district" />
                             </div>
                         </div>
                         <div>
-                            <InputLabel for="shop_phone" value="Téléphone boutique" />
+                            <InputLabel for="shop_phone" :value="$t('admin.management.shopPhone')" />
                             <div class="flex mt-1">
                                 <select
                                     v-model="shopSelectedCode"
@@ -544,23 +547,23 @@ const submitForm = (type) => {
                                     type="text"
                                     class="block w-full rounded-l-none"
                                     v-model="shopPhoneNumber"
-                                    placeholder="Ex: 6XXXXXXXX"
+                                    :placeholder="$t('admin.management.phonePlaceholder')"
                                 />
                             </div>
                             <InputError :message="shopForm.errors.phone" class="mt-2" />
                         </div>
                         <div>
-                            <InputLabel for="shop_user" value="Vendeur (Propriétaire)" />
+                            <InputLabel for="shop_user" :value="$t('admin.management.sellerOwner')" />
                             <select id="shop_user" v-model="shopForm.user_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm">
-                                <option value="">Sélectionner un vendeur</option>
+                                <option value="">{{ $t('admin.management.selectSeller') }}</option>
                                 <option v-for="user in all_users" :key="user.id" :value="user.id">{{ user.name }}</option>
                             </select>
                             <InputError :message="shopForm.errors.user_id" class="mt-2" />
                         </div>
                     </div>
                     <div class="mt-6 flex justify-end space-x-3">
-                        <SecondaryButton @click="modalOpen.shop = false">Annuler</SecondaryButton>
-                        <PrimaryButton :disabled="shopForm.processing">Enregistrer</PrimaryButton>
+                        <SecondaryButton @click="modalOpen.shop = false">{{ $t('admin.management.cancel') }}</SecondaryButton>
+                        <PrimaryButton :disabled="shopForm.processing">{{ $t('admin.management.save') }}</PrimaryButton>
                     </div>
                 </form>
             </Modal>
@@ -568,57 +571,57 @@ const submitForm = (type) => {
             <!-- Product Modal -->
             <Modal :show="modalOpen.product" @close="modalOpen.product = false">
                 <form @submit.prevent="submitForm('product')" class="p-6">
-                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.product ? 'Modifier le produit' : 'Nouveau produit' }}</h2>
+                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.product ? $t('admin.management.editProductTitle') : $t('admin.management.newProductTitle') }}</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
-                            <InputLabel for="prod_name" value="Nom du produit" />
+                            <InputLabel for="prod_name" :value="$t('admin.management.productName')" />
                             <TextInput id="prod_name" type="text" class="mt-1 block w-full" v-model="productForm.name" required />
                             <InputError :message="productForm.errors.name" class="mt-2" />
                         </div>
                         <div>
-                            <InputLabel for="prod_code" value="Code SKU" />
+                            <InputLabel for="prod_code" :value="$t('admin.management.skuCode')" />
                             <TextInput id="prod_code" type="text" class="mt-1 block w-full" v-model="productForm.code" />
                         </div>
                         <div>
-                            <InputLabel for="prod_price" value="Prix (FCFA)" />
+                            <InputLabel for="prod_price" :value="$t('admin.management.priceFcfa')" />
                             <TextInput id="prod_price" type="number" class="mt-1 block w-full" v-model="productForm.price" required />
                         </div>
                         <div>
-                            <InputLabel for="prod_promo" value="Prix Promotionnel" />
+                            <InputLabel for="prod_promo" :value="$t('admin.management.promoPrice')" />
                             <TextInput id="prod_promo" type="number" class="mt-1 block w-full" v-model="productForm.promotion_price" />
                         </div>
                         <div>
-                            <InputLabel for="prod_qty" value="Quantité en stock" />
+                            <InputLabel for="prod_qty" :value="$t('admin.management.quantityStock')" />
                             <TextInput id="prod_qty" type="number" class="mt-1 block w-full" v-model="productForm.quantity" />
                         </div>
                         <div>
-                            <InputLabel for="prod_cat" value="Catégorie" />
+                            <InputLabel for="prod_cat" :value="$t('admin.management.category')" />
                             <select id="prod_cat" v-model="productForm.category_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm">
-                                <option value="">Sélectionner</option>
+                                <option value="">{{ $t('admin.management.select') }}</option>
                                 <option v-for="cat in all_categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                             </select>
                         </div>
                         <div>
-                            <InputLabel for="prod_shop" value="Boutique" />
+                            <InputLabel for="prod_shop" :value="$t('admin.management.table.shop')" />
                             <select id="prod_shop" v-model="productForm.shop_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm">
-                                <option value="">Sélectionner</option>
+                                <option value="">{{ $t('admin.management.select') }}</option>
                                 <option v-for="shop in all_shops" :key="shop.id" :value="shop.id">{{ shop.name }}</option>
                             </select>
                         </div>
                         <div class="md:col-span-2">
-                            <InputLabel value="Description Courte" />
+                            <InputLabel :value="$t('admin.management.shortDescription')" />
                             <textarea v-model="productForm.description" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm" rows="2"></textarea>
                         </div>
                         <div class="flex items-center">
                             <label class="flex items-center">
                                 <input type="checkbox" v-model="productForm.in_stock" class="rounded border-gray-300 text-primary shadow-sm focus:ring-primary" />
-                                <span class="ms-2 text-sm text-muted-foreground">En stock</span>
+                                <span class="ms-2 text-sm text-muted-foreground">{{ $t('admin.management.inStockCheckbox') }}</span>
                             </label>
                         </div>
                     </div>
                     <div class="mt-6 flex justify-end space-x-3">
-                        <SecondaryButton @click="modalOpen.product = false">Annuler</SecondaryButton>
-                        <PrimaryButton :disabled="productForm.processing">Enregistrer</PrimaryButton>
+                        <SecondaryButton @click="modalOpen.product = false">{{ $t('admin.management.cancel') }}</SecondaryButton>
+                        <PrimaryButton :disabled="productForm.processing">{{ $t('admin.management.save') }}</PrimaryButton>
                     </div>
                 </form>
             </Modal>
@@ -626,36 +629,36 @@ const submitForm = (type) => {
             <!-- Category Modal -->
             <Modal :show="modalOpen.category" @close="modalOpen.category = false">
                 <form @submit.prevent="submitForm('category')" class="p-6">
-                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.category ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}</h2>
+                    <h2 class="text-lg font-medium text-foreground mb-4">{{ isEditing.category ? $t('admin.management.editCategoryTitle') : $t('admin.management.newCategoryTitle') }}</h2>
                     <div class="space-y-4">
                         <div>
-                            <InputLabel for="cat_name" value="Nom" />
+                            <InputLabel for="cat_name" :value="$t('admin.management.table.name')" />
                             <TextInput id="cat_name" type="text" class="mt-1 block w-full" v-model="categoryForm.name" required />
                             <InputError :message="categoryForm.errors.name" class="mt-2" />
                         </div>
                         <div>
-                            <InputLabel for="cat_slug" value="Slug (URL)" />
-                            <TextInput id="cat_slug" type="text" class="mt-1 block w-full" v-model="categoryForm.slug" placeholder="laisse vide pour générer" />
+                            <InputLabel for="cat_slug" :value="$t('admin.management.slugUrl')" />
+                            <TextInput id="cat_slug" type="text" class="mt-1 block w-full" v-model="categoryForm.slug" :placeholder="$t('admin.management.slugPlaceholder')" />
                         </div>
                         <div>
-                            <InputLabel for="cat_desc" value="Description" />
+                            <InputLabel for="cat_desc" :value="$t('admin.management.table.description')" />
                             <textarea id="cat_desc" v-model="categoryForm.description" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-primary focus:ring-primary rounded-md shadow-sm" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="mt-6 flex justify-end space-x-3">
-                        <SecondaryButton @click="modalOpen.category = false">Annuler</SecondaryButton>
-                        <PrimaryButton :disabled="categoryForm.processing">Enregistrer</PrimaryButton>
+                        <SecondaryButton @click="modalOpen.category = false">{{ $t('admin.management.cancel') }}</SecondaryButton>
+                        <PrimaryButton :disabled="categoryForm.processing">{{ $t('admin.management.save') }}</PrimaryButton>
                     </div>
                 </form>
             </Modal>
 
             <!-- Delete Confirmation -->
-            <DeleteConfirmationModal 
-                :show="deleteModalOpen" 
-                @close="deleteModalOpen = false" 
+            <DeleteConfirmationModal
+                :show="deleteModalOpen"
+                @close="deleteModalOpen = false"
                 @confirm="executeDelete"
-                :title="'Confirmer la suppression'"
-                :message="'Êtes-vous sûr de vouloir supprimer cet élément (' + deleteType + ') ? Cette action est irréversible.'"
+                :title="$t('admin.management.deleteConfirmTitle')"
+                :message="$t('admin.management.deleteConfirmMessage', { type: deleteType })"
             />
 
         </template>

@@ -40,14 +40,14 @@ onUnmounted(() => document.removeEventListener('mousedown', onClickOutside));
     <div ref="dropdownRef" class="relative">
         <button
             type="button"
-            class="flex items-center gap-1.5 rounded-2xl border border-border/60 bg-card/80 px-2.5 py-1.5 text-xs font-semibold text-foreground backdrop-blur-xl transition-all hover:bg-card active:scale-95 shadow-sm"
+            class="flex shrink-0 items-center gap-1 rounded-2xl border border-border/60 bg-card/80 px-2 py-1.5 text-xs font-semibold text-foreground backdrop-blur-xl transition-all hover:bg-card active:scale-95 shadow-sm sm:gap-1.5 sm:px-2.5"
             :aria-label="t('language.select')"
             @click="open = !open"
         >
-            <Globe class="h-3.5 w-3.5 text-muted-foreground" />
-            <span class="uppercase">{{ locale }}</span>
+            <Globe class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <span class="hidden uppercase sm:inline">{{ locale }}</span>
             <svg
-                class="h-3 w-3 text-muted-foreground transition-transform duration-200"
+                class="hidden h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200 sm:block"
                 :class="open && 'rotate-180'"
                 fill="none" stroke="currentColor" viewBox="0 0 24 24"
             >

@@ -68,6 +68,12 @@ const selectType = (type) => {
     form.account_type = type;
 };
 
+const googleRedirectHref = computed(() => {
+    return accountType.value
+        ? route('auth.google.redirect', { account_type: accountType.value })
+        : route('auth.google.redirect');
+});
+
 const submit = () => {
     if (isPro.value) {
         form.phone_number = form.phone_number.replace(/\D/g, '');
@@ -375,7 +381,7 @@ const inputClass = 'h-11 w-full rounded-[14px] border border-border bg-shop-bg p
                         <div class="flex-1 border-t border-border" />
                     </div>
                     <a
-                        :href="route('auth.google.redirect')"
+                        :href="googleRedirectHref"
                         class="flex h-11 w-full items-center justify-center gap-2.5 rounded-[14px] border border-border bg-white text-[13px] font-medium text-foreground transition hover:bg-shop-bg active:scale-95 dark:bg-white/5"
                     >
                         <svg class="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">

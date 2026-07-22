@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import AdminSidebar from '@/components/admin/AdminSidebar.vue';
 import { Button } from '@/components/ui/button';
 import { Link, usePage } from '@inertiajs/vue3';
-import { ExternalLink } from 'lucide-vue-next';
+import { ChevronDown, ExternalLink, Menu } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 
 const props = defineProps({
@@ -51,8 +51,22 @@ const mobileSidebarVisible = ref(false);
 
         <div class="overflow-x-hidden py-6 sm:py-8">
             <div class="mx-auto max-w-7xl overflow-x-hidden px-4 sm:px-6 lg:px-8">
-                <div class="mb-4 md:hidden">
-                    <!-- mobile toggle could go here -->
+                <div class="mb-4 lg:hidden">
+                    <button
+                        type="button"
+                        class="flex w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground shadow-sm"
+                        :aria-expanded="mobileSidebarVisible"
+                        @click="mobileSidebarVisible = !mobileSidebarVisible"
+                    >
+                        <span class="flex items-center gap-2">
+                            <Menu class="h-4 w-4" />
+                            {{ title }}
+                        </span>
+                        <ChevronDown class="h-4 w-4 transition-transform" :class="mobileSidebarVisible ? 'rotate-180' : ''" />
+                    </button>
+                    <div v-if="mobileSidebarVisible" class="mt-2">
+                        <AdminSidebar :active-route="$props.activeRoute" />
+                    </div>
                 </div>
 
                 <div class="grid gap-6 lg:grid-cols-[260px_1fr]">

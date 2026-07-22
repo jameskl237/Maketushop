@@ -32,12 +32,12 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Éditer utilisateur" />
+    <Head :title="$t('admin.editUser.pageTitle')" />
 
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center gap-3">
-                <h2 class="text-xl font-semibold leading-tight">Éditer — {{ user.name }}</h2>
+                <h2 class="text-xl font-semibold leading-tight">{{ $t('admin.editUser.headingPrefix', { name: user.name }) }}</h2>
             </div>
         </template>
 
@@ -46,56 +46,56 @@ const submit = () => {
                 <div class="border border-border bg-card text-foreground shadow sm:rounded-lg p-6">
                     <form @submit.prevent="submit" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-muted-foreground">Nom</label>
+                            <label class="block text-sm font-medium text-muted-foreground">{{ $t('admin.editUser.name') }}</label>
                             <input v-model="form.name" type="text" class="form-input" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-muted-foreground">Nom d'utilisateur</label>
+                            <label class="block text-sm font-medium text-muted-foreground">{{ $t('admin.editUser.username') }}</label>
                             <input v-model="form.username" type="text" class="form-input" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-muted-foreground">Email</label>
+                            <label class="block text-sm font-medium text-muted-foreground">{{ $t('admin.editUser.email') }}</label>
                             <input v-model="form.email" type="email" class="form-input" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-muted-foreground">Téléphone</label>
+                            <label class="block text-sm font-medium text-muted-foreground">{{ $t('admin.editUser.phone') }}</label>
                             <input v-model="form.phone" type="text" class="form-input" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-muted-foreground">Adresse</label>
+                            <label class="block text-sm font-medium text-muted-foreground">{{ $t('admin.editUser.address') }}</label>
                             <input v-model="form.address" type="text" class="form-input" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-muted-foreground">Rôle</label>
+                            <label class="block text-sm font-medium text-muted-foreground">{{ $t('admin.editUser.role') }}</label>
                             <select v-model="form.role" class="form-select">
-                                <option value="admin">admin</option>
-                                <option value="supplier">supplier</option>
-                                <option value="user">user</option>
+                                <option value="admin">{{ $t('admin.editUser.roleAdmin') }}</option>
+                                <option value="supplier">{{ $t('admin.editUser.roleSupplier') }}</option>
+                                <option value="user">{{ $t('admin.editUser.roleUser') }}</option>
                             </select>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-muted-foreground">Google ID</label>
+                            <label class="block text-sm font-medium text-muted-foreground">{{ $t('admin.editUser.googleId') }}</label>
                             <input v-model="form.google_id" type="text" class="form-input" />
                         </div>
 
                         <div class="flex items-center gap-2">
                             <input id="email_verified_edit" type="checkbox" v-model="form.email_verified" class="form-checkbox" />
-                            <label for="email_verified_edit" class="text-sm font-medium text-muted-foreground">Email vérifié</label>
+                            <label for="email_verified_edit" class="text-sm font-medium text-muted-foreground">{{ $t('admin.editUser.emailVerified') }}</label>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-muted-foreground">Mot de passe (laisser vide pour conserver)</label>
+                            <label class="block text-sm font-medium text-muted-foreground">{{ $t('admin.editUser.passwordKeepEmpty') }}</label>
                             <input v-model="form.password" type="password" class="form-input" />
                         </div>
 
                         <div class="flex items-center justify-end gap-3">
-                            <button type="submit" :disabled="submitting" class="btn btn-primary">Enregistrer</button>
+                            <button type="submit" :disabled="submitting" class="btn btn-primary">{{ $t('admin.editUser.save') }}</button>
                         </div>
                     </form>
                 </div>

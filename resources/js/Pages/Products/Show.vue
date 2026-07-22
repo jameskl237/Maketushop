@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/composables/useCart';
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft, Heart, ShoppingBag } from 'lucide-vue-next';
+import { ArrowLeft, ChevronLeft, ChevronRight, Heart, ShoppingBag } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -28,6 +28,33 @@ const ogImage = computed(() => {
     if (/^https?:\/\//.test(img)) return img;
     return `${origin}${img.startsWith('/') ? '' : '/'}${img}`;
 });
+
+const productImages = computed(() => {
+    if (props.product.images?.length) return props.product.images;
+    const fallbackUrl = props.product.main_image || '/images/Maketu1.png';
+    return [{ id: 'main', url: fallbackUrl, alt: props.product.name }];
+});
+const activeImageIndex = ref(0);
+const currentImage = computed(() => productImages.value[activeImageIndex.value]?.url);
+
+const prevImage = () => {
+    activeImageIndex.value = (activeImageIndex.value - 1 + productImages.value.length) % productImages.value.length;
+};
+const nextImage = () => {
+    activeImageIndex.value = (activeImageIndex.value + 1) % productImages.value.length;
+};
+
+let touchStartX = 0;
+const onImageTouchStart = (event) => {
+    touchStartX = event.changedTouches[0].clientX;
+};
+const onImageTouchEnd = (event) => {
+    if (productImages.value.length < 2) return;
+    const deltaX = event.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(deltaX) < 40) return;
+    if (deltaX < 0) nextImage();
+    else prevImage();
+};
 
 const canBuy = computed(() => props.product.stock > 0);
 const price = computed(() => {
@@ -57,14 +84,51 @@ const addProductToCart = () => {
     <div class="min-h-screen bg-shop-bg pb-16 text-foreground">
         <Transition name="page-fade" mode="out-in">
             <main class="mx-auto max-w-3xl">
-                <section class="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-[#F0EEFF] to-[#EEF4FF]">
+                <section
+                    class="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-[#F0EEFF] to-[#EEF4FF]"
+                    @touchstart="onImageTouchStart"
+                    @touchend="onImageTouchEnd"
+                >
                     <img
-                        :src="product.main_image || product.images?.[0] || '/images/Maketu1.png'"
+                        :src="currentImage"
                         :alt="product.name"
                         class="h-full w-full object-cover"
                         loading="lazy"
                         :style="`view-transition-name: product-img-${product.id}`"
                     />
+
+                    <template v-if="productImages.length > 1">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            class="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-[12px] bg-white/90 shadow-none"
+                            @click="prevImage"
+                        >
+                            <ChevronLeft class="h-4 w-4" />
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            class="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-[12px] bg-white/90 shadow-none"
+                            @click="nextImage"
+                        >
+                            <ChevronRight class="h-4 w-4" />
+                        </Button>
+
+                        <div class="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5">
+                            <button
+                                v-for="(image, index) in productImages"
+                                :key="image.id"
+                                type="button"
+                                class="h-1.5 rounded-full transition-all"
+                                :class="activeImageIndex === index ? 'w-4 bg-white' : 'w-1.5 bg-white/60'"
+                                @click="activeImageIndex = index"
+                            />
+                        </div>
+                    </template>
+
                     <Link :href="route('products.index')" class="absolute left-3 top-3">
                         <Button variant="ghost" size="icon" class="h-9 w-9 rounded-[12px] bg-white/90 shadow-none">
                             <ArrowLeft class="h-4 w-4" />
@@ -74,6 +138,19 @@ const addProductToCart = () => {
                         <Heart class="h-4 w-4" />
                     </Button>
                 </section>
+
+                <div v-if="productImages.length > 1" class="flex gap-2 overflow-x-auto bg-white px-4 py-2.5">
+                    <button
+                        v-for="(image, index) in productImages"
+                        :key="image.id"
+                        type="button"
+                        class="h-14 w-14 shrink-0 overflow-hidden rounded-[10px] border-2"
+                        :class="activeImageIndex === index ? 'border-primary' : 'border-transparent'"
+                        @click="activeImageIndex = index"
+                    >
+                        <img :src="image.url" :alt="image.alt || product.name" class="h-full w-full object-cover" />
+                    </button>
+                </div>
 
                 <section class="space-y-3 bg-white px-4 py-3.5">
                     <p class="text-[10px] leading-none text-shop-light">
@@ -118,7 +195,7 @@ const addProductToCart = () => {
                             Panier
                         </Button>
                         <Link :href="route('products.buy', { product: product.id })">
-                            <Button class="h-10 w-full rounded-[14px] bg-gradient-to-r from-primary to-pink text-[12px] font-bold text-white shadow-none" :disabled="!canBuy">
+                            <Button class="h-10 w-full rounded-[14px] bg-primary text-[12px] font-bold text-white shadow-none" :disabled="!canBuy">
                                 Acheter
                             </Button>
                         </Link>

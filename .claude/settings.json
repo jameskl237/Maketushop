@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ' *)",
+      "Bash(grep -o '$t\\('\\\\''admin[^'\\\\'']*'\\\\''\\\\|t\\('\\\\''admin[^'\\\\'']*'\\\\''' /home/jameskl237/Documents/private/Maketushop/resources/js/Pages/Backoffice/Admin/Management.vue)",
+      "Bash(grep -o '$t\\('\\\\''admin[^'\\\\'']*'\\\\''\\\\|t\\('\\\\''admin[^'\\\\'']*'\\\\''' /home/jameskl237/Documents/private/Maketushop/resources/js/Pages/Backoffice/Admin/Users/Edit.vue)",
+      "Bash(grep -o '$t\\('\\\\''admin[^'\\\\'']*'\\\\''\\\\|t\\('\\\\''admin[^'\\\\'']*'\\\\''' /home/jameskl237/Documents/private/Maketushop/resources/js/Pages/Backoffice/Admin/Users/Show.vue)",
+      "Bash(grep -o '$t\\('\\\\''admin[^'\\\\'']*'\\\\''\\\\|t\\('\\\\''admin[^'\\\\'']*'\\\\''' /home/jameskl237/Documents/private/Maketushop/resources/js/Pages/Backoffice/Admin/Users/Index.vue)",
+      "Bash(grep -o '$t\\('\\\\''admin[^'\\\\'']*'\\\\''\\\\|t\\('\\\\''admin[^'\\\\'']*'\\\\''' /home/jameskl237/Documents/private/Maketushop/resources/js/components/admin/AdminSidebar.vue)",
+      "Bash(grep -nP \"[À-ÿ]{3,}\" resources/js/Pages/Services/Index.vue resources/js/Pages/Services/Show.vue resources/js/Pages/Services/Buy.vue resources/js/components/services/ServiceCard.vue resources/js/components/services/QuoteDialog.vue)",
+      "Bash(node -e \"require\\('@vue/compiler-sfc'\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(sort -u -t: -k2)"
+    ]
+  }
+}

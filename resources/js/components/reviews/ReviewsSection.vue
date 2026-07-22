@@ -5,6 +5,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { router, usePage } from '@inertiajs/vue3';
 import { Star } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
     // 'product' | 'service' | 'shop'
@@ -58,7 +61,7 @@ const submit = () => {
 <template>
     <section class="mt-2 bg-white px-4 py-4 dark:bg-card">
         <div class="flex items-center justify-between">
-            <h2 class="font-display text-[16px] font-bold">Avis ({{ ratingsCount }})</h2>
+            <h2 class="font-display text-[16px] font-bold">{{ $t('rating.reviewsCount', { count: ratingsCount }) }}</h2>
             <div class="flex items-center gap-1 text-[13px] font-bold text-shop-amber">
                 <Star class="h-4 w-4 fill-current" />
                 {{ (Number(averageRating) || 0).toFixed(1) }}
@@ -68,7 +71,7 @@ const submit = () => {
         <!-- Formulaire d'avis (client connecté) -->
         <div v-if="isAuthenticated" class="mt-3 rounded-2xl border border-border p-3">
             <p class="mb-2 text-[12px] font-semibold text-foreground">
-                {{ userRating ? 'Modifier votre note' : 'Donnez votre avis' }}
+                {{ userRating ? $t('rating.editYourRating') : $t('rating.giveYourReview') }}
             </p>
             <div class="mb-2 flex items-center gap-1">
                 <button
@@ -87,7 +90,7 @@ const submit = () => {
             <Textarea
                 v-model="comment"
                 rows="2"
-                placeholder="Partagez votre expérience (optionnel)..."
+                :placeholder="t('rating.commentPlaceholder')"
                 class="text-[13px]"
             />
             <Button
@@ -95,15 +98,15 @@ const submit = () => {
                 class="mt-2 h-9 w-full rounded-xl text-[12px] font-bold"
                 @click="submit"
             >
-                {{ submitting ? 'Envoi...' : 'Publier mon avis' }}
+                {{ submitting ? $t('rating.submitting') : $t('rating.submitReview') }}
             </Button>
         </div>
 
         <!-- Invitation à se connecter -->
         <div v-else class="mt-3 rounded-2xl border border-dashed border-border p-3 text-center">
-            <p class="text-[12px] text-muted-foreground">Connectez-vous pour laisser un avis.</p>
+            <p class="text-[12px] text-muted-foreground">{{ $t('rating.loginToReview') }}</p>
             <a :href="loginUrl" class="mt-2 inline-block">
-                <Button variant="outline" size="sm" class="rounded-xl text-[12px]">Se connecter</Button>
+                <Button variant="outline" size="sm" class="rounded-xl text-[12px]">{{ $t('auth.login') }}</Button>
             </a>
         </div>
 
@@ -119,7 +122,7 @@ const submit = () => {
             </div>
         </div>
         <p v-else class="mt-4 text-center text-[12px] text-muted-foreground">
-            Aucun avis pour le moment. Soyez le premier !
+            {{ $t('rating.noReviewsYet') }}
         </p>
     </section>
 </template>

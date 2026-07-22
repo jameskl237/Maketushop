@@ -4,6 +4,9 @@ import { useFavoritesStore } from '@/stores/favorites';
 import { router } from '@inertiajs/vue3';
 import { Heart } from 'lucide-vue-next';
 import { computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
     // Rétrocompat : ciblage produit historique
@@ -19,6 +22,10 @@ const resolvedId = computed(() => props.itemId ?? props.productId);
 const resolvedType = computed(() => (props.itemId != null ? props.type : 'product'));
 
 const isFavorite = computed(() => favoritesStore.hasFor(resolvedType.value, resolvedId.value));
+
+const favoriteLabel = computed(() =>
+    isFavorite.value ? t('productsPage.favoriteButton.remove') : t('productsPage.favoriteButton.add'),
+);
 
 onMounted(() => {
     if (!favoritesStore.hydrated) {
@@ -43,6 +50,8 @@ const toggleFavorite = () => {
         variant="secondary"
         size="icon"
         class="h-8 w-8 rounded-full bg-background/95 shadow-sm"
+        :aria-label="favoriteLabel"
+        :title="favoriteLabel"
         @click.stop="toggleFavorite"
     >
         <Heart class="h-4 w-4" :class="isFavorite ? 'fill-primary text-primary' : 'text-muted-foreground'" />

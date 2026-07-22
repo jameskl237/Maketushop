@@ -11,12 +11,12 @@ const users = ref(props.users.data || []);
 </script>
 
 <template>
-    <Head title="Admin — Users" />
+    <Head :title="$t('admin.usersIndex.pageTitle')" />
 
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center gap-3">
-                <h2 class="text-xl font-semibold leading-tight">Gestion des utilisateurs</h2>
+                <h2 class="text-xl font-semibold leading-tight">{{ $t('admin.userManagementTitle') }}</h2>
             </div>
         </template>
 
@@ -26,10 +26,10 @@ const users = ref(props.users.data || []);
                     <table class="min-w-full divide-y divide-border">
                         <thead class="bg-muted/40">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Nom</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Email</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Rôle</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('admin.management.table.id') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('admin.management.table.name') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('admin.management.email') }}</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t('admin.management.table.role') }}</th>
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
@@ -45,7 +45,7 @@ const users = ref(props.users.data || []);
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ user.address ?? '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{{ user.email_verified_at ? new Date(user.email_verified_at).toLocaleString() : '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Link :href="route('backoffice.admin.users.show', { user: user.id })" class="text-primary hover:text-primary/80">Voir</Link>
+                                        <Link :href="route('backoffice.admin.users.show', { user: user.id })" class="text-primary hover:text-primary/80">{{ $t('admin.usersIndex.view') }}</Link>
                                     </td>
                             </tr>
                         </tbody>

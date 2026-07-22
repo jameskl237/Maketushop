@@ -155,7 +155,7 @@ const shareShop = async () => {
 
                 <section class="space-y-3 px-3 py-4">
                     <a v-if="whatsappUrl" :href="whatsappUrl" target="_blank" rel="noopener noreferrer">
-                        <Button class="h-10 w-full rounded-[14px] bg-gradient-to-r from-primary to-orange text-[12px] font-bold text-white shadow-none">
+                        <Button class="h-10 w-full rounded-[14px] bg-primary text-[12px] font-bold text-white shadow-none">
                             <MessageCircle class="h-4 w-4" />
                             {{ t('shopShow.contact') }}
                         </Button>

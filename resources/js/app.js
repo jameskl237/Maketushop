@@ -6,6 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createPinia } from 'pinia';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import PhoneVerificationModal from '@/components/PhoneVerificationModal.vue';
 import { initTheme } from '@/composables/useTheme';
 import { initViewTransitions } from '@/composables/useViewTransition';
 import { i18n, getI18nLocale, setI18nLocale } from '@/i18n';
@@ -30,7 +31,7 @@ createInertiaApp({
         ),
     setup({ el, App, props, plugin }) {
         const pinia = createPinia();
-        const app = createApp({ render: () => h(App, props) })
+        const app = createApp({ render: () => [h(App, props), h(PhoneVerificationModal)] })
             .use(plugin)
             .use(pinia)
             .use(i18n)

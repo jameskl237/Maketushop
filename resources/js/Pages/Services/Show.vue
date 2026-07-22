@@ -11,6 +11,7 @@ import { useCart } from '@/composables/useCart';
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft, MapPin, ShoppingBag } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     service: { type: Object, required: true },
@@ -18,6 +19,7 @@ const props = defineProps({
 });
 
 const { addToCart } = useCart();
+const { t } = useI18n();
 
 const origin = typeof window !== 'undefined' ? window.location.origin : '';
 const ogImage = computed(() => {
@@ -45,7 +47,7 @@ const orderService = () => {
 <template>
     <Head :title="service.name">
         <meta head-key="og:title" property="og:title" :content="service.name" />
-        <meta head-key="og:description" property="og:description" :content="service.short_description || service.subtitle || 'Découvrez ce service sur MaketuShop.'" />
+        <meta head-key="og:description" property="og:description" :content="service.short_description || service.subtitle || t('serviceShow.ogDescriptionFallback')" />
         <meta head-key="og:image" property="og:image" :content="ogImage" />
         <meta head-key="og:type" property="og:type" content="product" />
         <meta head-key="twitter:card" name="twitter:card" content="summary_large_image" />
@@ -68,23 +70,23 @@ const orderService = () => {
                         </Button>
                     </Link>
                     <Badge class="absolute right-3 top-3 rounded-full bg-orange/90 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-md">
-                        Service
+                        {{ t('servicesPage.serviceLabel') }}
                     </Badge>
                 </section>
 
                 <section class="space-y-3 bg-white px-4 py-3.5">
                     <p class="text-[10px] leading-none text-shop-light">
-                        Accueil / Services / {{ service.name }}
+                        {{ t('serviceShow.breadcrumbHome') }} / {{ t('serviceShow.breadcrumbServices') }} / {{ service.name }}
                     </p>
                     <p class="text-[10.5px] font-semibold uppercase leading-none text-primary">
-                        {{ service.category?.name || 'Service' }}
+                        {{ service.category?.name || t('servicesPage.serviceLabel') }}
                     </p>
                     <h1 class="font-display text-xl font-extrabold leading-6 text-foreground">{{ service.name }}</h1>
                     <p v-if="service.subtitle" class="text-[12px] leading-5 text-shop-muted">{{ service.subtitle }}</p>
 
                     <div class="flex items-center justify-between gap-3">
                         <p v-if="price" class="font-display text-[22px] font-extrabold text-primary">{{ price }}</p>
-                        <p v-else class="font-display text-[18px] font-extrabold text-primary">Sur devis</p>
+                        <p v-else class="font-display text-[18px] font-extrabold text-primary">{{ t('servicesPage.quoteOnlyPrice') }}</p>
                         <div v-if="service.city" class="flex items-center gap-1 text-[11px] text-shop-muted">
                             <MapPin class="h-3.5 w-3.5" />
                             {{ service.city }}
@@ -110,11 +112,11 @@ const orderService = () => {
                                 @click="orderService"
                             >
                                 <ShoppingBag class="h-4 w-4" />
-                                Commander
+                                {{ t('servicesPage.orderButton') }}
                             </Button>
                             <Link :href="route('services.buy', { service: service.id })">
-                                <Button class="h-12 w-full rounded-[14px] bg-gradient-to-r from-primary to-orange text-[12px] font-bold text-white shadow-none">
-                                    Acheter
+                                <Button class="h-12 w-full rounded-[14px] bg-primary text-[12px] font-bold text-white shadow-none">
+                                    {{ t('servicesPage.buyButton') }}
                                 </Button>
                             </Link>
                         </div>
@@ -122,14 +124,14 @@ const orderService = () => {
                 </section>
 
                 <section class="mt-2 bg-white px-4 py-3.5">
-                    <h2 class="font-display text-[16px] font-bold">Description</h2>
+                    <h2 class="font-display text-[16px] font-bold">{{ t('serviceShow.descriptionTitle') }}</h2>
                     <p class="mt-2 whitespace-pre-line text-[12px] leading-5 text-shop-muted">
-                        {{ service.description || service.short_description || 'Aucune description fournie pour ce service.' }}
+                        {{ service.description || service.short_description || t('serviceShow.descriptionFallback') }}
                     </p>
                 </section>
 
                 <section v-if="service.shop" class="mt-2 bg-white px-4 py-3.5">
-                    <h2 class="font-display text-[16px] font-bold">Prestataire</h2>
+                    <h2 class="font-display text-[16px] font-bold">{{ t('serviceShow.providerTitle') }}</h2>
                     <Separator class="my-3" />
                     <div class="flex items-center justify-between gap-3">
                         <div class="flex items-center gap-3">
@@ -146,7 +148,7 @@ const orderService = () => {
                         </div>
                         <Link :href="route('shops.show', { shop: service.shop.id })">
                             <Button variant="outline" class="h-[30px] rounded-[10px] border-border bg-shop-bg text-[11px] font-bold text-primary shadow-none">
-                                Voir la page
+                                {{ t('serviceShow.viewPage') }}
                             </Button>
                         </Link>
                     </div>
@@ -162,7 +164,7 @@ const orderService = () => {
                 />
 
                 <section v-if="relatedServices.length" class="space-y-3 px-3 py-4">
-                    <h2 class="font-display text-[17px] font-extrabold">Services similaires</h2>
+                    <h2 class="font-display text-[17px] font-extrabold">{{ t('serviceShow.relatedServices') }}</h2>
                     <div class="grid grid-cols-2 gap-2.5">
                         <ServiceCard v-for="related in relatedServices" :key="related.id" :service="related" />
                     </div>

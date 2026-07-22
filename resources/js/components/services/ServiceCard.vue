@@ -8,12 +8,14 @@ import { useCart } from '@/composables/useCart';
 import { Link } from '@inertiajs/vue3';
 import { FileText, Sparkles } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     service: { type: Object, required: true },
 });
 
 const { addToCart } = useCart();
+const { t } = useI18n();
 
 const isQuoteOnly = computed(() => props.service.quote_only || props.service.current_price == null);
 
@@ -47,10 +49,10 @@ const onAddToCart = () => {
 
                     <div class="absolute left-3 top-3 flex flex-col gap-1.5">
                         <Badge v-if="service.is_new" class="h-6 rounded-lg bg-primary/90 px-2.5 text-[10px] font-bold text-white backdrop-blur-md">
-                            New
+                            {{ t('servicesPage.newBadge') }}
                         </Badge>
                         <Badge class="h-6 rounded-lg bg-orange/90 px-2.5 text-[10px] font-bold text-white backdrop-blur-md">
-                            <Sparkles class="mr-1 h-3 w-3" /> Service
+                            <Sparkles class="mr-1 h-3 w-3" /> {{ t('servicesPage.serviceLabel') }}
                         </Badge>
                     </div>
 
@@ -63,7 +65,7 @@ const onAddToCart = () => {
                     <!-- Glass Price Capsule -->
                     <div class="absolute bottom-3 right-3 rounded-xl border border-white/40 bg-white/70 px-3 py-1.5 backdrop-blur-md shadow-lg shadow-black/5">
                         <p v-if="price" class="font-display text-[13px] font-black leading-none text-primary">{{ price }}</p>
-                        <p v-else class="font-display text-[11px] font-black leading-none text-primary">Sur devis</p>
+                        <p v-else class="font-display text-[11px] font-black leading-none text-primary">{{ t('servicesPage.quoteOnlyPrice') }}</p>
                     </div>
                 </div>
             </Link>
@@ -71,7 +73,7 @@ const onAddToCart = () => {
             <div class="space-y-2 px-1.5 py-3">
                 <div class="flex items-center justify-between gap-2">
                     <p class="line-clamp-1 text-[10px] font-bold uppercase tracking-wider text-shop-light">
-                        {{ service.category?.name || 'Service' }}
+                        {{ service.category?.name || t('servicesPage.serviceLabel') }}
                     </p>
                     <StarRating
                         :average-rating="Number(service.average_rating) || 0"
@@ -97,7 +99,7 @@ const onAddToCart = () => {
                     <Link v-if="isQuoteOnly" :href="route('services.show', { service: service.id })" class="block w-full">
                         <Button variant="default" class="h-9 w-full rounded-xl px-1 text-[11px] font-bold">
                             <FileText class="h-3.5 w-3.5" />
-                            Demander un devis
+                            {{ t('servicesPage.requestQuote') }}
                         </Button>
                     </Link>
                     <div v-else class="grid grid-cols-2 gap-2">
@@ -106,11 +108,11 @@ const onAddToCart = () => {
                             class="h-9 rounded-xl px-1 text-[11px] font-bold"
                             @click="onAddToCart"
                         >
-                            Commander
+                            {{ t('servicesPage.orderButton') }}
                         </Button>
                         <Link :href="route('services.buy', { service: service.id })" class="w-full">
                             <Button variant="default" class="h-9 w-full rounded-xl px-1 text-[11px] font-bold">
-                                Acheter
+                                {{ t('servicesPage.buyButton') }}
                             </Button>
                         </Link>
                     </div>

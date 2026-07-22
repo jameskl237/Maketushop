@@ -10,11 +10,11 @@ defineProps({
     },
     title: {
         type: String,
-        default: 'Confirmer la suppression',
+        default: null,
     },
     message: {
         type: String,
-        default: 'Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.',
+        default: null,
     },
 });
 
@@ -33,23 +33,23 @@ const confirm = () => {
     <Modal :show="show" @close="close" maxWidth="md">
         <div class="p-6">
             <h2 class="text-lg font-medium text-foreground">
-                {{ title }}
+                {{ title || $t('common.deleteConfirmTitle') }}
             </h2>
 
             <p class="mt-1 text-sm text-muted-foreground">
-                {{ message }}
+                {{ message || $t('common.deleteConfirmMessage') }}
             </p>
 
             <div class="mt-6 flex justify-end">
                 <SecondaryButton @click="close">
-                    Annuler
+                    {{ $t('common.cancel') }}
                 </SecondaryButton>
 
                 <DangerButton
                     class="ms-3"
                     @click="confirm"
                 >
-                    Supprimer
+                    {{ $t('common.delete') }}
                 </DangerButton>
             </div>
         </div>

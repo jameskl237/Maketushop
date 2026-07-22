@@ -19,28 +19,28 @@ const isAuthenticated = computed(() => !!page.props.auth?.user);
 
 <template>
     <header class="sticky top-0 z-50 h-14 border-b border-white/10 bg-white/65 backdrop-blur-2xl backdrop-saturate-150 dark:bg-[#130D22]/70 dark:border-white/5" style="view-transition-name: topbar">
-        <div class="mx-auto flex h-full max-w-7xl items-center justify-between px-4">
-            <Link :href="showBackHome ? '/' : route('products.index')" class="group flex items-center gap-1.5">
-                <div class="flex h-7 w-7 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition-transform group-active:scale-95">
+        <div class="mx-auto flex h-full max-w-7xl items-center justify-between gap-2 px-3 sm:px-4">
+            <Link :href="showBackHome ? '/' : route('products.index')" class="group flex min-w-0 shrink items-center gap-1.5">
+                <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition-transform group-active:scale-95">
                     <span class="font-display text-[13px] font-black">M</span>
                 </div>
-                <span class="font-display text-[14px] font-extrabold tracking-tight text-foreground">
+                <span class="truncate font-display text-[14px] font-extrabold tracking-tight text-foreground">
                     Maketu<span class="text-primary">Shop</span>
                 </span>
             </Link>
 
-            <div class="flex items-center gap-2">
+            <div class="flex shrink-0 items-center gap-1.5 sm:gap-2">
                 <Link
                     :href="route('register')"
-                    class="flex items-center gap-1.5 h-8 rounded-xl bg-primary/10 px-3 text-[11px] font-bold text-primary transition hover:bg-primary/20 active:scale-95"
+                    class="flex h-8 shrink-0 items-center gap-1.5 rounded-xl bg-primary/10 px-2.5 text-[11px] font-bold text-primary transition hover:bg-primary/20 active:scale-95 sm:px-3"
                 >
-                    <Store class="h-3.5 w-3.5" />
-                    Je veux vendre
+                    <Store class="h-3.5 w-3.5 shrink-0" />
+                    <span class="hidden sm:inline">{{ $t('shopChrome.sellCta') }}</span>
                 </Link>
 
                 <LanguageSwitcher />
 
-                <ThemeToggle :floating="false" class="h-9 w-9 rounded-2xl bg-glass border border-glass-border backdrop-blur-xl shadow-none" />
+                <ThemeToggle :floating="false" class="h-9 w-9 shrink-0 rounded-2xl bg-glass border border-glass-border backdrop-blur-xl shadow-none" />
 
                 <Link :href="route('cart.index')" class="relative hidden sm:block">
                     <Button

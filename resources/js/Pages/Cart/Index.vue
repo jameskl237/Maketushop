@@ -304,8 +304,8 @@ onMounted(() => {
     </div>
     
     <!-- Login prompt modal for guests who try to checkout -->
-    <div v-if="showLoginPrompt" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-        <div class="mb-6 transform overflow-hidden rounded-lg border border-border bg-card text-foreground shadow-xl p-6 w-full max-w-md">
+    <div v-if="showLoginPrompt" class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4">
+        <div class="max-h-[85vh] w-full max-w-md transform overflow-y-auto rounded-lg border border-border bg-card text-foreground shadow-xl p-6">
             <h4 class="text-lg font-semibold mb-4">{{ t('cartPage.loginRequiredTitle') }}</h4>
             <p class="text-sm text-muted-foreground mb-4">{{ t('cartPage.loginRequiredMessage') }}</p>
             <div class="flex justify-end gap-2">

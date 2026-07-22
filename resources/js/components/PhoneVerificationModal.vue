@@ -36,16 +36,16 @@ const submit = () => {
     <Modal :show="mustSetPhone" :closeable="false">
         <div class="p-6">
             <h2 class="text-lg font-medium text-foreground">
-                Informations complémentaires requises
+                {{ $t('phoneVerification.title') }}
             </h2>
 
             <p class="mt-1 text-sm text-muted-foreground">
-                Pour finaliser votre inscription, veuillez renseigner votre numéro de téléphone. Ce numéro sera également utilisé pour vos boutiques.
+                {{ $t('phoneVerification.description') }}
             </p>
 
             <form @submit.prevent="submit" class="mt-6">
                 <div>
-                    <InputLabel for="phone" value="Numéro de téléphone" />
+                    <InputLabel for="phone" :value="$t('phoneVerification.phoneNumberLabel')" />
 
                     <div class="flex mt-1">
                         <select
@@ -62,7 +62,7 @@ const submit = () => {
                             class="block w-full rounded-l-none"
                             v-model="phoneNumber"
                             required
-                            placeholder="Ex: 6XXXXXXXX"
+                            :placeholder="$t('phoneVerification.phoneNumberPlaceholder')"
                         />
                     </div>
 
@@ -71,7 +71,7 @@ const submit = () => {
 
                 <div class="mt-6 flex justify-end">
                     <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                        Enregistrer
+                        {{ $t('common.save') }}
                     </PrimaryButton>
                 </div>
             </form>

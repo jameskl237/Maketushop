@@ -5,10 +5,10 @@ import StatsOverview from '@/components/supplier/StatsOverview.vue';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
-    DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
+    DialogScrollContent,
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -231,7 +231,7 @@ const submitShopUpdate = () => {
                 </DialogDescription>
             </DialogHeader>
                 <div class="max-h-[70vh] overflow-y-auto pr-2">
-                    <form class="space-y-4" @submit.prevent="submitShop">
+                    <form id="create-shop-dashboard-form" class="space-y-4" @submit.prevent="submitShop">
                 <div class="space-y-2">
                     <Label for="shop-name">{{ $t('supplier.shopName') }}</Label>
                     <Input id="shop-name" v-model="form.name" type="text" required />
@@ -295,7 +295,7 @@ const submitShopUpdate = () => {
                     <Button type="button" variant="outline" @click="createShopDialogOpen = false">
                         {{ $t('common.cancel') }}
                     </Button>
-                    <Button type="submit" :disabled="form.processing">
+                    <Button type="submit" form="create-shop-dashboard-form" :disabled="form.processing">
                         {{ form.processing ? $t('common.saving') : $t('supplier.createShop') }}
                     </Button>
                 </DialogFooter>
@@ -311,7 +311,7 @@ const submitShopUpdate = () => {
                 </DialogDescription>
             </DialogHeader>
             <div class="max-h-[70vh] overflow-y-auto pr-2">
-                <form class="space-y-4" @submit.prevent="submitShopUpdate">
+                <form id="edit-shop-dashboard-form" class="space-y-4" @submit.prevent="submitShopUpdate">
                 <div class="space-y-2">
                     <Label for="edit-shop-name">{{ $t('supplier.shopName') }}</Label>
                     <Input id="edit-shop-name" v-model="editForm.name" type="text" required />
@@ -378,7 +378,7 @@ const submitShopUpdate = () => {
                     <Button type="button" variant="outline" @click="editShopDialogOpen = false">
                         {{ $t('common.cancel') }}
                     </Button>
-                    <Button type="submit" :disabled="editForm.processing">
+                    <Button type="submit" form="edit-shop-dashboard-form" :disabled="editForm.processing">
                         {{ editForm.processing ? $t('common.saving') : $t('supplier.updateShop') }}
                     </Button>
                 </DialogFooter>

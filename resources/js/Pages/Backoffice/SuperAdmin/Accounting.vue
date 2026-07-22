@@ -2,21 +2,24 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { onMounted, ref, computed } from 'vue';
-import { 
-    TrendingUp, 
-    ShoppingBag, 
-    CreditCard, 
+import { useI18n } from 'vue-i18n';
+import {
+    TrendingUp,
+    ShoppingBag,
+    CreditCard,
     Store,
     PieChart,
     BarChart3,
     Activity
 } from 'lucide-vue-next';
 
-const props = defineProps({ 
-    stats: Object, 
-    revenue_by_category: Array, 
-    revenue_by_payment_method: Array, 
-    orders_by_status: Array, 
+const { t } = useI18n();
+
+const props = defineProps({
+    stats: Object,
+    revenue_by_category: Array,
+    revenue_by_payment_method: Array,
+    orders_by_status: Array,
     revenue_over_time: Object,
     top_shops: Array
 });
@@ -29,11 +32,11 @@ const orderStatusChartRef = ref(null);
 const topShopsChartRef = ref(null);
 
 const formatPrice = (value) => {
-    if (value === null || value === undefined) return '0 FCFA';
-    return new Intl.NumberFormat(undefined, { 
-        style: 'currency', 
-        currency: 'XAF', 
-        maximumFractionDigits: 0 
+    if (value === null || value === undefined) return t('admin.superadmin.accounting.zeroAmount');
+    return new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: 'XAF',
+        maximumFractionDigits: 0
     }).format(value).replace('XAF', 'FCFA');
 };
 
@@ -54,7 +57,7 @@ onMounted(async () => {
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: (context) => `Revenu: ${formatPrice(context.raw)}`
+                                label: (context) => t('admin.superadmin.accounting.revenueTooltip', { amount: formatPrice(context.raw) })
                             }
                         }
                     },
@@ -91,7 +94,7 @@ onMounted(async () => {
                         legend: { position: 'bottom' },
                         tooltip: {
                             callbacks: {
-                                label: (context) => `${context.label}: ${formatPrice(context.raw)}`
+                                label: (context) => t('admin.superadmin.accounting.labelAmountTooltip', { label: context.label, amount: formatPrice(context.raw) })
                             }
                         }
                     }
@@ -117,7 +120,7 @@ onMounted(async () => {
                         legend: { position: 'bottom' },
                         tooltip: {
                             callbacks: {
-                                label: (context) => `${context.label}: ${formatPrice(context.raw)}`
+                                label: (context) => t('admin.superadmin.accounting.labelAmountTooltip', { label: context.label, amount: formatPrice(context.raw) })
                             }
                         }
                     }
@@ -132,7 +135,7 @@ onMounted(async () => {
                 data: {
                     labels: props.orders_by_status.map(s => s.status),
                     datasets: [{
-                        label: 'Nombre de commandes',
+                        label: t('admin.superadmin.accounting.ordersCountLabel'),
                         data: props.orders_by_status.map(s => s.count),
                         backgroundColor: '#6366f1'
                     }]
@@ -154,7 +157,7 @@ onMounted(async () => {
                 data: {
                     labels: props.top_shops.map(s => s.name),
                     datasets: [{
-                        label: 'Revenu Total',
+                        label: t('admin.superadmin.accounting.totalRevenue'),
                         data: props.top_shops.map(s => s.total),
                         backgroundColor: '#10b981'
                     }]
@@ -167,7 +170,7 @@ onMounted(async () => {
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: (context) => `Revenu: ${formatPrice(context.raw)}`
+                                label: (context) => t('admin.superadmin.accounting.revenueTooltip', { amount: formatPrice(context.raw) })
                             }
                         }
                     }
@@ -182,47 +185,47 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Head title="Comptabilité — SuperAdmin" />
+    <Head :title="$t('admin.superadmin.accounting.pageTitle')" />
 
-    <AdminLayout title="Comptabilité SuperAdmin" active-route="backoffice.superadmin.accounting">
+    <AdminLayout :title="$t('admin.superadmin.accounting.title')" active-route="backoffice.superadmin.accounting">
         <template #content>
             <div class="p-6 space-y-8">
                 <!-- Header Stats -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-card border border-border rounded-xl p-5 shadow-sm">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-muted-foreground">Revenu Total</span>
+                            <span class="text-sm font-medium text-muted-foreground">{{ $t('admin.superadmin.accounting.totalRevenue') }}</span>
                             <TrendingUp class="w-4 h-4 text-primary" />
                         </div>
                         <div class="text-2xl font-bold">{{ formatPrice(props.stats.total_revenue) }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">Commandes livrées uniquement</p>
+                        <p class="text-xs text-muted-foreground mt-1">{{ $t('admin.superadmin.accounting.totalRevenueHint') }}</p>
                     </div>
 
                     <div class="bg-card border border-border rounded-xl p-5 shadow-sm">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-muted-foreground">Commandes</span>
+                            <span class="text-sm font-medium text-muted-foreground">{{ $t('admin.superadmin.accounting.orders') }}</span>
                             <ShoppingBag class="w-4 h-4 text-indigo-500" />
                         </div>
                         <div class="text-2xl font-bold">{{ props.stats.total_orders }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">Toutes les commandes confondues</p>
+                        <p class="text-xs text-muted-foreground mt-1">{{ $t('admin.superadmin.accounting.ordersHint') }}</p>
                     </div>
 
                     <div class="bg-card border border-border rounded-xl p-5 shadow-sm">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-muted-foreground">Frais Plateforme</span>
+                            <span class="text-sm font-medium text-muted-foreground">{{ $t('admin.superadmin.accounting.platformFees') }}</span>
                             <CreditCard class="w-4 h-4 text-emerald-500" />
                         </div>
                         <div class="text-2xl font-bold">{{ formatPrice(props.stats.total_platform_fees) }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">Estimation (10% de commission)</p>
+                        <p class="text-xs text-muted-foreground mt-1">{{ $t('admin.superadmin.accounting.platformFeesHint') }}</p>
                     </div>
 
                     <div class="bg-card border border-border rounded-xl p-5 shadow-sm">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-muted-foreground">Boutiques Actives</span>
+                            <span class="text-sm font-medium text-muted-foreground">{{ $t('admin.superadmin.accounting.activeShops') }}</span>
                             <Store class="w-4 h-4 text-orange-500" />
                         </div>
                         <div class="text-2xl font-bold">{{ props.stats.active_shops }}</div>
-                        <p class="text-xs text-muted-foreground mt-1">Boutiques enregistrées sur la plateforme</p>
+                        <p class="text-xs text-muted-foreground mt-1">{{ $t('admin.superadmin.accounting.activeShopsHint') }}</p>
                     </div>
                 </div>
 
@@ -232,7 +235,7 @@ onMounted(async () => {
                     <div class="lg:col-span-2 bg-card border border-border rounded-xl p-6 shadow-sm">
                         <div class="flex items-center gap-2 mb-6">
                             <Activity class="w-5 h-5 text-primary" />
-                            <h3 class="font-semibold text-lg">Évolution du Revenu (30 derniers jours)</h3>
+                            <h3 class="font-semibold text-lg">{{ $t('admin.superadmin.accounting.revenueOverTimeTitle') }}</h3>
                         </div>
                         <div class="h-80 w-full">
                             <canvas ref="revenueTimeChartRef"></canvas>
@@ -243,7 +246,7 @@ onMounted(async () => {
                     <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
                         <div class="flex items-center gap-2 mb-6">
                             <PieChart class="w-5 h-5 text-primary" />
-                            <h3 class="font-semibold text-lg">Méthodes de Paiement</h3>
+                            <h3 class="font-semibold text-lg">{{ $t('admin.superadmin.accounting.paymentMethodsTitle') }}</h3>
                         </div>
                         <div class="h-80 w-full">
                             <canvas ref="paymentMethodChartRef"></canvas>
@@ -256,7 +259,7 @@ onMounted(async () => {
                     <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
                         <div class="flex items-center gap-2 mb-6">
                             <PieChart class="w-5 h-5 text-primary" />
-                            <h3 class="font-semibold text-lg">Revenu par Catégorie</h3>
+                            <h3 class="font-semibold text-lg">{{ $t('admin.superadmin.accounting.revenueByCategoryTitle') }}</h3>
                         </div>
                         <div class="h-80 w-full">
                             <canvas ref="categoryChartRef"></canvas>
@@ -267,7 +270,7 @@ onMounted(async () => {
                     <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
                         <div class="flex items-center gap-2 mb-6">
                             <BarChart3 class="w-5 h-5 text-primary" />
-                            <h3 class="font-semibold text-lg">Top 5 Boutiques (Revenu)</h3>
+                            <h3 class="font-semibold text-lg">{{ $t('admin.superadmin.accounting.topShopsTitle') }}</h3>
                         </div>
                         <div class="h-80 w-full">
                             <canvas ref="topShopsChartRef"></canvas>
@@ -279,7 +282,7 @@ onMounted(async () => {
                 <div class="bg-card border border-border rounded-xl p-6 shadow-sm">
                     <div class="flex items-center gap-2 mb-6">
                         <BarChart3 class="w-5 h-5 text-primary" />
-                        <h3 class="font-semibold text-lg">Répartition des Commandes par Statut</h3>
+                        <h3 class="font-semibold text-lg">{{ $t('admin.superadmin.accounting.orderStatusTitle') }}</h3>
                     </div>
                     <div class="h-64 w-full">
                         <canvas ref="orderStatusChartRef"></canvas>

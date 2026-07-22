@@ -72,7 +72,7 @@ const toggleMobileSidebar = () => {
 
         <div class="overflow-x-hidden py-6 sm:py-8">
             <div class="mx-auto max-w-7xl overflow-x-hidden px-4 sm:px-6 lg:px-8">
-                <div class="mb-4 md:hidden">
+                <div class="mb-4 lg:hidden">
                     <div class="rounded-xl border border-border bg-card p-3 shadow-sm">
                         <button
                             type="button"
