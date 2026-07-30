@@ -19,9 +19,9 @@ class OrderService
 
     public const PLATFORM_FEE_PERCENT = 10;
 
-    public function createOrder(int $userId, array $delivery, array $items): Order
+    public function createOrder(int $userId, array $delivery, array $items, string $paymentMethod = 'online'): Order
     {
-        return DB::transaction(function () use ($userId, $delivery, $items) {
+        return DB::transaction(function () use ($userId, $delivery, $items, $paymentMethod) {
             $reference = $this->generateOrderNumber();
 
             $totalPrice = collect($items)->sum(fn ($item) => (float) $item['price'] * (int) $item['quantity']);
@@ -39,7 +39,7 @@ class OrderService
                 'status' => Order::STATUS_PENDING,
                 'is_paid' => false,
                 'is_delivered' => false,
-                'payment_method' => 'cinetpay',
+                'payment_method' => $paymentMethod === 'cod' ? 'cod' : 'cinetpay',
                 'vendor_status' => self::VENDOR_STATUS_PENDING,
                 'platform_fee' => 0,
                 'vendor_amount' => 0,

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Payment;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\CinetPay\CinetPayService;
 use App\Services\Order\OrderService;
 use App\Services\Payment\PaymentManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class CheckoutController extends Controller
@@ -37,6 +39,7 @@ class CheckoutController extends Controller
                 'image' => $image?->full_url,
                 'shop_name' => $product->shop?->name,
             ],
+            'methods' => $this->paymentMethods(),
         ]);
     }
 
@@ -45,6 +48,7 @@ class CheckoutController extends Controller
         return Inertia::render('Payments/Method', [
             'context' => 'cart',
             'product' => null,
+            'methods' => $this->paymentMethods(),
         ]);
     }
 
@@ -58,30 +62,13 @@ class CheckoutController extends Controller
             'price' => (float) $product->price,
         ]];
 
-        $order = $this->orderService->createOrder(
-            Auth::id(),
-            $validated,
-            $items
-        );
+        $channel = $validated['payment_channel'] ?? 'cod';
 
-        try {
-            $result = $this->paymentManager->checkoutOrder(
-                $order,
-                notifyUrl: route('cinetpay.webhook'),
-                returnUrl: route('payments.cinetpay.callback', ['transaction_id' => $order->order_number]),
-                customer: [
-                    'email' => Auth::user()->email,
-                    'phone' => $validated['phone_number'],
-                    'first_name' => $validated['first_name'],
-                    'last_name' => $validated['last_name'],
-                ]
-            );
-
-            return Inertia::location($result['payment_url']);
-        } catch (\Throwable $e) {
-            $order->delete();
-            return back()->with('error', 'Erreur de paiement : ' . $e->getMessage());
+        if ($channel === 'cod') {
+            return $this->handleCodOrder(Auth::id(), $validated, $items);
         }
+
+        return $this->handleOnlinePayment(Auth::id(), $validated, $items);
     }
 
     public function checkoutCart(Request $request)
@@ -104,10 +91,34 @@ class CheckoutController extends Controller
             ->values()
             ->all();
 
+        $channel = $validated['payment_channel'] ?? 'cod';
+
+        if ($channel === 'cod') {
+            return $this->handleCodOrder(Auth::id(), $validated, $items);
+        }
+
+        return $this->handleOnlinePayment(Auth::id(), $validated, $items);
+    }
+
+    private function handleCodOrder(int $userId, array $validated, array $items)
+    {
         $order = $this->orderService->createOrder(
-            Auth::id(),
+            $userId,
             $validated,
-            $items
+            $items,
+            paymentMethod: 'cod'
+        );
+
+        return redirect()->route('home')->with('success', 'Votre commande a été enregistrée. Vous paierez à la livraison.');
+    }
+
+    private function handleOnlinePayment(int $userId, array $validated, array $items)
+    {
+        $order = $this->orderService->createOrder(
+            $userId,
+            $validated,
+            $items,
+            paymentMethod: 'online'
         );
 
         try {
@@ -130,6 +141,26 @@ class CheckoutController extends Controller
         }
     }
 
+    private function paymentMethods(): array
+    {
+        return [
+            [
+                'key' => 'online',
+                'name' => 'Paiement en ligne',
+                'channel' => 'cinetpay',
+                'description' => 'Orange Money, MTN MoMo, Moov Money, Flooz, T-Money, Carte bancaire',
+                'image' => '/images/payments/cinetpay.svg',
+            ],
+            [
+                'key' => 'cod',
+                'name' => 'Paiement à la livraison',
+                'channel' => 'cod',
+                'description' => 'Vous payez en espèces à la réception de votre commande',
+                'image' => '/images/payments/cash-delivery.svg',
+            ],
+        ];
+    }
+
     private function rules(): array
     {
         return [
@@ -137,6 +168,7 @@ class CheckoutController extends Controller
             'last_name' => ['required', 'string', 'max:255'],
             'delivery_address' => ['required', 'string', 'max:500'],
             'phone_number' => ['required', 'string', 'max:20'],
+            'payment_channel' => ['nullable', 'string', 'in:cinetpay,cod'],
         ];
     }
 }

@@ -3,12 +3,11 @@ import InputError from '@/components/InputError.vue';
 import InputLabel from '@/components/InputLabel.vue';
 import TextInput from '@/components/TextInput.vue';
 import ProductsNavbar from '@/components/products/layout/ProductsNavbar.vue';
-import PriceDisplay from '@/components/products/shared/PriceDisplay.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCartStore } from '@/stores/cart';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { ArrowLeft, Check, CreditCard, Lock, MapPin, User, Phone, ArrowRight } from 'lucide-vue-next';
+import { ArrowLeft, Check, CreditCard, Lock, MapPin, User, Phone, ArrowRight, Banknote, Globe } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -33,7 +32,7 @@ const page = usePage();
 const authUser = computed(() => page.props.auth.user);
 
 const currentStep = ref(1);
-const selectedMethod = ref(props.methods[0] || null);
+const selectedMethod = ref(null);
 
 const form = ref({
     first_name: authUser.value?.name?.split(' ')[0] || '',
@@ -45,7 +44,7 @@ const form = ref({
 const formatPrice = (value) =>
     new Intl.NumberFormat('fr-FR', {
         style: 'currency',
-        currency: 'XAF',
+        currency: 'XOF',
         maximumFractionDigits: 0,
     }).format(value);
 
@@ -60,8 +59,8 @@ const isFormValid = computed(() => {
 
 const canSubmit = computed(() => {
     if (currentStep.value === 1) return isFormValid.value;
-    if (!selectedMethod.value) return false;
-    return !isCart.value || cartItems.value.length > 0;
+    if (currentStep.value === 2 && !selectedMethod.value) return false;
+    return true;
 });
 
 const nextStep = () => {
@@ -74,6 +73,11 @@ const prevStep = () => {
     if (currentStep.value === 2) {
         currentStep.value = 1;
     }
+};
+
+const methodIcon = (key) => {
+    if (key === 'cod') return Banknote;
+    return Globe;
 };
 
 const submitPayment = () => {
@@ -89,12 +93,11 @@ const submitPayment = () => {
             id: item.id,
             quantity: item.quantity,
         }));
-
-        router.post(route('payments.cart.checkout'), payload);
+        router.post(route('checkout.cart'), payload);
         return;
     }
 
-    router.post(route('payments.checkout', { product: props.product.id }), payload);
+    router.post(route('checkout.product', { product: props.product.id }), payload);
 };
 </script>
 
@@ -124,7 +127,6 @@ const submitPayment = () => {
                     {{ t('payments.previous') }}
                 </button>
 
-                <!-- Steps Indicator -->
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-2">
                         <span :class="['flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold', currentStep >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground']">1</span>
@@ -140,7 +142,6 @@ const submitPayment = () => {
 
             <div class="grid gap-6 lg:grid-cols-[1fr_340px]">
                 <section class="space-y-6">
-                    <!-- Step 1: Delivery Information -->
                     <div v-if="currentStep === 1" class="space-y-4">
                         <div>
                             <h1 class="text-2xl font-bold">{{ t('payments.deliveryInfo') }}</h1>
@@ -221,7 +222,6 @@ const submitPayment = () => {
                         </div>
                     </div>
 
-                    <!-- Step 2: Payment Method -->
                     <div v-if="currentStep === 2" class="space-y-4">
                         <div>
                             <h1 class="text-2xl font-bold">{{ t('payments.methodTitle') }}</h1>
@@ -246,7 +246,8 @@ const submitPayment = () => {
                                     <Check class="h-4 w-4" />
                                 </span>
                                 <div class="flex h-16 w-full items-center justify-center rounded-lg bg-muted/30 p-2">
-                                    <img :src="method.image" :alt="method.name" class="h-full max-w-full object-contain" />
+                                    <img v-if="method.image" :src="method.image" :alt="method.name" class="h-full max-w-full object-contain" />
+                                    <component v-else :is="methodIcon(method.key)" class="h-10 w-10 text-muted-foreground" />
                                 </div>
                                 <span class="mt-4 block text-lg font-bold">{{ method.name }}</span>
                                 <span class="mt-1 block text-sm text-muted-foreground">{{ method.description }}</span>
@@ -305,7 +306,6 @@ const submitPayment = () => {
                                 </div>
                             </div>
 
-                            <!-- User Info Summary in Sidebar when at Step 2 -->
                             <div v-if="currentStep === 2" class="rounded-lg bg-muted/50 p-3 space-y-2 text-xs">
                                 <div class="flex items-center gap-2 text-muted-foreground font-semibold uppercase tracking-wider">
                                     <MapPin class="h-3 w-3" />
@@ -325,9 +325,13 @@ const submitPayment = () => {
                                     {{ t('payments.next') }}
                                     <ArrowRight class="ml-2 h-4 w-4" />
                                 </template>
+                                <template v-else-if="selectedMethod?.key === 'cod'">
+                                    <Banknote class="mr-2 h-4 w-4" />
+                                    Commander (paiement à la livraison)
+                                </template>
                                 <template v-else>
-                                    <Lock class="mr-2 h-4 w-4" />
-                                    {{ t('payments.continueToNotchPay') }}
+                                    <Globe class="mr-2 h-4 w-4" />
+                                    Payer en ligne
                                 </template>
                             </Button>
 
@@ -337,7 +341,6 @@ const submitPayment = () => {
                         </CardContent>
                     </Card>
 
-                    <!-- Trust badges -->
                     <div class="flex items-center justify-center gap-4 text-muted-foreground opacity-50 grayscale hover:grayscale-0 transition-all">
                          <img src="/images/payments/mtn-momo.svg" class="h-6" alt="MTN" />
                          <img src="/images/payments/orange-money.svg" class="h-6" alt="Orange" />
