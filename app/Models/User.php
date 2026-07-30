@@ -138,4 +138,19 @@ class User extends Authenticatable
             ->pluck('favoritable_id')
             ->all();
     }
+
+    public function balance()
+    {
+        return $this->hasOne(VendorBalance::class);
+    }
+
+    public function walletTransactions()
+    {
+        return $this->hasMany(VendorWalletTransaction::class);
+    }
+
+    public function withdrawalRequests()
+    {
+        return $this->hasMany(WithdrawalRequest::class);
+    }
 }
