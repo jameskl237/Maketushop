@@ -18,7 +18,6 @@ class CheckoutController extends Controller
         private OrderService $orderService,
         private PaymentManager $paymentManager
     ) {
-        $this->middleware('auth');
     }
 
     public function productMethod(Product $product)
