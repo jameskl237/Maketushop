@@ -113,7 +113,7 @@ const payOnlineEnabled = computed(() => Boolean(page.props?.features?.pay_online
 
 const checkoutOnPlatform = () => {
     if (isAuthenticated.value) {
-        router.visit(route('payments.cart.method'));
+        router.visit(route('checkout.cart.method'));
         return;
     }
 

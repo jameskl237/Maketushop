@@ -51,12 +51,9 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
-            // Paiement en ligne : actif uniquement si explicitement activé ET clés NotchPay présentes.
-            // Tant que false, les boutons "payer sur la plateforme" sont grisés (Bientôt disponible).
             'features' => [
-                'pay_online_enabled' => filled(config('services.notchpay.public_key'))
-                    && filled(config('services.notchpay.secret_key'))
-                    && env('PAY_ONLINE_ENABLED', false),
+                'pay_online_enabled' => filled(config('services.cinetpay.api_key'))
+                    && filled(config('services.cinetpay.site_id')),
             ],
         ];
     }

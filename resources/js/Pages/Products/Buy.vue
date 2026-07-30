@@ -15,7 +15,7 @@ const page = usePage();
 const payOnlineEnabled = computed(() => Boolean(page.props?.features?.pay_online_enabled));
 
 const handlePlatformBuy = () => {
-    router.visit(route('payments.product.method', { product: props.product.id }));
+    router.visit(route('checkout.product.method', { product: props.product.id }));
 };
 
 const publicBaseUrl = (import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin).replace(/\/+$/, '');
