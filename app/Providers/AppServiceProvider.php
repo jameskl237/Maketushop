@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use App\Models\Order;
+use App\Models\Product;
+use App\Models\Service;
+use App\Models\Shop;
 use App\Models\ShopSubscription;
 use App\Services\CinetPay\CinetPayService;
 use App\Services\Order\OrderService;
@@ -30,9 +33,12 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        Relation::enforceMorphMap([
+        Relation::morphMap([
             'order' => Order::class,
             'subscription' => ShopSubscription::class,
+            'product' => Product::class,
+            'service' => Service::class,
+            'shop' => Shop::class,
         ]);
     }
 }
