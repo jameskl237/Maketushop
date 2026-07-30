@@ -7,6 +7,7 @@ use App\Http\Controllers\Backoffice\Admin\OrderController as AdminOrderControlle
 use App\Http\Controllers\Backoffice\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Backoffice\Admin\ShopController as AdminShopController;
 use App\Http\Controllers\Backoffice\Admin\UserController;
+use App\Http\Controllers\CinetPayWebhookController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\QuoteRequestController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ShareController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierServiceController;
 use Illuminate\Support\Facades\Route;
@@ -63,6 +65,18 @@ Route::get('/shops', [ProductController::class, 'shops'])->name('shops.index');
 Route::get('/shops/{shop}/{slug?}', [ProductController::class, 'shopShow'])->name('shops.show');
 Route::get('/cart', [ProductController::class, 'cart'])->name('cart.index');
 Route::get('/cart/metadata', [ProductController::class, 'cartMetadata'])->name('cart.metadata');
+
+// Abonnements boutique (location)
+Route::middleware('auth')->group(function () {
+    Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+    Route::post('/subscriptions/{shop}/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
+    Route::get('/subscriptions/{shop}/payment', [SubscriptionController::class, 'payment'])->name('subscriptions.payment');
+    Route::get('/subscriptions/{shop}/callback', [SubscriptionController::class, 'callback'])->name('subscriptions.callback');
+    Route::post('/subscriptions/{shop}/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
+});
+
+// Webhook CinetPay (accessible publiquement)
+Route::match(['get', 'post'], '/webhooks/cinetpay', CinetPayWebhookController::class)->name('cinetpay.webhook');
 
 // Demande de devis : accessible aux invités comme aux clients connectés
 // (user_id est enregistré si l'utilisateur est connecté)

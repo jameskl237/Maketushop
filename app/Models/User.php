@@ -81,6 +81,12 @@ class User extends Authenticatable
         return $this->hasMany(Shop::class);
     }
 
+    // Abonnements boutique via ses boutiques
+    public function shopSubscriptions()
+    {
+        return $this->hasManyThrough(ShopSubscription::class, Shop::class);
+    }
+
     // 📦 Un utilisateur peut avoir plusieurs produits (qu’il a créés)
     public function products()
     {

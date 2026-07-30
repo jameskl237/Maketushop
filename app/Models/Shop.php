@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Storage;
 
@@ -43,6 +44,19 @@ class Shop extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(ShopSubscription::class);
+    }
+
+    public function activeSubscription()
+    {
+        return $this->hasOne(ShopSubscription::class)
+            ->where('status', ShopSubscription::STATUS_ACTIVE)
+            ->where('ends_at', '>=', now())
+            ->latestOfMany();
     }
 
     public function ratings(): MorphMany

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\CinetPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,7 @@ use NotchPay\Payment;
 
 class PaymentController extends Controller
 {
-    public function initialize(Request $request, Product $product)
+    public function initialize(Request $request, Product $product, CinetPayService $cinetpay)
     {
         if (! Auth::check()) {
             return redirect()->route('login')->with('error', 'Veuillez vous connecter pour continuer votre achat.');
@@ -33,6 +34,12 @@ class PaymentController extends Controller
         $order = $this->createPendingOrder($reference, (int) $user->id, $validated, $items);
 
         try {
+            $channel = $validated['payment_channel'] ?? null;
+
+            if ($this->isCinetpayChannel($channel)) {
+                return $this->initializeWithCinetpay($cinetpay, $order, $user, $product->name, $items, $validated);
+            }
+
             $this->configureNotchPay();
 
             $payment = Payment::initialize($this->buildPaymentPayload(
@@ -45,7 +52,7 @@ class PaymentController extends Controller
                 items: $items,
                 userId: (int) $user->id,
                 delivery: $validated,
-                channel: $validated['payment_channel'] ?? null,
+                channel: $channel,
             ));
 
             return Inertia::location($payment->authorization_url);
@@ -57,13 +64,17 @@ class PaymentController extends Controller
     }
 
     /**
-     * Le paiement en ligne est-il activé ? (clés NotchPay + flag explicite)
+     * Le paiement en ligne est-il activé ?
      */
     private function payOnlineEnabled(): bool
     {
-        return filled(config('services.notchpay.public_key'))
+        $notchpayReady = filled(config('services.notchpay.public_key'))
             && filled(config('services.notchpay.secret_key'))
             && (bool) env('PAY_ONLINE_ENABLED', false);
+
+        $cinetpayReady = app(CinetPayService::class)->isConfigured();
+
+        return $notchpayReady || $cinetpayReady;
     }
 
     public function productMethod(Product $product)
@@ -108,7 +119,7 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function checkoutCart(Request $request)
+    public function checkoutCart(Request $request, CinetPayService $cinetpay)
     {
         if (! Auth::check()) {
             return redirect()->route('login')->with('error', 'Veuillez vous connecter pour continuer votre achat.');
@@ -151,6 +162,16 @@ class PaymentController extends Controller
         $order = $this->createPendingOrder($reference, (int) $user->id, $validated, $paymentItems);
 
         try {
+            $channel = $validated['payment_channel'] ?? null;
+
+            if ($this->isCinetpayChannel($channel)) {
+                return $this->initializeWithCinetpay(
+                    $cinetpay, $order, $user,
+                    count($paymentItems).' produit(s)',
+                    $paymentItems, $validated
+                );
+            }
+
             $this->configureNotchPay();
 
             $payment = Payment::initialize($this->buildPaymentPayload(
@@ -163,7 +184,7 @@ class PaymentController extends Controller
                 items: $paymentItems,
                 userId: (int) $user->id,
                 delivery: $validated,
-                channel: $validated['payment_channel'] ?? null,
+                channel: $channel,
             ));
 
             return Inertia::location($payment->authorization_url);
@@ -174,12 +195,17 @@ class PaymentController extends Controller
         }
     }
 
-    public function callback(Request $request)
+    public function callback(Request $request, CinetPayService $cinetpay)
     {
         $reference = $request->query('reference');
+        $provider = $request->query('provider', 'notchpay');
 
         if (! $reference) {
             return redirect()->route('products.index')->with('error', 'Référence de paiement manquante.');
+        }
+
+        if ($provider === 'cinetpay') {
+            return $this->handleCinetpayCallback($cinetpay, $reference);
         }
 
         try {
@@ -209,7 +235,7 @@ class PaymentController extends Controller
     private function checkoutValidationRules(): array
     {
         return [
-            'payment_channel' => ['required', 'string', 'in:cm.mtn,cm.orange'],
+            'payment_channel' => ['required', 'string', 'in:cm.mtn,cm.orange,cinetpay-momo,cinetpay-card,cinetpay-all'],
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'delivery_address' => ['required', 'string', 'max:255'],
@@ -332,23 +358,128 @@ class PaymentController extends Controller
         ]);
     }
 
+    private function isCinetpayChannel(?string $channel): bool
+    {
+        return $channel !== null && str_starts_with($channel, 'cinetpay');
+    }
+
+    private function initializeWithCinetpay(
+        CinetPayService $cinetpay,
+        Order $order,
+        \App\Models\User $user,
+        string $productLabel,
+        array $items,
+        array $delivery,
+    ) {
+        $channel = $delivery['payment_channel'] ?? 'cinetpay-all';
+
+        $channelsMap = [
+            'cinetpay-momo' => 'MOBILE',
+            'cinetpay-card' => 'CARD',
+            'cinetpay-all' => 'ALL',
+        ];
+
+        $payment = $cinetpay->initializePayment([
+            'transaction_id' => $order->order_number,
+            'amount' => (int) round((float) $order->total_price),
+            'description' => 'Achat ' . $productLabel . ' - MaketuShop',
+            'notify_url' => route('cinetpay.webhook'),
+            'return_url' => route('payments.callback', ['reference' => $order->order_number, 'provider' => 'cinetpay']),
+            'channels' => $channelsMap[$channel] ?? 'ALL',
+            'customer' => [
+                'name' => $delivery['first_name'] ?? '',
+                'surname' => $delivery['last_name'] ?? '',
+                'email' => $user->email ?? '',
+                'phone_number' => $delivery['phone_number'] ?? $user->phone ?? '+2250000000000',
+                'address' => $delivery['delivery_address'] ?? '',
+                'city' => 'Abidjan',
+                'country' => 'CI',
+            ],
+            'metadata' => [
+                'order_id' => $order->order_number,
+                'user_id' => $user->id,
+                'type' => 'product_purchase',
+            ],
+        ]);
+
+        $order->update(['payment_method' => 'cinetpay']);
+
+        return Inertia::location($payment['payment_url']);
+    }
+
+    private function handleCinetpayCallback(CinetPayService $cinetpay, string $transactionId)
+    {
+        try {
+            $verification = $cinetpay->verifyPayment($transactionId);
+
+            $order = Order::where('order_number', $transactionId)->first();
+
+            if (! $order) {
+                return redirect()->route('products.index')->with('error', 'Commande introuvable pour ce paiement.');
+            }
+
+            if ($cinetpay->isPaymentValid($verification)) {
+                $order->update(['is_paid' => true]);
+
+                return redirect()->route('user.dashboard')->with('success', 'Votre paiement CinetPay a été effectué avec succès !');
+            }
+
+            return redirect()->route('products.index')->with('error', 'Le paiement CinetPay n\'a pas été confirmé.');
+        } catch (\Throwable $e) {
+            return redirect()->route('products.index')->with('error', 'Erreur CinetPay : ' . $e->getMessage());
+        }
+    }
+
     private function paymentMethods(): array
     {
-        return [
+        $methods = [
             [
                 'key' => 'mtn',
                 'name' => 'MTN MoMo',
-                'description' => 'Paiement via MTN Mobile Money Cameroun sur NotchPay.',
+                'description' => 'Paiement via MTN Mobile Money Cameroun (XAF).',
                 'channel' => 'cm.mtn',
                 'image' => '/images/payments/mtn-momo.svg',
+                'provider' => 'notchpay',
             ],
             [
                 'key' => 'orange',
                 'name' => 'Orange Money',
-                'description' => 'Paiement via Orange Money Cameroun sur NotchPay.',
+                'description' => 'Paiement via Orange Money Cameroun (XAF).',
                 'channel' => 'cm.orange',
                 'image' => '/images/payments/orange-money.svg',
+                'provider' => 'notchpay',
             ],
         ];
+
+        $cinetpay = app(CinetPayService::class);
+
+        if ($cinetpay->isConfigured()) {
+            $methods[] = [
+                'key' => 'cinetpay-momo',
+                'name' => 'Mobile Money (UEMOA)',
+                'description' => 'Orange Money, MTN MoMo, Moov Money, Flooz, T-Money (XOF).',
+                'channel' => 'cinetpay-momo',
+                'image' => '/images/payments/cinetpay.svg',
+                'provider' => 'cinetpay',
+            ];
+            $methods[] = [
+                'key' => 'cinetpay-card',
+                'name' => 'Carte bancaire (UEMOA)',
+                'description' => 'Visa, MasterCard, American Express (XOF).',
+                'channel' => 'cinetpay-card',
+                'image' => '/images/payments/cinetpay.svg',
+                'provider' => 'cinetpay',
+            ];
+            $methods[] = [
+                'key' => 'cinetpay-all',
+                'name' => 'CinetPay (Tous moyens)',
+                'description' => 'Mobile Money, Cartes, E-wallet (XOF).',
+                'channel' => 'cinetpay-all',
+                'image' => '/images/payments/cinetpay.svg',
+                'provider' => 'cinetpay',
+            ];
+        }
+
+        return $methods;
     }
 }

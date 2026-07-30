@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "CinetPay Payment Integration": {
+      "source": "AfricanDigitalAssetFramework/africa-stack-skills",
+      "sourceType": "github",
+      "skillPath": "pan-african/uemoa/cinetpay/SKILL.md",
+      "computedHash": "bcd4f594cde5ea22dde733221a51fd768c6bc598a5deb70143dadf320d224c0f"
+    }
+  }
+}
