@@ -9,13 +9,15 @@ use App\Models\ShopSubscription;
 use App\Models\SubscriptionPayment;
 use App\Models\VendorBalance;
 use App\Models\WebhookLog;
+use App\Services\Order\OrderService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class CinetPayWebhookHandler
 {
     public function __construct(
-        private CinetPayService $cinetpay
+        private CinetPayService $cinetpay,
+        private OrderService $orderService
     ) {}
 
     public function handle(array $payload, array $headers): array
@@ -104,12 +106,7 @@ class CinetPayWebhookHandler
 
     private function processOrderPayment(Order $order, array $verification): void
     {
-        $order->update([
-            'is_paid' => true,
-            'payment_method' => 'cinetpay',
-        ]);
-
-        VendorBalance::initForUser($order->user_id);
+        $this->orderService->markAsPaid($order);
     }
 
     private function processSubscriptionPayment(ShopSubscription $subscription, array $verification, Payment $payment): void

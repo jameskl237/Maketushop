@@ -16,9 +16,9 @@ class PaymentManager
         private CinetPayService $cinetpay
     ) {}
 
-    public function checkoutOrder(Order $order, string $notifyUrl, string $returnUrl, array $customer = []): array
+    public function checkoutOrder(Order $order, string $notifyUrl, string $returnUrl, array $customer = [], ?string $transactionId = null): array
     {
-        $transactionId = $this->cinetpay->generateTransactionId();
+        $transactionId ??= $this->cinetpay->generateTransactionId();
 
         $payment = DB::transaction(function () use ($order, $transactionId) {
             $payment = Payment::create([
@@ -140,7 +140,9 @@ class PaymentManager
 
     public function handlePaymentReturn(string $transactionId, string $expectedType): ?Payment
     {
-        $payment = Payment::where('transaction_id', $transactionId)->first();
+        $payment = Payment::where('transaction_id', $transactionId)
+            ->orWhere('reference', $transactionId)
+            ->first();
 
         if (!$payment) {
             return null;

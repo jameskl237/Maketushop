@@ -120,17 +120,20 @@ class CheckoutController extends Controller
             paymentMethod: 'online'
         );
 
+        $transactionId = app(CinetPayService::class)->generateTransactionId();
+
         try {
             $result = $this->paymentManager->checkoutOrder(
                 $order,
                 notifyUrl: route('cinetpay.webhook'),
-                returnUrl: route('payments.cinetpay.callback', ['transaction_id' => $order->order_number]),
+                returnUrl: route('payments.cinetpay.callback', ['transaction_id' => $transactionId]),
                 customer: [
                     'email' => Auth::user()->email,
-                    'phone' => $validated['phone_number'],
+                    'phone' => $this->formatPhone($validated['phone_number']),
                     'first_name' => $validated['first_name'],
                     'last_name' => $validated['last_name'],
-                ]
+                ],
+                transactionId: $transactionId,
             );
 
             return Inertia::location($result['payment_url']);
@@ -138,6 +141,21 @@ class CheckoutController extends Controller
             $order->delete();
             return back()->with('error', 'Erreur de paiement : ' . $e->getMessage());
         }
+    }
+
+    private function formatPhone(string $phone): string
+    {
+        $digits = preg_replace('/[^\d]/', '', $phone);
+
+        if (strlen($digits) >= 11 && str_starts_with($digits, '225')) {
+            return '+' . $digits;
+        }
+
+        if (str_starts_with($digits, '0')) {
+            $digits = substr($digits, 1);
+        }
+
+        return '+225' . $digits;
     }
 
     private function paymentMethods(): array
