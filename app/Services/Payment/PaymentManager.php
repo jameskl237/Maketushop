@@ -39,30 +39,22 @@ class PaymentManager
 
         try {
             $result = $this->cinetpay->initializePayment([
-                'transaction_id' => $transactionId,
+                'merchant_transaction_id' => $transactionId,
                 'amount' => $payment->amount,
-                'description' => 'Commande ' . $order->order_number . ' - MaketuShop',
+                'designation' => 'Commande ' . $order->order_number . ' - MaketuShop',
+                'client_email' => $customer['email'] ?? '',
+                'client_first_name' => $customer['first_name'] ?? $order->customer_first_name ?? '',
+                'client_last_name' => $customer['last_name'] ?? $order->customer_last_name ?? '',
+                'client_phone_number' => $customer['phone'] ?? $order->phone_number ?? '',
+                'success_url' => $returnUrl,
+                'failed_url' => $returnUrl,
                 'notify_url' => $notifyUrl,
-                'return_url' => $returnUrl,
-                'channels' => 'MOBILE',
-                'customer' => [
-                    'name' => $customer['first_name'] ?? $order->customer_first_name ?? '',
-                    'surname' => $customer['last_name'] ?? $order->customer_last_name ?? '',
-                    'email' => $customer['email'] ?? '',
-                    'phone_number' => $customer['phone'] ?? $order->phone_number ?? '+2250000000000',
-                    'country' => 'CI',
-                ],
-                'metadata' => [
-                    'type' => 'order',
-                    'order_id' => $order->id,
-                    'order_number' => $order->order_number,
-                ],
             ]);
 
             return [
                 'success' => true,
                 'payment_url' => $result['payment_url'],
-                'token' => $result['token'],
+                'token' => $result['payment_token'],
                 'transaction_id' => $transactionId,
                 'payment' => $payment,
             ];
@@ -102,33 +94,25 @@ class PaymentManager
 
         try {
             $result = $this->cinetpay->initializePayment([
-                'transaction_id' => $transactionId,
+                'merchant_transaction_id' => $transactionId,
                 'amount' => $amount,
-                'description' => 'Abonnement ' . $subscription->plan . ' - MaketuShop',
+                'designation' => 'Abonnement ' . $subscription->plan . ' - MaketuShop',
+                'client_email' => $customer['email'] ?? '',
+                'client_first_name' => $customer['first_name'] ?? '',
+                'client_last_name' => $customer['last_name'] ?? '',
+                'client_phone_number' => $customer['phone'] ?? '',
+                'success_url' => route('payments.cinetpay.callback', ['transaction_id' => $transactionId]),
+                'failed_url' => route('payments.cinetpay.callback', ['transaction_id' => $transactionId]),
                 'notify_url' => $notifyUrl,
-                'return_url' => $returnUrl,
-                'channels' => 'MOBILE',
-                'customer' => [
-                    'name' => $customer['first_name'] ?? '',
-                    'surname' => $customer['last_name'] ?? '',
-                    'email' => $customer['email'] ?? '',
-                    'phone_number' => $customer['phone'] ?? '+2250000000000',
-                    'country' => 'CI',
-                ],
-                'metadata' => [
-                    'type' => 'subscription',
-                    'subscription_id' => $subscription->id,
-                    'plan' => $subscription->plan,
-                ],
             ]);
 
             $subscription->update(['transaction_id' => $transactionId]);
-            $payment->update(['reference' => $result['transaction_id']]);
+            $payment->update(['reference' => $result['transaction_id'] ?? $transactionId]);
 
             return [
                 'success' => true,
                 'payment_url' => $result['payment_url'],
-                'token' => $result['token'],
+                'token' => $result['payment_token'],
                 'transaction_id' => $transactionId,
                 'payment' => $payment,
             ];
@@ -158,7 +142,7 @@ class PaymentManager
             if ($this->cinetpay->isPaymentValid($verification)) {
                 $payment->update([
                     'status' => Payment::STATUS_SUCCESS,
-                    'payment_method' => $verification['payment_method'],
+                    'payment_method' => $verification['payment_method'] ?? null,
                     'provider_data' => $verification,
                     'paid_at' => now(),
                 ]);

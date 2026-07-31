@@ -43,8 +43,11 @@ return [
 
     'cinetpay' => [
         'api_key' => env('CINETPAY_API_KEY'),
+        'api_password' => env('CINETPAY_API_PASSWORD'),
         'site_id' => env('CINETPAY_SITE_ID'),
-        'base_url' => env('CINETPAY_BASE_URL', 'https://api-checkout.cinetpay.com/v2'),
+        'secret_key' => env('CINETPAY_SECRET_KEY'),
+        'country' => env('CINETPAY_COUNTRY', 'CI'),
+        'base_url' => env('CINETPAY_BASE_URL', 'https://api.cinetpay.co'),
     ],
 
 ];

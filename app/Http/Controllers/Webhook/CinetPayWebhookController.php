@@ -17,12 +17,12 @@ class CinetPayWebhookController extends Controller
         $payload = $request->all();
         $headers = $request->headers->all();
 
-        if (empty($payload['cpm_trans_id'])) {
-            $transactionId = $request->input('transaction_id') ?? $request->input('cpm_trans_id');
-            if (!$transactionId) {
-                return response()->json(['status' => 'error', 'message' => 'Missing transaction ID'], 400);
-            }
-            $payload['cpm_trans_id'] = $transactionId;
+        $transactionId = $payload['merchant_transaction_id']
+            ?? $payload['transaction_id']
+            ?? $request->input('cpm_trans_id');
+
+        if (!$transactionId) {
+            return response()->json(['status' => 'error', 'message' => 'Missing transaction ID'], 200);
         }
 
         $result = $this->handler->handle($payload, $headers);

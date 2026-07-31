@@ -22,15 +22,24 @@ class CinetPayWebhookHandler
 
     public function handle(array $payload, array $headers): array
     {
-        $transactionId = $payload['cpm_trans_id'] ?? null;
+        $merchantTransactionId = $payload['merchant_transaction_id'] ?? null;
 
-        if (!$transactionId) {
-            return $this->error('Transaction ID manquant dans le webhook');
+        if (!$merchantTransactionId) {
+            return $this->error('merchant_transaction_id manquant dans le webhook');
         }
 
-        $webhookLog = $this->cinetpay->logWebhook($headers, $payload, $transactionId);
+        $webhookLog = $this->cinetpay->logWebhook($headers, $payload, $merchantTransactionId);
 
         try {
+            $verified = $this->cinetpay->verifyWebhook($payload);
+
+            if (!$verified['valid']) {
+                $this->cinetpay->markWebhookProcessed($webhookLog, $verified['reason'] ?? 'Notification invalide');
+                return $this->error($verified['reason'] ?? 'Notification invalide');
+            }
+
+            $transactionId = $verified['transaction_id'] ?? $merchantTransactionId;
+
             $verification = $this->cinetpay->verifyPayment($transactionId);
 
             if (!$this->cinetpay->isPaymentValid($verification)) {
@@ -38,15 +47,15 @@ class CinetPayWebhookHandler
                 return $this->success('Notification reçue, paiement non validé');
             }
 
-            DB::transaction(function () use ($transactionId, $verification, $webhookLog) {
-                $this->processValidPayment($transactionId, $verification);
+            DB::transaction(function () use ($merchantTransactionId, $verification, $webhookLog, $payload) {
+                $this->processValidPayment($merchantTransactionId, $verification, $payload);
                 $this->cinetpay->markWebhookProcessed($webhookLog);
             });
 
             return $this->success('Paiement traité avec succès');
         } catch (\Throwable $e) {
             Log::error('CinetPay.webhook_handler_error', [
-                'transaction_id' => $transactionId,
+                'transaction_id' => $merchantTransactionId,
                 'error' => $e->getMessage(),
             ]);
             $this->cinetpay->markWebhookProcessed($webhookLog, $e->getMessage());
@@ -54,7 +63,7 @@ class CinetPayWebhookHandler
         }
     }
 
-    private function processValidPayment(string $transactionId, array $verification): void
+    private function processValidPayment(string $transactionId, array $verification, array $webhookPayload): void
     {
         $cinetpayTransaction = CinetpayTransaction::where('transaction_id', $transactionId)->first();
 
@@ -64,11 +73,11 @@ class CinetPayWebhookHandler
         }
 
         $cinetpayTransaction->update([
-            'status' => 'VALIDATED',
-            'raw_webhook' => request()->all(),
+            'status' => 'SUCCESS',
+            'raw_webhook' => $webhookPayload,
             'paid_at' => now(),
-            'payment_method' => $verification['payment_method'],
-            'cpm_trans_id' => $verification['cpm_trans_id'],
+            'payment_method' => $verification['payment_method'] ?? null,
+            'cpm_trans_id' => $verification['transaction_id'] ?? $webhookPayload['transaction_id'] ?? null,
         ]);
 
         $payment = Payment::where('transaction_id', $cinetpayTransaction->transaction_id)->first();
@@ -90,7 +99,7 @@ class CinetPayWebhookHandler
 
         $payment->update([
             'status' => Payment::STATUS_SUCCESS,
-            'payment_method' => $verification['payment_method'],
+            'payment_method' => $verification['payment_method'] ?? null,
             'provider_data' => $verification,
             'paid_at' => now(),
         ]);
@@ -121,7 +130,7 @@ class CinetPayWebhookHandler
             ->update([
                 'status' => SubscriptionPayment::STATUS_SUCCESS,
                 'paid_at' => now(),
-                'payment_method' => $verification['payment_method'],
+                'payment_method' => $verification['payment_method'] ?? null,
                 'provider_data' => $verification,
             ]);
     }
