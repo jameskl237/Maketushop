@@ -9,7 +9,6 @@ use App\Http\Controllers\Backoffice\Admin\ShopController as AdminShopController;
 use App\Http\Controllers\Backoffice\Admin\UserController;
 use App\Http\Controllers\Backoffice\SuperAdminController;
 use App\Http\Controllers\FavoriteController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\QuoteRequestController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ProductController;
@@ -90,9 +89,10 @@ Route::get('/cart/metadata', [ProductController::class, 'cartMetadata'])->name('
 Route::post('/services/{service}/quote', [QuoteRequestController::class, 'store'])->name('services.quote');
 
 // === WEBHOOK CINETPAY ===
+// CSRF exclu dans bootstrap/app.php (validateCsrfTokens except).
+// GET = test de disponibilité de l'URL par CinetPay, POST = notification de paiement.
 Route::match(['get', 'post'], '/webhooks/cinetpay', CinetPayWebhookController::class)
-    ->name('cinetpay.webhook')
-    ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+    ->name('cinetpay.webhook');
 
 // === RATINGS & FAVORITES ===
 Route::middleware('auth')->group(function () {

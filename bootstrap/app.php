@@ -22,6 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
         ]);
+
+        // Les notifications CinetPay sont des POST serveur à serveur : pas de session,
+        // donc pas de jeton CSRF. Elles sont authentifiées par le HMAC (header x-token).
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/cinetpay',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->respond(function (Response $response, \Throwable $exception, Request $request) {

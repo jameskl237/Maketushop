@@ -20,26 +20,26 @@ class CinetPayWebhookHandler
         private OrderService $orderService
     ) {}
 
-    public function handle(array $payload, array $headers): array
+    public function handle(array $payload, array $headers, ?string $token = null): array
     {
-        $merchantTransactionId = $payload['merchant_transaction_id'] ?? null;
+        $transactionId = $payload['cpm_trans_id'] ?? $payload['transaction_id'] ?? null;
 
-        if (!$merchantTransactionId) {
-            return $this->error('merchant_transaction_id manquant dans le webhook');
+        if (!$transactionId) {
+            return $this->error('cpm_trans_id manquant dans le webhook');
         }
 
-        $webhookLog = $this->cinetpay->logWebhook($headers, $payload, $merchantTransactionId);
+        $webhookLog = $this->cinetpay->logWebhook($headers, $payload, $transactionId);
 
         try {
-            $verified = $this->cinetpay->verifyWebhook($payload);
+            $verified = $this->cinetpay->verifyWebhook($payload, $token);
 
             if (!$verified['valid']) {
                 $this->cinetpay->markWebhookProcessed($webhookLog, $verified['reason'] ?? 'Notification invalide');
                 return $this->error($verified['reason'] ?? 'Notification invalide');
             }
 
-            $transactionId = $verified['transaction_id'] ?? $merchantTransactionId;
-
+            // La notification ne fait qu'annoncer un changement d'état :
+            // seul l'appel à /payment/check fait foi.
             $verification = $this->cinetpay->verifyPayment($transactionId);
 
             if (!$this->cinetpay->isPaymentValid($verification)) {
@@ -47,15 +47,15 @@ class CinetPayWebhookHandler
                 return $this->success('Notification reçue, paiement non validé');
             }
 
-            DB::transaction(function () use ($merchantTransactionId, $verification, $webhookLog, $payload) {
-                $this->processValidPayment($merchantTransactionId, $verification, $payload);
+            DB::transaction(function () use ($transactionId, $verification, $webhookLog, $payload) {
+                $this->processValidPayment($transactionId, $verification, $payload);
                 $this->cinetpay->markWebhookProcessed($webhookLog);
             });
 
             return $this->success('Paiement traité avec succès');
         } catch (\Throwable $e) {
             Log::error('CinetPay.webhook_handler_error', [
-                'transaction_id' => $merchantTransactionId,
+                'transaction_id' => $transactionId,
                 'error' => $e->getMessage(),
             ]);
             $this->cinetpay->markWebhookProcessed($webhookLog, $e->getMessage());
@@ -73,11 +73,11 @@ class CinetPayWebhookHandler
         }
 
         $cinetpayTransaction->update([
-            'status' => 'SUCCESS',
+            'status' => 'ACCEPTED',
             'raw_webhook' => $webhookPayload,
             'paid_at' => now(),
-            'payment_method' => $verification['payment_method'] ?? null,
-            'cpm_trans_id' => $verification['transaction_id'] ?? $webhookPayload['transaction_id'] ?? null,
+            'payment_method' => $verification['payment_method'] ?? $webhookPayload['payment_method'] ?? null,
+            'cpm_trans_id' => $verification['operator_id'] ?? $webhookPayload['cpm_payid'] ?? null,
         ]);
 
         $payment = Payment::where('transaction_id', $cinetpayTransaction->transaction_id)->first();

@@ -39,24 +39,35 @@ class PaymentManager
 
         try {
             $result = $this->cinetpay->initializePayment([
-                'merchant_transaction_id' => $transactionId,
+                'transaction_id' => $transactionId,
                 'amount' => $payment->amount,
-                'designation' => 'Commande ' . $order->order_number . ' - MaketuShop',
-                'client_email' => $customer['email'] ?? '',
-                'client_first_name' => $customer['first_name'] ?? $order->customer_first_name ?? '',
-                'client_last_name' => $customer['last_name'] ?? $order->customer_last_name ?? '',
-                'client_phone_number' => $customer['phone'] ?? $order->phone_number ?? '',
-                'success_url' => $returnUrl,
-                'failed_url' => $returnUrl,
+                'description' => 'Commande ' . $order->order_number . ' - MaketuShop',
                 'notify_url' => $notifyUrl,
+                'return_url' => $returnUrl,
+                'metadata' => 'order:' . $order->id,
+                'customer' => [
+                    'id' => (string) $order->user_id,
+                    'name' => $customer['first_name'] ?? $order->customer_first_name ?? '',
+                    'surname' => $customer['last_name'] ?? $order->customer_last_name ?? '',
+                    'email' => $customer['email'] ?? '',
+                    'phone' => $customer['phone'] ?? $order->phone_number ?? '',
+                    'address' => $customer['address'] ?? $order->delivery_address ?? '',
+                ],
             ]);
+
+            // CinetPay peut arrondir le montant (multiple de 5 en XOF) :
+            // on aligne la trace locale sur ce qui sera réellement débité.
+            if (isset($result['amount']) && (int) $result['amount'] !== $payment->amount) {
+                $payment->update(['amount' => (int) $result['amount']]);
+            }
 
             return [
                 'success' => true,
                 'payment_url' => $result['payment_url'],
                 'token' => $result['payment_token'],
                 'transaction_id' => $transactionId,
-                'payment' => $payment,
+                'amount' => $result['amount'] ?? $payment->amount,
+                'payment' => $payment->refresh(),
             ];
         } catch (\Throwable $e) {
             DB::transaction(function () use ($payment) {
@@ -94,27 +105,33 @@ class PaymentManager
 
         try {
             $result = $this->cinetpay->initializePayment([
-                'merchant_transaction_id' => $transactionId,
+                'transaction_id' => $transactionId,
                 'amount' => $amount,
-                'designation' => 'Abonnement ' . $subscription->plan . ' - MaketuShop',
-                'client_email' => $customer['email'] ?? '',
-                'client_first_name' => $customer['first_name'] ?? '',
-                'client_last_name' => $customer['last_name'] ?? '',
-                'client_phone_number' => $customer['phone'] ?? '',
-                'success_url' => route('payments.cinetpay.callback', ['transaction_id' => $transactionId]),
-                'failed_url' => route('payments.cinetpay.callback', ['transaction_id' => $transactionId]),
+                'description' => 'Abonnement ' . $subscription->plan . ' - MaketuShop',
                 'notify_url' => $notifyUrl,
+                'return_url' => route('payments.cinetpay.callback', ['transaction_id' => $transactionId]),
+                'metadata' => 'subscription:' . $subscription->id,
+                'customer' => [
+                    'name' => $customer['first_name'] ?? '',
+                    'surname' => $customer['last_name'] ?? '',
+                    'email' => $customer['email'] ?? '',
+                    'phone' => $customer['phone'] ?? '',
+                ],
             ]);
 
             $subscription->update(['transaction_id' => $transactionId]);
-            $payment->update(['reference' => $result['transaction_id'] ?? $transactionId]);
+
+            if (isset($result['amount']) && (int) $result['amount'] !== $payment->amount) {
+                $payment->update(['amount' => (int) $result['amount']]);
+            }
 
             return [
                 'success' => true,
                 'payment_url' => $result['payment_url'],
                 'token' => $result['payment_token'],
                 'transaction_id' => $transactionId,
-                'payment' => $payment,
+                'amount' => $result['amount'] ?? $payment->amount,
+                'payment' => $payment->refresh(),
             ];
         } catch (\Throwable $e) {
             $payment->update(['status' => Payment::STATUS_FAILED]);

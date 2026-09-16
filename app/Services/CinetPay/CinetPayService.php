@@ -4,144 +4,259 @@ namespace App\Services\CinetPay;
 
 use App\Models\CinetpayTransaction;
 use App\Models\WebhookLog;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * Client CinetPay - API Checkout v2.
+ *
+ * Authentification par apikey + site_id sur chaque appel (pas d'OAuth).
+ * Docs : https://docs.cinetpay.com/api/1.0-fr/checkout/initialisation
+ */
 class CinetPayService
 {
+    /** Statuts renvoyés par /payment/check pour un paiement encaissé. */
+    private const PAID_STATUSES = ['ACCEPTED', 'VALIDATED', 'SUCCESS'];
+
+    /** Codes de succès à l'initialisation (201 = CREATED). */
+    private const INIT_SUCCESS_CODES = ['201', '00'];
+
+    /** Alias tolérés vers les canaux réellement acceptés par l'API v2. */
+    private const CHANNEL_ALIASES = [
+        'MOBILE' => 'MOBILE_MONEY',
+        'MOBILE_MONEY' => 'MOBILE_MONEY',
+        'CARD' => 'CREDIT_CARD',
+        'CREDIT_CARD' => 'CREDIT_CARD',
+        'WALLET' => 'WALLET',
+        'ALL' => 'ALL',
+    ];
+
     private string $apiKey;
-    private string $apiPassword;
+    private string $siteId;
+    private string $secretKey;
     private string $baseUrl;
     private string $country;
-
-    private const SUCCESS_CODES = [200, 100];
-    private const TOKEN_ERROR_CODES = [1002, 1003];
+    private string $currency;
+    private string $defaultChannels;
+    private string $lang;
 
     public function __construct()
     {
         $this->apiKey = (string) config('services.cinetpay.api_key', '');
-        $this->apiPassword = (string) config('services.cinetpay.api_password', '');
-        $this->baseUrl = rtrim((string) config('services.cinetpay.base_url', 'https://api.cinetpay.co'), '/');
+        $this->siteId = (string) config('services.cinetpay.site_id', '');
+        $this->secretKey = (string) config('services.cinetpay.secret_key', '');
+        $this->baseUrl = $this->normalizeBaseUrl((string) config('services.cinetpay.base_url', 'https://api-checkout.cinetpay.com/v2'));
         $this->country = strtoupper((string) config('services.cinetpay.country', 'CI'));
+        $this->currency = strtoupper((string) config('services.cinetpay.currency', 'XOF'));
+        $this->defaultChannels = $this->normalizeChannels((string) config('services.cinetpay.channels', 'ALL'));
+        $this->lang = strtolower((string) config('services.cinetpay.lang', 'fr'));
     }
 
     public function isConfigured(): bool
     {
-        return filled($this->apiKey) && filled($this->apiPassword);
+        return filled($this->apiKey) && filled($this->siteId);
     }
 
+    /**
+     * Identifiant marchand unique. L'API v2 limite à 100 caractères
+     * alphanumériques ; on reste volontairement court et sans caractère spécial.
+     */
     public function generateTransactionId(): string
     {
-        return 'TXN-' . now()->format('YmdHis') . '-' . strtoupper(Str::random(8));
+        return 'TXN' . now()->format('YmdHis') . strtoupper(Str::random(8));
     }
 
+    /**
+     * Crée la transaction et renvoie l'URL de paiement hébergée par CinetPay.
+     *
+     * @param  array  $params  transaction_id, amount, description, notify_url, return_url,
+     *                         customer (name/surname/email/phone/address/city/country...),
+     *                         channels, metadata, invoice_data
+     *
+     * @throws CinetPayException
+     */
     public function initializePayment(array $params): array
     {
-        $payload = array_merge([
-            'currency' => 'XOF',
-            'lang' => 'fr',
-            'channel' => 'PUSH',
-        ], $params);
-
-        $payload['client_phone_number'] = $this->normalizePhone($payload['client_phone_number'] ?? '');
-
-        $this->validatePayload($payload);
-
-        $body = $this->request('POST', '/v1/payment', $payload);
-        $code = (int) ($body['code'] ?? 0);
-
-        if (!in_array($code, self::SUCCESS_CODES, true)) {
-            Log::error('CinetPay.init_error', [
-                'transaction_id' => $payload['merchant_transaction_id'],
-                'code' => $body['code'] ?? null,
-                'status' => $body['status'] ?? null,
-                'description' => $body['description'] ?? null,
-            ]);
+        if (!$this->isConfigured()) {
             throw new CinetPayException(
-                $body['description'] ?? $body['status'] ?? 'Erreur de communication avec CinetPay',
-                (string) ($body['code'] ?? 'UNKNOWN')
+                'CinetPay n\'est pas configuré (CINETPAY_API_KEY / CINETPAY_SITE_ID manquants).',
+                'NOT_CONFIGURED'
             );
         }
 
-        $this->logTransaction($payload['merchant_transaction_id'], $payload, $body);
-        $this->updateTransactionStatus($payload['merchant_transaction_id'], 'INITIATED', $body);
+        $payload = $this->buildInitPayload($params);
+        $this->validatePayload($payload);
+
+        $body = $this->request('/payment', $payload);
+        $code = (string) ($body['code'] ?? '');
+
+        if (!in_array($code, self::INIT_SUCCESS_CODES, true)) {
+            Log::error('CinetPay.init_error', [
+                'transaction_id' => $payload['transaction_id'],
+                'code' => $code,
+                'message' => $body['message'] ?? null,
+                'description' => $body['description'] ?? null,
+            ]);
+
+            throw new CinetPayException(
+                $this->errorMessage($body),
+                $code !== '' ? $code : 'UNKNOWN'
+            );
+        }
+
+        $data = $body['data'] ?? [];
+        $token = $data['payment_token'] ?? $data['token'] ?? null;
+        $url = $data['payment_url'] ?? null;
+
+        if (!$url) {
+            throw new CinetPayException('CinetPay n\'a pas renvoyé d\'URL de paiement.', 'NO_PAYMENT_URL');
+        }
+
+        $this->logTransaction($payload, $body);
 
         return [
             'success' => true,
-            'payment_token' => $body['payment_token'] ?? null,
-            'payment_url' => $body['payment_url'] ?? null,
-            'transaction_id' => $body['transaction_id'] ?? null,
-            'merchant_transaction_id' => $payload['merchant_transaction_id'],
-            'notify_token' => $body['notify_token'] ?? null,
+            'payment_token' => $token,
+            'payment_url' => $url,
+            'transaction_id' => $payload['transaction_id'],
+            'merchant_transaction_id' => $payload['transaction_id'],
+            // Montant réellement débité : peut différer de celui demandé
+            // (arrondi au multiple de 5 imposé par CinetPay sur le XOF).
+            'amount' => $payload['amount'],
+            'currency' => $payload['currency'],
         ];
     }
 
-    public function verifyPayment(string $identifier): array
+    /**
+     * Vérifie l'état réel d'une transaction auprès de CinetPay.
+     * C'est la seule source de vérité : ni le webhook ni le return_url ne suffisent.
+     */
+    public function verifyPayment(string $transactionId): array
     {
-        $body = $this->request('GET', '/v1/payment/' . rawurlencode($identifier));
-        $code = (int) ($body['code'] ?? 0);
-
-        if (!in_array($code, [200, 100, 2001, 2002], true)) {
-            Log::warning('CinetPay.verify_error', [
-                'identifier' => $identifier,
-                'code' => $body['code'] ?? null,
-                'status' => $body['status'] ?? null,
-                'description' => $body['description'] ?? null,
+        try {
+            $body = $this->request('/payment/check', [
+                'transaction_id' => $transactionId,
             ]);
+        } catch (CinetPayException $e) {
             return [
                 'verified' => false,
-                'status' => $body['status'] ?? null,
-                'error' => $body['description'] ?? $body['status'] ?? 'Erreur de vérification',
-                'code' => $body['code'] ?? null,
+                'status' => null,
+                'code' => $e->getApiCode(),
+                'error' => $e->getMessage(),
             ];
         }
 
-        $status = (string) ($body['status'] ?? '');
-        $this->updateTransactionStatus($identifier, $status, $body);
+        $code = (string) ($body['code'] ?? '');
+        $data = $body['data'] ?? [];
+
+        if ($code !== '00') {
+            Log::warning('CinetPay.verify_error', [
+                'transaction_id' => $transactionId,
+                'code' => $code,
+                'message' => $body['message'] ?? null,
+            ]);
+
+            // 662 (attente client), 600 (échec) et 627 (annulation) sont des
+            // réponses métier légitimes : la transaction existe mais n'est pas payée.
+            $status = $this->extractStatus($data) ?: ($body['message'] ?? null);
+            $this->updateTransactionStatus($transactionId, $status, $data);
+
+            return [
+                'verified' => false,
+                'status' => $status,
+                'code' => $code,
+                'error' => $this->errorMessage($body),
+            ];
+        }
+
+        $status = $this->extractStatus($data);
+        $this->updateTransactionStatus($transactionId, $status, $data);
 
         return [
             'verified' => true,
             'status' => $status,
             'code' => $code,
-            'transaction_id' => $body['transaction_id'] ?? null,
-            'merchant_transaction_id' => $body['merchant_transaction_id'] ?? $identifier,
-            'user' => $body['user'] ?? [],
+            'amount' => $data['amount'] ?? $data['cpm_amount'] ?? null,
+            'currency' => $data['currency'] ?? $data['cpm_currency'] ?? null,
+            'payment_method' => $data['payment_method'] ?? null,
+            'payment_date' => $data['payment_date'] ?? $data['cpm_trans_date'] ?? null,
+            'operator_id' => $data['operator_id'] ?? null,
+            'metadata' => $data['metadata'] ?? $data['cpm_custom'] ?? null,
+            'transaction_id' => $transactionId,
+            'merchant_transaction_id' => $transactionId,
+            'reference' => $data['operator_id'] ?? $data['cpm_trans_id'] ?? null,
+            'raw' => $data,
         ];
     }
 
     public function isPaymentValid(array $verification): bool
     {
         return ($verification['verified'] ?? false)
-            && ($verification['status'] ?? '') === 'SUCCESS';
+            && in_array(strtoupper((string) ($verification['status'] ?? '')), self::PAID_STATUSES, true);
     }
 
-    public function verifyWebhook(array $payload): array
+    /**
+     * Valide la signature HMAC-SHA256 envoyée par CinetPay dans le header x-token.
+     *
+     * La chaîne signée est la concaténation, dans cet ordre exact, des champs du
+     * POST de notification. Un champ absent compte comme une chaîne vide.
+     */
+    public function verifyHmac(array $payload, ?string $token): bool
     {
-        $merchantTransactionId = $payload['merchant_transaction_id'] ?? null;
-        $notifyToken = $payload['notify_token'] ?? null;
-
-        if (!$merchantTransactionId) {
-            return ['valid' => false, 'reason' => 'merchant_transaction_id manquant'];
+        if (blank($this->secretKey) || blank($token)) {
+            return false;
         }
 
-        $transaction = CinetpayTransaction::where('transaction_id', $merchantTransactionId)->first();
+        $fields = [
+            'cpm_site_id', 'cpm_trans_id', 'cpm_trans_date', 'cpm_amount', 'cpm_currency',
+            'signature', 'payment_method', 'cel_phone_num', 'cpm_phone_prefixe',
+            'cpm_language', 'cpm_version', 'cpm_payment_config', 'cpm_page_action',
+            'cpm_custom', 'cpm_designation', 'cpm_error_message',
+        ];
+
+        $data = '';
+        foreach ($fields as $field) {
+            $data .= (string) ($payload[$field] ?? '');
+        }
+
+        $expected = hash_hmac('sha256', $data, $this->secretKey);
+
+        return hash_equals($expected, trim($token));
+    }
+
+    /**
+     * Contrôles de cohérence sur une notification reçue, avant tout traitement métier.
+     */
+    public function verifyWebhook(array $payload, ?string $token = null): array
+    {
+        $transactionId = $payload['cpm_trans_id'] ?? $payload['transaction_id'] ?? null;
+
+        if (!$transactionId) {
+            return ['valid' => false, 'reason' => 'cpm_trans_id manquant'];
+        }
+
+        $siteId = (string) ($payload['cpm_site_id'] ?? '');
+        if ($siteId !== '' && $siteId !== $this->siteId) {
+            return ['valid' => false, 'reason' => 'site_id inattendu'];
+        }
+
+        if (filled($this->secretKey) && !$this->verifyHmac($payload, $token)) {
+            return ['valid' => false, 'reason' => 'signature HMAC (x-token) invalide'];
+        }
+
+        $transaction = CinetpayTransaction::where('transaction_id', $transactionId)->first();
 
         if (!$transaction) {
             return ['valid' => false, 'reason' => 'transaction inconnue'];
         }
 
-        if (!$notifyToken || !hash_equals((string) $transaction->notify_token, (string) $notifyToken)) {
-            return ['valid' => false, 'reason' => 'notify_token invalide'];
-        }
-
         return [
             'valid' => true,
             'transaction' => $transaction,
-            'transaction_id' => $payload['transaction_id'] ?? $transaction->cpm_trans_id,
-            'merchant_transaction_id' => $merchantTransactionId,
-            'user' => $payload['user'] ?? [],
+            'transaction_id' => $transactionId,
+            'merchant_transaction_id' => $transactionId,
         ];
     }
 
@@ -150,7 +265,7 @@ class CinetPayService
         return WebhookLog::create([
             'provider' => 'cinetpay',
             'event' => 'notification',
-            'transaction_id' => $transactionId ?? $payload['merchant_transaction_id'] ?? $payload['transaction_id'] ?? null,
+            'transaction_id' => $transactionId ?? $payload['cpm_trans_id'] ?? $payload['transaction_id'] ?? null,
             'status' => 'received',
             'headers' => $headers,
             'payload' => $payload,
@@ -166,84 +281,160 @@ class CinetPayService
         ]);
     }
 
-    private function getAccessToken(): string
+    /**
+     * Construit le corps de la requête d'initialisation au format attendu par l'API v2
+     * (champs client à plat : customer_name, customer_surname, ...).
+     */
+    private function buildInitPayload(array $params): array
     {
-        return Cache::remember(
-            'cinetpay_token_' . strtolower($this->country),
-            now()->addHours(23),
-            fn () => $this->authenticate()
-        );
-    }
+        $customer = $params['customer'] ?? [];
 
-    private function authenticate(): string
-    {
-        $response = Http::acceptJson()
-            ->timeout(15)
-            ->post("{$this->baseUrl}/v1/oauth/login", [
-                'api_key' => $this->apiKey,
-                'api_password' => $this->apiPassword,
-            ]);
+        $payload = [
+            'apikey' => $this->apiKey,
+            'site_id' => $this->siteId,
+            'transaction_id' => $params['transaction_id'] ?? $this->generateTransactionId(),
+            'amount' => $this->normalizeAmount($params['amount'] ?? 0),
+            'currency' => strtoupper((string) ($params['currency'] ?? $this->currency)),
+            'description' => Str::limit((string) ($params['description'] ?? ''), 250, ''),
+            'notify_url' => $params['notify_url'] ?? '',
+            'return_url' => $params['return_url'] ?? '',
+            'channels' => $this->normalizeChannels((string) ($params['channels'] ?? $this->defaultChannels)),
+            'lang' => strtolower((string) ($params['lang'] ?? $this->lang)),
+        ];
 
-        $body = $response->json() ?? [];
-        $token = $body['access_token'] ?? null;
+        // Champs client : obligatoires dès que le canal carte est proposé.
+        $customerFields = [
+            'customer_id' => $customer['id'] ?? null,
+            'customer_name' => $customer['name'] ?? $customer['first_name'] ?? null,
+            'customer_surname' => $customer['surname'] ?? $customer['last_name'] ?? null,
+            'customer_email' => $customer['email'] ?? null,
+            'customer_phone_number' => $this->normalizePhone((string) ($customer['phone'] ?? $customer['phone_number'] ?? '')),
+            'customer_address' => $customer['address'] ?? null,
+            'customer_city' => $customer['city'] ?? null,
+            'customer_country' => strtoupper((string) ($customer['country'] ?? $this->country)),
+            'customer_state' => $customer['state'] ?? null,
+            'customer_zip_code' => $customer['zip_code'] ?? null,
+        ];
 
-        if ($response->failed() || !$token) {
-            Log::error('CinetPay.auth_failed', [
-                'code' => $body['code'] ?? null,
-                'status' => $body['status'] ?? null,
-                'description' => $body['description'] ?? null,
-                'http' => $response->status(),
-            ]);
-            throw new CinetPayException(
-                $body['description'] ?? $body['status'] ?? 'Authentification CinetPay échouée. Vérifiez vos clés API.',
-                (string) ($body['code'] ?? 'AUTH_ERROR')
+        foreach ($customerFields as $key => $value) {
+            if (filled($value)) {
+                $payload[$key] = (string) $value;
+            }
+        }
+
+        // metadata est une chaîne côté CinetPay (255 caractères max).
+        if (filled($params['metadata'] ?? null)) {
+            $metadata = $params['metadata'];
+            $payload['metadata'] = Str::limit(
+                is_string($metadata) ? $metadata : json_encode($metadata, JSON_UNESCAPED_UNICODE),
+                250,
+                ''
             );
         }
 
-        return $token;
+        if (filled($params['invoice_data'] ?? null)) {
+            $payload['invoice_data'] = $params['invoice_data'];
+        }
+
+        if (filled($params['alternative_currency'] ?? null)) {
+            $payload['alternative_currency'] = strtoupper((string) $params['alternative_currency']);
+        }
+
+        return $payload;
     }
 
-    private function request(string $method, string $path, ?array $payload = null): array
+    private function request(string $path, array $payload): array
     {
-        $attempts = 0;
+        $payload = array_merge([
+            'apikey' => $this->apiKey,
+            'site_id' => $this->siteId,
+        ], $payload);
 
-        do {
-            $http = Http::withToken($this->getAccessToken())
-                ->acceptJson()
-                ->timeout(15);
+        try {
+            $response = Http::acceptJson()
+                ->timeout(20)
+                ->retry(2, 500, throw: false)
+                ->post($this->baseUrl . $path, $payload);
+        } catch (\Throwable $e) {
+            Log::error('CinetPay.network_error', ['path' => $path, 'error' => $e->getMessage()]);
+            throw new CinetPayException('Impossible de joindre CinetPay. Réessayez dans un instant.', 'NETWORK_ERROR');
+        }
 
-            $response = $method === 'GET'
-                ? $http->get("{$this->baseUrl}{$path}")
-                : $http->post("{$this->baseUrl}{$path}", $payload ?? []);
+        $body = $response->json();
 
-            $body = $response->json() ?? [];
-            $code = (int) ($body['code'] ?? 0);
+        if (!is_array($body)) {
+            Log::error('CinetPay.invalid_response', [
+                'path' => $path,
+                'http' => $response->status(),
+                'body' => Str::limit($response->body(), 500),
+            ]);
+            throw new CinetPayException('Réponse illisible de CinetPay.', 'INVALID_RESPONSE');
+        }
 
-            if (in_array($code, self::TOKEN_ERROR_CODES, true)) {
-                Cache::forget('cinetpay_token_' . strtolower($this->country));
-                $attempts++;
+        // Une erreur HTTP sans code métier exploitable n'est pas récupérable côté appelant.
+        if ($response->serverError() && !isset($body['code'])) {
+            throw new CinetPayException('CinetPay est momentanément indisponible.', 'SERVER_ERROR');
+        }
+
+        return $body;
+    }
+
+    private function errorMessage(array $body): string
+    {
+        return $body['description']
+            ?? $body['message']
+            ?? 'Erreur de communication avec CinetPay';
+    }
+
+    private function extractStatus(array $data): ?string
+    {
+        $status = $data['status'] ?? $data['cpm_trans_status'] ?? null;
+
+        return $status !== null ? strtoupper((string) $status) : null;
+    }
+
+    private function normalizeBaseUrl(string $url): string
+    {
+        $url = rtrim(trim($url), '/');
+
+        // Tolère une valeur d'environnement sans le suffixe de version.
+        if (!str_ends_with($url, '/v2')) {
+            $url .= '/v2';
+        }
+
+        return $url;
+    }
+
+    private function normalizeChannels(string $channels): string
+    {
+        $normalized = [];
+
+        foreach (explode(',', strtoupper($channels)) as $channel) {
+            $channel = trim($channel);
+
+            if ($channel === '') {
                 continue;
             }
 
-            if ($response->failed() || $code === 404) {
-                Log::error('CinetPay.request_failed', [
-                    'method' => $method,
-                    'path' => $path,
-                    'http' => $response->status(),
-                    'code' => $body['code'] ?? null,
-                    'status' => $body['status'] ?? null,
-                    'description' => $body['description'] ?? null,
-                ]);
-                throw new CinetPayException(
-                    $body['description'] ?? $body['status'] ?? 'Erreur de communication avec CinetPay',
-                    (string) ($body['code'] ?? 'NETWORK_ERROR')
-                );
-            }
+            $normalized[] = self::CHANNEL_ALIASES[$channel] ?? $channel;
+        }
 
-            return $body;
-        } while ($attempts < 2);
+        return $normalized === [] ? 'ALL' : implode(',', array_unique($normalized));
+    }
 
-        throw new CinetPayException('Échec d\'authentification CinetPay', 'TOKEN_ERROR');
+    /**
+     * CinetPay refuse les montants non entiers, et exige un multiple de 5
+     * pour les devises d'Afrique de l'Ouest et centrale.
+     */
+    private function normalizeAmount(int|float|string $amount): int
+    {
+        $amount = (int) round((float) $amount);
+
+        if (in_array($this->currency, ['XOF', 'XAF', 'CDF', 'GNF'], true) && $amount % 5 !== 0) {
+            $amount = (int) (ceil($amount / 5) * 5);
+        }
+
+        return $amount;
     }
 
     private function normalizePhone(string $phone): string
@@ -284,58 +475,67 @@ class CinetPayService
 
     private function validatePayload(array $payload): void
     {
-        $required = [
-            'merchant_transaction_id', 'amount', 'designation',
-            'notify_url', 'success_url', 'failed_url',
-            'client_email', 'client_first_name', 'client_last_name',
-        ];
-
-        foreach ($required as $field) {
+        foreach (['transaction_id', 'amount', 'description', 'notify_url', 'return_url'] as $field) {
             if (empty($payload[$field])) {
                 throw new CinetPayException("Le champ '{$field}' est requis", 'VALIDATION_ERROR');
             }
         }
 
-        if ((int) $payload['amount'] < 100 || (int) $payload['amount'] > 2500000) {
-            throw new CinetPayException('Le montant doit être compris entre 100 et 2 500 000', 'VALIDATION_ERROR');
+        $min = (int) config('services.cinetpay.min_amount', 100);
+        $max = (int) config('services.cinetpay.max_amount', 2500000);
+
+        if ($payload['amount'] < $min || $payload['amount'] > $max) {
+            throw new CinetPayException(
+                sprintf('Le montant doit être compris entre %s et %s %s', $min, $max, $payload['currency']),
+                'VALIDATION_ERROR'
+            );
         }
 
-        if (strlen((string) $payload['merchant_transaction_id']) > 30) {
-            throw new CinetPayException('Transaction ID invalide (max 30 caractères)', 'VALIDATION_ERROR');
+        if (!preg_match('/^[A-Za-z0-9_-]{1,100}$/', (string) $payload['transaction_id'])) {
+            throw new CinetPayException('Transaction ID invalide (alphanumérique, 100 caractères max)', 'VALIDATION_ERROR');
         }
 
-        if (filter_var($payload['client_email'], FILTER_VALIDATE_EMAIL) === false) {
+        foreach (['notify_url', 'return_url'] as $urlField) {
+            if (filter_var($payload[$urlField], FILTER_VALIDATE_URL) === false) {
+                throw new CinetPayException("L'URL '{$urlField}' est invalide", 'VALIDATION_ERROR');
+            }
+        }
+
+        if (filled($payload['customer_email'] ?? null)
+            && filter_var($payload['customer_email'], FILTER_VALIDATE_EMAIL) === false) {
             throw new CinetPayException('Email client invalide', 'VALIDATION_ERROR');
         }
     }
 
-    private function logTransaction(string $transactionId, array $request, array $response): void
+    private function logTransaction(array $request, array $response): void
     {
         try {
+            $data = $response['data'] ?? [];
+
             CinetpayTransaction::updateOrCreate(
-                ['transaction_id' => $transactionId],
+                ['transaction_id' => $request['transaction_id']],
                 [
-                    'site_id' => config('services.cinetpay.site_id'),
-                    'country' => $this->country,
+                    'site_id' => $this->siteId,
+                    'country' => $request['customer_country'] ?? $this->country,
                     'amount' => (int) ($request['amount'] ?? 0),
-                    'currency' => $request['currency'] ?? 'XOF',
-                    'status' => 'INITIATED',
-                    'description' => $request['designation'] ?? null,
+                    'currency' => $request['currency'] ?? $this->currency,
+                    'status' => 'CREATED',
+                    'description' => $request['description'] ?? null,
                     'customer_name' => trim(
-                        ($request['client_first_name'] ?? '') . ' ' . ($request['client_last_name'] ?? '')
+                        ($request['customer_name'] ?? '') . ' ' . ($request['customer_surname'] ?? '')
                     ) ?: null,
-                    'customer_email' => $request['client_email'] ?? null,
-                    'customer_phone' => $request['client_phone_number'] ?? null,
-                    'notify_token' => $response['notify_token'] ?? null,
-                    'payment_token' => $response['payment_token'] ?? null,
-                    'payment_url' => $response['payment_url'] ?? null,
-                    'raw_request' => $request,
+                    'customer_email' => $request['customer_email'] ?? null,
+                    'customer_phone' => $request['customer_phone_number'] ?? null,
+                    'payment_token' => $data['payment_token'] ?? $data['token'] ?? null,
+                    'payment_url' => $data['payment_url'] ?? null,
+                    // La clé API ne doit jamais atterrir en base.
+                    'raw_request' => Arr::except($request, ['apikey']),
                     'raw_response' => $response,
                 ]
             );
         } catch (\Throwable $e) {
             Log::warning('CinetPay.log_transaction_error', [
-                'transaction_id' => $transactionId,
+                'transaction_id' => $request['transaction_id'] ?? null,
                 'error' => $e->getMessage(),
             ]);
         }
@@ -345,11 +545,13 @@ class CinetPayService
     {
         try {
             $update = ['status' => $status ?? 'UNKNOWN'];
-            if ($status === 'SUCCESS') {
+
+            if ($status !== null && in_array($status, self::PAID_STATUSES, true)) {
                 $update['paid_at'] = now();
-                $update['cpm_trans_id'] = $data['transaction_id'] ?? null;
                 $update['payment_method'] = $data['payment_method'] ?? null;
+                $update['cpm_trans_id'] = $data['operator_id'] ?? $data['cpm_trans_id'] ?? null;
             }
+
             CinetpayTransaction::where('transaction_id', $transactionId)->update($update);
         } catch (\Throwable $e) {
             Log::warning('CinetPay.update_status_error', [
