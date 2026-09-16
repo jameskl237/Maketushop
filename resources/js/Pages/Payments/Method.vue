@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCartStore } from '@/stores/cart';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ArrowLeft, Check, CreditCard, Lock, MapPin, User, Phone, ArrowRight, Banknote, Globe } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
@@ -48,10 +48,19 @@ const formatPrice = (value) =>
         maximumFractionDigits: 0,
     }).format(value);
 
+onMounted(() => {
+    // Le récapitulatif lit le panier local : on réaligne d'abord les lignes
+    // dont le prix est inexploitable, sinon le total afficherait 0.
+    if (props.context === 'cart') cartStore.hydrateFromServer();
+});
+
 const isCart = computed(() => props.context === 'cart');
 const cartItems = computed(() => cartStore.items);
 const cartTotal = computed(() => cartStore.totalAmount);
 const cartItemsCount = computed(() => cartStore.itemsCount);
+// Une ligne au prix non résolu fausserait le total affiché : on le signale
+// plutôt que d'annoncer un montant erroné pendant la réhydratation.
+const hasUnpricedItems = computed(() => cartStore.hasUnpricedItems);
 
 const isFormValid = computed(() => {
     return form.value.first_name && form.value.last_name && form.value.delivery_address && form.value.phone_number;
@@ -290,6 +299,9 @@ const submitPayment = () => {
                                         <span class="text-sm text-muted-foreground">{{ t('dashboard.client.items', { count: cartItemsCount }) }}</span>
                                         <span class="text-xl font-black text-primary">{{ formatPrice(cartTotal) }}</span>
                                     </div>
+                                    <p v-if="hasUnpricedItems" class="mt-2 text-xs text-amber-600">
+                                        Actualisation des prix en cours… Le montant débité sera celui du catalogue.
+                                    </p>
                                 </div>
                             </div>
 

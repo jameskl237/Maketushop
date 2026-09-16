@@ -8,7 +8,6 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { CreditCard, MessageCircle, Store } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 
 const cartStore = useCartStore();
@@ -121,43 +120,10 @@ const checkoutOnPlatform = () => {
     showLoginPrompt.value = true;
 };
 
-const hydrateLegacyCartItems = async () => {
-    const missingIds = cartStore.items
-        .filter((item) => !item.shop?.id || !item.shop?.owner_phone)
-        .map((item) => item.id);
-
-    if (!missingIds.length) return;
-
-    try {
-        const { data } = await axios.get(route('cart.metadata'), {
-            params: { ids: missingIds },
-        });
-
-        const metadata = data?.metadata || {};
-
-        cartStore.items = cartStore.items.map((item) => {
-            const meta = metadata[item.id];
-            if (!meta?.shop) return item;
-
-            return {
-                ...item,
-                shop: {
-                    id: meta.shop.id ?? item.shop?.id ?? null,
-                    name: meta.shop.name ?? item.shop?.name ?? 'Boutique inconnue',
-                    logo: meta.shop.logo ?? item.shop?.logo ?? null,
-                    owner_phone: meta.shop.owner_phone ?? item.shop?.owner_phone ?? null,
-                },
-            };
-        });
-
-        cartStore.persist();
-    } catch {
-        // Keep existing cart state if metadata hydration fails.
-    }
-};
-
 onMounted(() => {
-    hydrateLegacyCartItems();
+    // Réaligne prix et boutique des lignes incomplètes (paniers enregistrés
+    // avant que le prix ne soit correctement résolu).
+    cartStore.hydrateFromServer();
 });
 </script>
 

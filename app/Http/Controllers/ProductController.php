@@ -56,11 +56,15 @@ class ProductController extends Controller
                 'shop:id,name,logo,phone,user_id',
                 'shop.user:id,phone',
             ])
-            ->get(['id', 'shop_id']);
+            ->get(['id', 'name', 'price', 'shop_id']);
 
         $metadata = $products->mapWithKeys(function (Product $product) {
             return [
                 $product->id => [
+                    // Prix faisant foi : une ligne de panier périmée ou incomplète
+                    // est réalignée sur la base plutôt que sur le localStorage.
+                    'name' => $product->name,
+                    'price' => (float) $product->price,
                     'shop' => [
                         'id' => $product->shop?->id,
                         'name' => $product->shop?->name ?? 'Boutique inconnue',

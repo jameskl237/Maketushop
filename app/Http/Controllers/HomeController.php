@@ -90,6 +90,8 @@ class HomeController extends Controller
             'name'           => $product->name,
             'main_image'     => $mainImage,
             'price'          => $price,
+            // Même nom que dans ProductController : c'est le champ que lit le panier.
+            'current_price'  => $price,
             'promo_price'    => $promo,
             'average_rating' => round((float) ($product->average_rating ?? 0), 1),
             'ratings_count'  => (int) ($product->ratings_count ?? 0),
