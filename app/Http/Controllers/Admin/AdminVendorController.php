@@ -14,7 +14,6 @@ class AdminVendorController extends Controller
     public function __construct(
         private VendorWalletService $walletService
     ) {
-        $this->middleware(['auth', 'role:admin,superadmin']);
     }
 
     public function index()

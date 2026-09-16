@@ -78,15 +78,24 @@ class UserDashboardController extends Controller
         ]);
     }
 
-    public function markAsDelivered(Order $order)
+    /**
+     * Confirmation de réception par l'acheteur.
+     *
+     * Passe par OrderService : forcer le statut ici laisserait l'escrow du
+     * vendeur bloqué et court-circuiterait l'exigence de preuve de livraison.
+     */
+    public function markAsDelivered(Order $order, \App\Services\Order\OrderService $orders)
     {
-        // Ensure the order belongs to the user
         if ($order->user_id !== Auth::id()) {
             abort(403);
         }
 
-        $order->update(['status' => Order::STATUS_DELIVERED]);
+        try {
+            $orders->confirmReceptionByClient($order);
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
-        return back()->with('success', 'La commande a été marquée comme livrée.');
+        return back()->with('success', 'Réception confirmée. Le vendeur a été payé, merci !');
     }
 }

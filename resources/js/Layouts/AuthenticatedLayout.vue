@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import Dropdown from '@/components/Dropdown.vue';
+import NotificationBell from '@/Components/NotificationBell.vue';
 import DropdownLink from '@/components/DropdownLink.vue';
 import NavLink from '@/components/NavLink.vue';
 import ResponsiveNavLink from '@/components/ResponsiveNavLink.vue';
@@ -58,6 +59,7 @@ const showingNavigationDropdown = ref(false);
                         <div class="hidden sm:ms-6 sm:flex sm:items-center gap-2">
                             <LanguageSwitcher :floating="false" />
                             <ThemeToggle :floating="false" />
+                            <NotificationBell v-if="$page.props.auth?.user" />
 
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">

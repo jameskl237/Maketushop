@@ -16,7 +16,6 @@ class VendorSubscriptionController extends Controller
         private SubscriptionManager $subscriptionManager,
         private PaymentManager $paymentManager
     ) {
-        $this->middleware(['auth', 'role:supplier']);
     }
 
     public function index()

@@ -23,6 +23,9 @@ use App\Http\Controllers\Admin\AdminWithdrawalController;
 use App\Http\Controllers\Admin\AdminVendorController;
 use App\Http\Controllers\Payment\CheckoutController;
 use App\Http\Controllers\Payment\PaymentCallbackController;
+use App\Http\Controllers\Order\OrderTrackingController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Admin\AdminRefundController;
 use App\Http\Controllers\Vendor\VendorOrderController;
 use App\Http\Controllers\Vendor\VendorWalletController;
 use App\Http\Controllers\Vendor\VendorSubscriptionController;
@@ -87,6 +90,26 @@ Route::get('/cart/metadata', [ProductController::class, 'cartMetadata'])->name('
 
 // === DEVIS ===
 Route::post('/services/{service}/quote', [QuoteRequestController::class, 'store'])->name('services.quote');
+
+// === REÇU PDF ===
+// Accessible au propriétaire connecté OU via un lien signé, pour que l'acheteur
+// puisse transmettre le reçu (WhatsApp) sans partager son compte.
+Route::get('/orders/{order}/receipt', [OrderTrackingController::class, 'receipt'])
+    ->name('orders.receipt');
+
+// === SUIVI DE COMMANDE (acheteur) ===
+Route::middleware('auth')->group(function () {
+    Route::get('/orders', [OrderTrackingController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}/track', [OrderTrackingController::class, 'show'])->name('orders.track');
+    Route::post('/orders/{order}/confirm-reception', [OrderTrackingController::class, 'confirmReception'])->name('orders.confirm');
+    Route::post('/orders/{order}/cancel', [OrderTrackingController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/{order}/decline-cancellation', [OrderTrackingController::class, 'declineCancellation'])->name('orders.decline-cancellation');
+
+    // Cloche de notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+});
 
 // === WEBHOOK CINETPAY ===
 // CSRF exclu dans bootstrap/app.php (validateCsrfTokens except).
@@ -165,6 +188,13 @@ Route::middleware(['auth', 'role:admin,superadmin'])->prefix('backoffice/admin')
         Route::get('/transactions', [AdminPaymentController::class, 'transactions'])->name('backoffice.admin.payments.transactions');
         Route::get('/cinetpay', [AdminPaymentController::class, 'cinetpayTransactions'])->name('backoffice.admin.payments.cinetpay');
         Route::get('/webhooks', [AdminPaymentController::class, 'webhookLogs'])->name('backoffice.admin.payments.webhooks');
+    });
+
+    // === REMBOURSEMENTS ===
+    Route::prefix('refunds')->group(function () {
+        Route::get('/', [AdminRefundController::class, 'index'])->name('backoffice.admin.refunds.index');
+        Route::post('/{refundRequest}/refunded', [AdminRefundController::class, 'markRefunded'])->name('backoffice.admin.refunds.refunded');
+        Route::post('/{refundRequest}/reject', [AdminRefundController::class, 'reject'])->name('backoffice.admin.refunds.reject');
     });
 
     // === RETRAITS ===

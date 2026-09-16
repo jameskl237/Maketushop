@@ -14,7 +14,6 @@ class VendorOrderController extends Controller
     public function __construct(
         private OrderService $orderService
     ) {
-        $this->middleware(['auth', 'role:supplier']);
     }
 
     public function index(Request $request)
@@ -45,6 +44,16 @@ class VendorOrderController extends Controller
 
         return Inertia::render('Backoffice/Vendor/OrderDetail', [
             'order' => $order,
+            'delivery' => [
+                'has_proof' => $order->hasDeliveryProof(),
+                'proof_url' => $order->delivery_proof_path
+                    ? \Illuminate\Support\Facades\Storage::disk('public')->url($order->delivery_proof_path)
+                    : null,
+                'proof_at' => $order->delivery_proof_at,
+                'client_confirmed_at' => $order->client_confirmed_at,
+                'is_paid' => $order->isPaid(),
+                'status' => $order->status,
+            ],
         ]);
     }
 
@@ -72,12 +81,29 @@ class VendorOrderController extends Controller
         return back()->with('success', 'Commande expédiée.');
     }
 
-    public function deliver(Order $order)
+    /**
+     * Le vendeur atteste la livraison en joignant une photo. Le paiement n'est
+     * libéré qu'ensuite, quand le client confirme avoir reçu sa commande.
+     */
+    public function deliver(Request $request, Order $order)
     {
         $this->authorizeVendor($order);
-        $this->orderService->markAsDelivered($order, Auth::id());
 
-        return back()->with('success', 'Commande livrée. Le montant a été crédité sur votre solde disponible.');
+        $validated = $request->validate([
+            'proof' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ], [
+            'proof.required' => 'Une photo de livraison est obligatoire.',
+            'proof.image' => 'Le fichier doit être une image.',
+            'proof.max' => 'L\'image ne doit pas dépasser 5 Mo.',
+        ]);
+
+        try {
+            $this->orderService->attachDeliveryProof($order, Auth::id(), $validated['proof']);
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Preuve de livraison enregistrée. Le paiement sera versé dès que le client aura confirmé la réception.');
     }
 
     private function authorizeVendor(Order $order): void

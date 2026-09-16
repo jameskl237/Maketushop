@@ -15,7 +15,6 @@ class VendorWalletController extends Controller
         private VendorWalletService $walletService,
         private WithdrawalService $withdrawalService
     ) {
-        $this->middleware(['auth', 'role:supplier']);
     }
 
     public function index()
@@ -26,7 +25,7 @@ class VendorWalletController extends Controller
             'stats' => $this->walletService->getStats($vendor),
             'transactions' => $this->walletService->getTransactions($vendor),
             'withdrawals' => $this->withdrawalService->getVendorRequests($vendor),
-            'minWithdrawal' => config('payments.min_withdrawal', 500),
+            'minWithdrawal' => (int) config('payments.min_withdrawal', 500),
         ]);
     }
 
@@ -35,11 +34,11 @@ class VendorWalletController extends Controller
         $validated = $request->validate([
             'amount' => ['required', 'integer', 'min:' . config('payments.min_withdrawal', 500)],
             'phone_number' => ['required', 'string', 'max:20'],
-            'operator' => ['required', 'string', 'in:ORANGE_MONEY,MTN_MOMO'],
+            'operator' => ['required', 'string', 'in:ORANGE_MONEY,MTN_MOMO,MOOV_MONEY,WAVE'],
         ]);
 
         try {
-            $withdrawal = $this->withdrawalService->request(
+            $this->withdrawalService->request(
                 Auth::user(),
                 $validated['amount'],
                 $validated['phone_number'],

@@ -14,26 +14,37 @@ class AdminWithdrawalController extends Controller
     public function __construct(
         private WithdrawalService $withdrawalService
     ) {
-        $this->middleware(['auth', 'role:admin,superadmin']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        // Une seule liste paginée : deux paginateurs sur la même page se
+        // disputeraient le paramètre « page ».
+        $status = $request->query('status', WithdrawalRequest::STATUS_PENDING);
+
         return Inertia::render('Backoffice/Admin/Withdrawals/Index', [
-            'pendingWithdrawals' => WithdrawalRequest::pending()
-                ->with('user')
+            'requests' => WithdrawalRequest::query()
+                ->when($status !== 'all', fn ($q) => $q->where('status', $status))
+                ->with('user:id,name,email')
                 ->latest()
-                ->paginate(20),
-            'allWithdrawals' => WithdrawalRequest::with('user')
-                ->latest()
-                ->paginate(20),
+                ->paginate(20)
+                ->withQueryString(),
+            'currentStatus' => $status,
+            'statuses' => [
+                'pending' => 'À traiter',
+                'approved' => 'Approuvées',
+                'paid' => 'Versées',
+                'rejected' => 'Refusées',
+                'all' => 'Toutes',
+            ],
+            'pendingTotal' => (int) WithdrawalRequest::pending()->sum('amount'),
         ]);
     }
 
-    public function approve(WithdrawalRequest $request)
+    public function approve(WithdrawalRequest $withdrawalRequest)
     {
         try {
-            $this->withdrawalService->approve($request, Auth::user());
+            $this->withdrawalService->approve($withdrawalRequest, Auth::user());
             return back()->with('success', 'Demande de retrait approuvée.');
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());
@@ -54,10 +65,10 @@ class AdminWithdrawalController extends Controller
         }
     }
 
-    public function markPaid(WithdrawalRequest $request)
+    public function markPaid(WithdrawalRequest $withdrawalRequest)
     {
         try {
-            $this->withdrawalService->markAsPaid($request, Auth::user());
+            $this->withdrawalService->markAsPaid($withdrawalRequest, Auth::user());
             return back()->with('success', 'Retrait marqué comme payé.');
         } catch (\RuntimeException $e) {
             return back()->with('error', $e->getMessage());

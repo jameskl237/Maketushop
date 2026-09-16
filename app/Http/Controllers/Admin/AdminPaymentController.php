@@ -12,11 +12,8 @@ use Inertia\Inertia;
 
 class AdminPaymentController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth', 'role:admin,superadmin']);
-    }
-
+    // Authentification et rôle appliqués par le groupe de routes
+    // (Laravel 12 : le contrôleur de base ne porte plus de middleware).
     public function orders()
     {
         return Inertia::render('Backoffice/Admin/Payments/Orders', [

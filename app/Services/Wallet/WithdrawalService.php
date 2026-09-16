@@ -5,6 +5,8 @@ namespace App\Services\Wallet;
 use App\Models\User;
 use App\Models\VendorBalance;
 use App\Models\WithdrawalRequest;
+use App\Notifications\WithdrawalProcessedNotification;
+use App\Notifications\WithdrawalRequestedAdminNotification;
 use Illuminate\Support\Facades\DB;
 
 class WithdrawalService
@@ -21,20 +23,22 @@ class WithdrawalService
             throw new \RuntimeException($check['reason']);
         }
 
-        return DB::transaction(function () use ($vendor, $amount, $phoneNumber, $operator) {
+        $request = DB::transaction(function () use ($vendor, $amount, $phoneNumber, $operator) {
             $balance = VendorBalance::initForUser($vendor->id);
             $balance->holdForWithdrawal($amount);
 
-            $request = WithdrawalRequest::create([
+            return WithdrawalRequest::create([
                 'user_id' => $vendor->id,
                 'amount' => $amount,
                 'phone_number' => $phoneNumber,
                 'operator' => $operator,
                 'status' => WithdrawalRequest::STATUS_PENDING,
             ]);
-
-            return $request;
         });
+
+        $this->notifyAdmins($request->load('user'));
+
+        return $request;
     }
 
     public function approve(WithdrawalRequest $request, User $admin): void
@@ -48,6 +52,8 @@ class WithdrawalService
             'approved_by' => $admin->id,
             'approved_at' => now(),
         ]);
+
+        $request->user?->notify(new WithdrawalProcessedNotification($request->fresh(), 'approved'));
     }
 
     public function reject(WithdrawalRequest $request, User $admin, ?string $reason = null): void
@@ -67,6 +73,8 @@ class WithdrawalService
                 'rejected_at' => now(),
             ]);
         });
+
+        $request->user?->notify(new WithdrawalProcessedNotification($request->fresh(), 'rejected'));
     }
 
     public function markAsPaid(WithdrawalRequest $request, User $admin): void
@@ -77,13 +85,15 @@ class WithdrawalService
 
         DB::transaction(function () use ($request, $admin) {
             $balance = VendorBalance::initForUser($request->user_id);
-            $balance->withdraw($request->amount, "Retrait #{$request->id}", $request);
+            $balance->settleWithdrawal($request->amount, "Retrait #{$request->id}", $request);
 
             $request->update([
                 'status' => WithdrawalRequest::STATUS_PAID,
                 'paid_at' => now(),
             ]);
         });
+
+        $request->user?->notify(new WithdrawalProcessedNotification($request->fresh(), 'paid'));
     }
 
     public function getPendingRequests()
@@ -99,5 +109,13 @@ class WithdrawalService
         return WithdrawalRequest::where('user_id', $vendor->id)
             ->latest()
             ->paginate(20);
+    }
+
+    private function notifyAdmins(WithdrawalRequest $request): void
+    {
+        User::whereIn('role', [User::ROLE_ADMIN, User::ROLE_SUPERADMIN])
+            ->get()
+            ->each
+            ->notify(new WithdrawalRequestedAdminNotification($request));
     }
 }

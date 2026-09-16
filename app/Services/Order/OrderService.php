@@ -4,9 +4,19 @@ namespace App\Services\Order;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\User;
 use App\Models\VendorBalance;
 use App\Models\VendorWalletTransaction;
+use App\Notifications\CancellationOfferedNotification;
+use App\Notifications\OrderConfirmedVendorNotification;
+use App\Notifications\OrderPaidClientNotification;
+use App\Notifications\OrderPaidVendorNotification;
+use App\Services\Receipt\ReceiptService;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class OrderService
@@ -57,14 +67,151 @@ class OrderService
         });
     }
 
+    /**
+     * Paiement validé : la commande passe « en cours », l'argent du vendeur part
+     * en escrow, le reçu est généré et les deux parties sont notifiées.
+     *
+     * Idempotent : un second webhook CinetPay ne recrédite pas l'escrow.
+     */
     public function markAsPaid(Order $order): void
     {
+        if ($order->isPaid()) {
+            return;
+        }
+
         $order->update([
             'is_paid' => true,
-            'status' => Order::STATUS_PENDING,
+            'paid_at' => now(),
+            'status' => Order::STATUS_IN_PROGRESS,
         ]);
 
-        $this->creditVendorPendingBalance($order);
+        $credited = $this->creditVendorPendingBalance($order);
+
+        $this->generateReceipt($order);
+        $this->notifyPayment($order->fresh(), $credited);
+    }
+
+    /**
+     * Le vendeur atteste la livraison en déposant une photo. Cela ne libère pas
+     * l'escrow : seule la confirmation du client le fait.
+     */
+    public function attachDeliveryProof(Order $order, int $vendorId, UploadedFile $photo): void
+    {
+        if (!$order->isPaid()) {
+            throw new \RuntimeException('La commande n\'est pas encore payée');
+        }
+
+        if ($order->isCancelled()) {
+            throw new \RuntimeException('Cette commande a été annulée');
+        }
+
+        if ($order->isDelivered()) {
+            throw new \RuntimeException('La livraison est déjà confirmée par le client');
+        }
+
+        $path = $photo->store('delivery-proofs', 'public');
+
+        // Une nouvelle preuve remplace la précédente : on ne garde pas d'orphelin.
+        $previous = $order->delivery_proof_path;
+
+        $order->update([
+            'delivery_proof_path' => $path,
+            'delivery_proof_at' => now(),
+            'vendor_status' => self::VENDOR_STATUS_DELIVERED,
+            'vendor_delivered_at' => now(),
+        ]);
+
+        if ($previous && $previous !== $path) {
+            Storage::disk('public')->delete($previous);
+        }
+    }
+
+    /**
+     * Le client confirme avoir reçu sa commande : statut « livrée » et
+     * libération de l'escrow vers le solde disponible des vendeurs.
+     */
+    public function confirmReceptionByClient(Order $order): void
+    {
+        if ($order->isDelivered()) {
+            return;
+        }
+
+        if (!$order->canBeConfirmedByClient()) {
+            throw new \RuntimeException(
+                $order->hasDeliveryProof()
+                    ? 'Cette commande ne peut pas être confirmée'
+                    : 'Le vendeur n\'a pas encore déposé sa preuve de livraison'
+            );
+        }
+
+        $released = DB::transaction(function () use ($order) {
+            $order->update([
+                'status' => Order::STATUS_DELIVERED,
+                'is_delivered' => true,
+                'client_confirmed_at' => now(),
+                'escrow_released_at' => now(),
+            ]);
+
+            return $this->releaseEscrowToVendor($order);
+        });
+
+        foreach ($released as $vendorId => $amount) {
+            $this->notifyVendor($vendorId, new OrderConfirmedVendorNotification($order->fresh(), $amount));
+        }
+    }
+
+    /** Propose au client d'annuler après le délai sans livraison confirmée. */
+    public function offerCancellation(Order $order): void
+    {
+        if ($order->cancellation_offered_at || !$order->isInProgress()) {
+            return;
+        }
+
+        $order->update(['cancellation_offered_at' => now()]);
+        $order->user?->notify(new CancellationOfferedNotification($order->fresh()));
+    }
+
+    /** Le client refuse d'annuler : on repart pour le délai d'attente final. */
+    public function declineCancellation(Order $order): void
+    {
+        if (!$order->cancellation_offered_at) {
+            throw new \RuntimeException('Aucune annulation n\'a été proposée pour cette commande');
+        }
+
+        if (!$order->isInProgress()) {
+            throw new \RuntimeException('Cette commande n\'est plus en cours');
+        }
+
+        $order->update(['cancellation_declined_at' => now()]);
+    }
+
+    private function generateReceipt(Order $order): void
+    {
+        try {
+            app(ReceiptService::class)->refresh($order);
+        } catch (\Throwable $e) {
+            // Un reçu manquant ne doit jamais bloquer l'encaissement : il sera
+            // régénéré à la demande au premier téléchargement.
+            Log::warning('Order.receipt_generation_failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /** @param array<int,int> $credited  montant en escrow par vendeur */
+    private function notifyPayment(Order $order, array $credited): void
+    {
+        $order->user?->notify(new OrderPaidClientNotification($order));
+
+        foreach ($credited as $vendorId => $amount) {
+            $this->notifyVendor($vendorId, new OrderPaidVendorNotification($order, $amount));
+        }
+    }
+
+    private function notifyVendor(int $vendorId, $notification): void
+    {
+        User::find($vendorId)?->notify($notification);
     }
 
     public function acceptByVendor(Order $order, int $vendorId): void
@@ -103,23 +250,15 @@ class OrderService
         ]);
     }
 
+    /**
+     * @deprecated Le vendeur atteste désormais la livraison via attachDeliveryProof(),
+     *             et c'est la confirmation du client qui clôture la commande.
+     */
     public function markAsDelivered(Order $order, int $vendorId): void
     {
-        if ($order->vendor_status !== self::VENDOR_STATUS_SHIPPED) {
-            throw new \RuntimeException('La commande doit d\'abord être expédiée');
-        }
-
-        DB::transaction(function () use ($order) {
-            $order->update([
-                'vendor_status' => self::VENDOR_STATUS_DELIVERED,
-                'vendor_delivered_at' => now(),
-                'status' => Order::STATUS_DELIVERED,
-                'is_delivered' => true,
-                'escrow_released_at' => now(),
-            ]);
-
-            $this->releaseEscrowToVendor($order);
-        });
+        throw new \RuntimeException(
+            'Déposez une photo de livraison : la commande sera clôturée par la confirmation du client.'
+        );
     }
 
     public function getVendorOrders(int $vendorId, ?string $vendorStatus = null)
@@ -137,43 +276,79 @@ class OrderService
         return $query->latest()->paginate(20);
     }
 
-    private function creditVendorPendingBalance(Order $order): void
+    /**
+     * Répartition du montant d'une commande entre ses vendeurs, après commission.
+     *
+     * Les quantités et prix se lisent sur $product->pivot : Laravel réserve le
+     * préfixe « pivot_ » et vide les colonnes ainsi aliasées dans un select.
+     *
+     * @return array<int,array{subtotal:float,fee:int,vendor_amount:int}>
+     */
+    private function vendorShares(Order $order): array
     {
-        $vendorProducts = $order->products()
-            ->select('products.*', 'order_product.quantity as pivot_quantity', 'order_product.price as pivot_price')
-            ->get()
-            ->groupBy('user_id');
+        $shares = [];
 
-        foreach ($vendorProducts as $vendorId => $products) {
-            $subtotal = $products->sum(fn ($p) => (float) $p->pivot_price * (int) $p->pivot_quantity);
+        foreach ($order->products()->get()->groupBy('user_id') as $vendorId => $products) {
+            $subtotal = $products->sum(
+                fn ($p) => (float) $p->pivot->price * (int) $p->pivot->quantity
+            );
             $fee = (int) round($subtotal * self::PLATFORM_FEE_PERCENT / 100);
-            $vendorAmount = (int) round($subtotal - $fee);
 
-            $order->update([
-                'platform_fee' => $order->platform_fee + $fee,
-                'vendor_amount' => $order->vendor_amount + $vendorAmount,
-            ]);
-
-            $balance = VendorBalance::initForUser($vendorId);
-            $balance->addPending($vendorAmount, "Commande #{$order->order_number} (en attente de livraison)", $order);
+            $shares[(int) $vendorId] = [
+                'subtotal' => $subtotal,
+                'fee' => $fee,
+                'vendor_amount' => (int) round($subtotal - $fee),
+            ];
         }
+
+        return $shares;
     }
 
-    private function releaseEscrowToVendor(Order $order): void
+    /** @return array<int,int> montant mis en escrow, par identifiant de vendeur */
+    private function creditVendorPendingBalance(Order $order): array
     {
-        $vendorProducts = $order->products()
-            ->select('products.*', 'order_product.quantity as pivot_quantity', 'order_product.price as pivot_price')
-            ->get()
-            ->groupBy('user_id');
+        $credited = [];
 
-        foreach ($vendorProducts as $vendorId => $products) {
-            $subtotal = $products->sum(fn ($p) => (float) $p->pivot_price * (int) $p->pivot_quantity);
-            $fee = (int) round($subtotal * self::PLATFORM_FEE_PERCENT / 100);
-            $vendorAmount = (int) round($subtotal - $fee);
+        foreach ($this->vendorShares($order) as $vendorId => $share) {
+            $order->update([
+                'platform_fee' => $order->platform_fee + $share['fee'],
+                'vendor_amount' => $order->vendor_amount + $share['vendor_amount'],
+            ]);
 
-            $balance = VendorBalance::initForUser($vendorId);
-            $balance->releaseToAvailable($vendorAmount, "Libération du paiement - Commande #{$order->order_number}", $order);
+            VendorBalance::initForUser($vendorId)->addPending(
+                $share['vendor_amount'],
+                "Commande #{$order->order_number} (en attente de livraison)",
+                $order
+            );
+
+            $credited[$vendorId] = $share['vendor_amount'];
         }
+
+        return $credited;
+    }
+
+    /** @return array<int,int> montant libéré, par identifiant de vendeur */
+    private function releaseEscrowToVendor(Order $order): array
+    {
+        $released = [];
+
+        foreach ($this->vendorShares($order) as $vendorId => $share) {
+            VendorBalance::initForUser($vendorId)->releaseToAvailable(
+                $share['vendor_amount'],
+                "Libération du paiement - Commande #{$order->order_number}",
+                $order
+            );
+
+            $released[$vendorId] = $share['vendor_amount'];
+        }
+
+        return $released;
+    }
+
+    /** Exposé pour les annulations : même répartition, en sens inverse. */
+    public function vendorSharesFor(Order $order): array
+    {
+        return $this->vendorShares($order);
     }
 
     private function generateOrderNumber(): string

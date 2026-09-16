@@ -48,16 +48,37 @@ class VendorBalance extends Model
         });
     }
 
-    public function withdraw(int $amount, string $description, ?Model $reference = null): VendorWalletTransaction
+    /**
+     * Reprend un montant encore en escrow : commande annulée avant livraison,
+     * l'argent n'a jamais été acquis au vendeur.
+     */
+    public function reversePending(int $amount, string $description, ?Model $reference = null): VendorWalletTransaction
+    {
+        return $this->recordTransaction('order_reversal', $description, $amount, 'credit', $reference, function () use ($amount) {
+            $this->decrement('pending_balance', $amount);
+            $this->decrement('total_earned', $amount);
+        });
+    }
+
+    /**
+     * Solde un retrait effectivement versé.
+     *
+     * Le montant a déjà quitté le solde disponible au moment de la demande
+     * (holdForWithdrawal) : le redébiter ici le compterait deux fois.
+     */
+    public function settleWithdrawal(int $amount, string $description, ?Model $reference = null): VendorWalletTransaction
     {
         return $this->recordTransaction('withdrawal', $description, $amount, 'debit', $reference, function () use ($amount) {
-            $this->decrement('available_balance', $amount);
             $this->increment('total_withdrawn', $amount);
         });
     }
 
     public function holdForWithdrawal(int $amount): void
     {
+        if ($amount > $this->available_balance) {
+            throw new \RuntimeException('Solde disponible insuffisant');
+        }
+
         $this->decrement('available_balance', $amount);
     }
 

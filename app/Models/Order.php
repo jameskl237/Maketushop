@@ -13,8 +13,16 @@ class Order extends Model
 {
     use HasFactory;
 
-    const STATUS_PENDING = 'pending';
-    const STATUS_DELIVERED = 'delivered';
+    const STATUS_PENDING = 'pending';          // créée, pas encore payée
+    const STATUS_IN_PROGRESS = 'in_progress';  // payée, en cours de livraison
+    const STATUS_DELIVERED = 'delivered';      // réception confirmée par le client
+    const STATUS_CANCELLED = 'cancelled';
+
+    /** Délai après paiement au bout duquel l'annulation est proposée au client. */
+    const CANCELLATION_OFFER_HOURS = 72;
+
+    /** Délai supplémentaire après un refus d'annulation avant annulation d'office. */
+    const AUTO_CANCEL_DAYS = 7;
 
     const VENDOR_STATUS_PENDING = 'pending';
     const VENDOR_STATUS_ACCEPTED = 'accepted';
@@ -43,6 +51,14 @@ class Order extends Model
         'vendor_shipped_at',
         'vendor_delivered_at',
         'escrow_released_at',
+        'paid_at',
+        'delivery_proof_path',
+        'delivery_proof_at',
+        'client_confirmed_at',
+        'cancellation_offered_at',
+        'cancellation_declined_at',
+        'cancelled_at',
+        'cancellation_reason',
     ];
 
     protected $casts = [
@@ -56,6 +72,12 @@ class Order extends Model
         'vendor_shipped_at' => 'datetime',
         'vendor_delivered_at' => 'datetime',
         'escrow_released_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'delivery_proof_at' => 'datetime',
+        'client_confirmed_at' => 'datetime',
+        'cancellation_offered_at' => 'datetime',
+        'cancellation_declined_at' => 'datetime',
+        'cancelled_at' => 'datetime',
     ];
 
     protected static function booted()
@@ -96,5 +118,71 @@ class Order extends Model
     public function payments(): MorphMany
     {
         return $this->morphMany(Payment::class, 'payable');
+    }
+
+    public function refundRequest()
+    {
+        return $this->hasOne(RefundRequest::class);
+    }
+
+    public function isPaid(): bool
+    {
+        return (bool) $this->is_paid;
+    }
+
+    public function isInProgress(): bool
+    {
+        return $this->status === self::STATUS_IN_PROGRESS;
+    }
+
+    public function isDelivered(): bool
+    {
+        return $this->status === self::STATUS_DELIVERED;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === self::STATUS_CANCELLED;
+    }
+
+    /** Le vendeur a-t-il déposé sa preuve de livraison ? */
+    public function hasDeliveryProof(): bool
+    {
+        return filled($this->delivery_proof_path);
+    }
+
+    /**
+     * Le client ne peut confirmer la réception que si la commande est payée,
+     * en cours, et que le vendeur a déposé sa preuve de livraison.
+     */
+    public function canBeConfirmedByClient(): bool
+    {
+        return $this->isPaid() && $this->isInProgress() && $this->hasDeliveryProof();
+    }
+
+    /** Date à laquelle l'annulation devient proposable au client. */
+    public function cancellationOfferableAt(): ?\Illuminate\Support\Carbon
+    {
+        return $this->paid_at?->copy()->addHours(self::CANCELLATION_OFFER_HOURS);
+    }
+
+    /** Date de l'annulation d'office si le client a refusé d'annuler. */
+    public function autoCancelAt(): ?\Illuminate\Support\Carbon
+    {
+        return $this->cancellation_declined_at?->copy()->addDays(self::AUTO_CANCEL_DAYS);
+    }
+
+    public function scopeAwaitingDelivery($query)
+    {
+        return $query->where('status', self::STATUS_IN_PROGRESS)->where('is_paid', true);
+    }
+
+    public function vendorIds(): array
+    {
+        return $this->products()
+            ->pluck('products.user_id')
+            ->unique()
+            ->values()
+            ->all();
     }
 }
