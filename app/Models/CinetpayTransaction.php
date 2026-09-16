@@ -9,7 +9,7 @@ class CinetpayTransaction extends Model
     protected $fillable = [
         'transaction_id', 'site_id', 'country', 'amount', 'currency',
         'status', 'payment_method', 'cpm_trans_id',
-        'payment_token', 'payment_url',
+        'notify_token', 'payment_token', 'payment_url',
         'customer_name', 'customer_email', 'customer_phone',
         'description', 'raw_request', 'raw_response', 'raw_webhook',
         'paid_at',

@@ -42,24 +42,17 @@ return [
     ],
 
     'cinetpay' => [
-        // Récupérées sur https://app.cinetpay.com/marchand (page Intégration)
+        // Back-office CinetPay > Intégration. api_password est indispensable :
+        // l'API v1 s'authentifie en OAuth, pas avec la seule clé.
         'api_key' => env('CINETPAY_API_KEY'),
+        'api_password' => env('CINETPAY_API_PASSWORD'),
         'site_id' => env('CINETPAY_SITE_ID'),
-        // Clé secrète utilisée pour vérifier le HMAC (header x-token) des notifications
         'secret_key' => env('CINETPAY_SECRET_KEY'),
-
-        // API Checkout v2 : même URL en test et en production
-        'base_url' => env('CINETPAY_API_URL', 'https://api-checkout.cinetpay.com/v2'),
-
-        // Valeurs par défaut du checkout
-        'currency' => env('CINETPAY_CURRENCY', 'XOF'),
         'country' => env('CINETPAY_COUNTRY', 'CI'),
-        'channels' => env('CINETPAY_CHANNELS', 'ALL'),
-        'lang' => env('CINETPAY_LANG', 'fr'),
 
-        // Garde-fous montant (XOF : multiple de 5 exigé par CinetPay)
-        'min_amount' => (int) env('CINETPAY_MIN_AMOUNT', 100),
-        'max_amount' => (int) env('CINETPAY_MAX_AMOUNT', 2500000),
+        // Production : https://api.cinetpay.co | Sandbox : https://api.cinetpay.net
+        // Sans /v1 : le suffixe est ajouté par le service.
+        'base_url' => env('CINETPAY_API_URL', env('CINETPAY_BASE_URL', 'https://api.cinetpay.co')),
     ],
 
 ];

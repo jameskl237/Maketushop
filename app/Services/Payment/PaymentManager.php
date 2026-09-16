@@ -39,20 +39,16 @@ class PaymentManager
 
         try {
             $result = $this->cinetpay->initializePayment([
-                'transaction_id' => $transactionId,
+                'merchant_transaction_id' => $transactionId,
                 'amount' => $payment->amount,
-                'description' => 'Commande ' . $order->order_number . ' - MaketuShop',
+                'designation' => 'Commande ' . $order->order_number . ' - MaketuShop',
+                'client_email' => $customer['email'] ?? '',
+                'client_first_name' => $customer['first_name'] ?? $order->customer_first_name ?? '',
+                'client_last_name' => $customer['last_name'] ?? $order->customer_last_name ?? '',
+                'client_phone_number' => $customer['phone'] ?? $order->phone_number ?? '',
                 'notify_url' => $notifyUrl,
-                'return_url' => $returnUrl,
-                'metadata' => 'order:' . $order->id,
-                'customer' => [
-                    'id' => (string) $order->user_id,
-                    'name' => $customer['first_name'] ?? $order->customer_first_name ?? '',
-                    'surname' => $customer['last_name'] ?? $order->customer_last_name ?? '',
-                    'email' => $customer['email'] ?? '',
-                    'phone' => $customer['phone'] ?? $order->phone_number ?? '',
-                    'address' => $customer['address'] ?? $order->delivery_address ?? '',
-                ],
+                'success_url' => $returnUrl,
+                'failed_url' => $returnUrl,
             ]);
 
             // CinetPay peut arrondir le montant (multiple de 5 en XOF) :
@@ -105,18 +101,16 @@ class PaymentManager
 
         try {
             $result = $this->cinetpay->initializePayment([
-                'transaction_id' => $transactionId,
+                'merchant_transaction_id' => $transactionId,
                 'amount' => $amount,
-                'description' => 'Abonnement ' . $subscription->plan . ' - MaketuShop',
+                'designation' => 'Abonnement ' . $subscription->plan . ' - MaketuShop',
+                'client_email' => $customer['email'] ?? '',
+                'client_first_name' => $customer['first_name'] ?? '',
+                'client_last_name' => $customer['last_name'] ?? '',
+                'client_phone_number' => $customer['phone'] ?? '',
                 'notify_url' => $notifyUrl,
-                'return_url' => route('payments.cinetpay.callback', ['transaction_id' => $transactionId]),
-                'metadata' => 'subscription:' . $subscription->id,
-                'customer' => [
-                    'name' => $customer['first_name'] ?? '',
-                    'surname' => $customer['last_name'] ?? '',
-                    'email' => $customer['email'] ?? '',
-                    'phone' => $customer['phone'] ?? '',
-                ],
+                'success_url' => route('payments.cinetpay.callback', ['transaction_id' => $transactionId]),
+                'failed_url' => route('payments.cinetpay.callback', ['transaction_id' => $transactionId]),
             ]);
 
             $subscription->update(['transaction_id' => $transactionId]);

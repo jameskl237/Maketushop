@@ -28,7 +28,7 @@ class CinetPayWebhookController extends Controller
 
         $payload = $request->all();
 
-        $transactionId = $payload['cpm_trans_id']
+        $transactionId = $payload['merchant_transaction_id']
             ?? $payload['transaction_id']
             ?? null;
 
