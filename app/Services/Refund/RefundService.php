@@ -54,7 +54,7 @@ class RefundService
                 'order_id' => $order->id,
                 'user_id' => $order->user_id,
                 'amount' => (int) round((float) $order->total_price),
-                'currency' => 'XOF',
+                'currency' => config('payments.currency', 'XAF'),
                 'status' => RefundRequest::STATUS_PENDING,
                 'reason' => $reason,
                 'phone_number' => $order->phone_number,

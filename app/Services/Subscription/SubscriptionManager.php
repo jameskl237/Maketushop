@@ -40,48 +40,81 @@ class SubscriptionManager
         });
     }
 
+    /**
+     * Crée l'abonnement Standard en attente de paiement. L'abonnement actuel
+     * reste actif tant que CinetPay n'a pas confirmé le paiement.
+     */
     public function initiateStandardSubscription(Shop $shop, User $user): ShopSubscription
     {
         $this->ensureOwnership($shop, $user);
 
         return DB::transaction(function () use ($shop) {
-            $this->cancelCurrent($shop);
+            // Un seul Standard en attente par boutique.
+            ShopSubscription::where('shop_id', $shop->id)
+                ->where('status', ShopSubscription::STATUS_PENDING)
+                ->update(['status' => ShopSubscription::STATUS_CANCELLED, 'cancelled_at' => now()]);
 
-            $subscription = ShopSubscription::create([
+            return ShopSubscription::create([
                 'shop_id' => $shop->id,
                 'plan' => ShopSubscription::PLAN_STANDARD,
-                'status' => ShopSubscription::STATUS_ACTIVE,
+                'status' => ShopSubscription::STATUS_PENDING,
                 'amount' => ShopSubscription::priceFor(ShopSubscription::PLAN_STANDARD),
                 'payment_method' => 'cinetpay',
-                'starts_at' => now(),
-                'ends_at' => now()->addDays(ShopSubscription::durationFor(ShopSubscription::PLAN_STANDARD)),
             ]);
-
-            return $subscription;
         });
     }
 
-    public function confirmStandardPayment(ShopSubscription $subscription, string $transactionId, string $paymentMethod): void
+    /**
+     * Active un abonnement après confirmation du paiement par CinetPay.
+     * Idempotent : appelé depuis PaymentFinalizer sous verrou.
+     */
+    public function activatePaidSubscription(ShopSubscription $subscription, string $transactionId, string $paymentMethod): void
     {
         DB::transaction(function () use ($subscription, $transactionId, $paymentMethod) {
+            $subscription->refresh();
+
+            if ($subscription->status === ShopSubscription::STATUS_ACTIVE) {
+                return;
+            }
+
+            ShopSubscription::where('shop_id', $subscription->shop_id)
+                ->where('id', '!=', $subscription->id)
+                ->where('status', ShopSubscription::STATUS_ACTIVE)
+                ->update(['status' => ShopSubscription::STATUS_CANCELLED, 'cancelled_at' => now()]);
+
+            $startsAt = now();
+            $endsAt = now()->addDays(ShopSubscription::durationFor($subscription->plan));
+
             $subscription->update([
                 'transaction_id' => $transactionId,
                 'payment_method' => $paymentMethod,
                 'status' => ShopSubscription::STATUS_ACTIVE,
+                'starts_at' => $startsAt,
+                'ends_at' => $endsAt,
             ]);
 
             SubscriptionPayment::create([
                 'shop_subscription_id' => $subscription->id,
-                'plan' => ShopSubscription::PLAN_STANDARD,
+                'plan' => $subscription->plan,
                 'amount' => $subscription->amount,
                 'transaction_id' => $transactionId,
                 'payment_method' => $paymentMethod,
                 'status' => SubscriptionPayment::STATUS_SUCCESS,
                 'paid_at' => now(),
-                'period_start' => $subscription->starts_at,
-                'period_end' => $subscription->ends_at,
+                'period_start' => $startsAt,
+                'period_end' => $endsAt,
             ]);
         });
+    }
+
+    public function discardPendingSubscription(ShopSubscription $subscription): void
+    {
+        if ($subscription->status === ShopSubscription::STATUS_PENDING) {
+            $subscription->update([
+                'status' => ShopSubscription::STATUS_CANCELLED,
+                'cancelled_at' => now(),
+            ]);
+        }
     }
 
     public function cancel(Shop $shop, User $user): void

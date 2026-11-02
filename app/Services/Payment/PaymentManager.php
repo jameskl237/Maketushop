@@ -5,7 +5,6 @@ namespace App\Services\Payment;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\ShopSubscription;
-use App\Models\VendorBalance;
 use App\Services\CinetPay\CinetPayService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +12,8 @@ use Illuminate\Support\Facades\Log;
 class PaymentManager
 {
     public function __construct(
-        private CinetPayService $cinetpay
+        private CinetPayService $cinetpay,
+        private PaymentFinalizer $finalizer
     ) {}
 
     public function checkoutOrder(Order $order, string $notifyUrl, string $returnUrl, array $customer = [], ?string $transactionId = null): array
@@ -28,7 +28,7 @@ class PaymentManager
                 'transaction_id' => $transactionId,
                 'reference' => $order->order_number,
                 'amount' => (int) round((float) $order->total_price),
-                'currency' => 'XOF',
+                'currency' => $this->cinetpay->currency(),
                 'status' => Payment::STATUS_PENDING,
             ]);
 
@@ -51,7 +51,7 @@ class PaymentManager
                 'failed_url' => $returnUrl,
             ]);
 
-            // CinetPay peut arrondir le montant (multiple de 5 en XOF) :
+            // CinetPay peut arrondir le montant (multiple de 5 en FCFA) :
             // on aligne la trace locale sur ce qui sera réellement débité.
             if (isset($result['amount']) && (int) $result['amount'] !== $payment->amount) {
                 $payment->update(['amount' => (int) $result['amount']]);
@@ -92,7 +92,7 @@ class PaymentManager
                 'transaction_id' => $transactionId,
                 'reference' => 'SUB-' . $subscription->id . '-' . now()->format('Ymd'),
                 'amount' => $amount,
-                'currency' => 'XOF',
+                'currency' => $this->cinetpay->currency(),
                 'status' => Payment::STATUS_PENDING,
             ]);
 
@@ -133,33 +133,22 @@ class PaymentManager
         }
     }
 
-    public function handlePaymentReturn(string $transactionId, string $expectedType): ?Payment
+    /**
+     * Retour du client depuis la page CinetPay. Le paiement peut encore être en
+     * cours (validation mobile money) : on ne le marque en échec que sur un
+     * statut définitif. La finalisation est partagée avec le webhook.
+     */
+    public function handlePaymentReturn(string $transactionId): ?Payment
     {
-        $payment = Payment::where('transaction_id', $transactionId)
-            ->orWhere('reference', $transactionId)
-            ->first();
+        $payment = Payment::where('transaction_id', $transactionId)->first();
 
-        if (!$payment) {
-            return null;
-        }
-
-        if ($payment->isSuccess()) {
+        if (!$payment || $payment->isSuccess()) {
             return $payment;
         }
 
         try {
             $verification = $this->cinetpay->verifyPayment($transactionId);
-
-            if ($this->cinetpay->isPaymentValid($verification)) {
-                $payment->update([
-                    'status' => Payment::STATUS_SUCCESS,
-                    'payment_method' => $verification['payment_method'] ?? null,
-                    'provider_data' => $verification,
-                    'paid_at' => now(),
-                ]);
-            } else {
-                $payment->update(['status' => Payment::STATUS_FAILED]);
-            }
+            return $this->finalizer->apply($transactionId, $verification) ?? $payment->fresh();
         } catch (\Throwable $e) {
             Log::error('PaymentManager.return_verify_error', [
                 'transaction_id' => $transactionId,

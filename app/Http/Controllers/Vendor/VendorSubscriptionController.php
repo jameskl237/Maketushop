@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Shop;
 use App\Services\Payment\PaymentManager;
 use App\Services\Subscription\SubscriptionManager;
+use App\Support\PhoneNumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -42,19 +43,29 @@ class VendorSubscriptionController extends Controller
     {
         $this->authorizeShop($shop);
 
-        try {
-            $subscription = $this->subscriptionManager->initiateStandardSubscription($shop, Auth::user());
+        $customer = Auth::user();
+        // Le paiement mobile money pousse la demande de validation sur ce numéro :
+        // pas de numéro fictif, on exige un vrai mobile.
+        $phone = PhoneNumber::toE164($customer->phone ?: $shop->phone);
 
-            $customer = Auth::user();
+        if (!PhoneNumber::isValidMobile($phone)) {
+            return back()->with('error', 'Renseignez un numéro mobile money valide dans votre profil avant de souscrire.');
+        }
+
+        $nameParts = preg_split('/\s+/', trim((string) $customer->name), 2);
+
+        try {
+            $subscription = $this->subscriptionManager->initiateStandardSubscription($shop, $customer);
+
             $result = $this->paymentManager->checkoutSubscription(
                 $subscription,
                 notifyUrl: route('cinetpay.webhook'),
                 returnUrl: route('payments.cinetpay.callback', ['transaction_id' => 'SUB-' . $subscription->id]),
                 customer: [
                     'email' => $customer->email,
-                    'phone' => $customer->phone ?? '+2250000000000',
-                    'first_name' => $customer->name ?? '',
-                    'last_name' => '',
+                    'phone' => $phone,
+                    'first_name' => $nameParts[0] ?: 'Client',
+                    'last_name' => $nameParts[1] ?? ($nameParts[0] ?: 'MaketuShop'),
                 ]
             );
 

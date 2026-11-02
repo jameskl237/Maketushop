@@ -16,6 +16,7 @@ class ShopSubscription extends Model
     public const PLAN_FREE = 'free';
     public const PLAN_STANDARD = 'standard';
 
+    public const STATUS_PENDING = 'pending'; // Standard en attente de paiement
     public const STATUS_ACTIVE = 'active';
     public const STATUS_CANCELLED = 'cancelled';
     public const STATUS_EXPIRED = 'expired';

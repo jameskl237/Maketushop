@@ -82,8 +82,8 @@ const submit = () =>
 
                         <div>
                             <label class="mb-1 block text-sm font-medium">Numéro mobile money</label>
-                            <input v-model="form.phone_number" type="tel" placeholder="0708091011"
-                                   class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm" />
+                            <input v-model="form.phone_number" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="0708091011"
+                                   class="w-full rounded-md border border-border bg-background px-3 py-2.5 text-base tracking-wider sm:text-sm" />
                             <p v-if="form.errors.phone_number" class="mt-1 text-xs text-destructive">{{ form.errors.phone_number }}</p>
                         </div>
 

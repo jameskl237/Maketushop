@@ -20,7 +20,7 @@ const authUser = computed(() => page.props.auth.user);
 const formatPrice = (value) =>
     new Intl.NumberFormat('fr-FR', {
         style: 'currency',
-        currency: 'XOF',
+        currency: page.props.currency || 'XAF',
         maximumFractionDigits: 0,
     }).format(value);
 

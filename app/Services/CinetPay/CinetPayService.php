@@ -3,7 +3,9 @@
 namespace App\Services\CinetPay;
 
 use App\Models\CinetpayTransaction;
+use App\Models\Payment;
 use App\Models\WebhookLog;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -25,6 +27,7 @@ class CinetPayService
     private string $apiPassword;
     private string $baseUrl;
     private string $country;
+    private string $currency;
 
     private const SUCCESS_CODES = [200, 100];
     private const TOKEN_ERROR_CODES = [1002, 1003];
@@ -33,13 +36,82 @@ class CinetPayService
     {
         $this->apiKey = (string) config('services.cinetpay.api_key', '');
         $this->apiPassword = (string) config('services.cinetpay.api_password', '');
-        $this->baseUrl = rtrim((string) config('services.cinetpay.base_url', 'https://api.cinetpay.co'), '/');
-        $this->country = strtoupper((string) config('services.cinetpay.country', 'CI'));
+        $this->baseUrl = $this->resolveBaseUrl((string) config('services.cinetpay.base_url', ''));
+        $this->country = strtoupper((string) config('services.cinetpay.country', 'CM'));
+        $this->currency = strtoupper((string) config('services.cinetpay.currency', 'XAF'));
+    }
+
+    public const PRODUCTION_URL = 'https://api.cinetpay.co';
+    public const SANDBOX_URL = 'https://api.cinetpay.net';
+
+    /**
+     * Une clé sk_test_ n'est reconnue que par la sandbox, une clé sk_live_ que
+     * par la production : un mauvais couple clé/URL donne INVALID_CREDENTIALS.
+     */
+    private function resolveBaseUrl(string $configured): string
+    {
+        $expected = match (true) {
+            str_starts_with($this->apiKey, 'sk_test_') => self::SANDBOX_URL,
+            str_starts_with($this->apiKey, 'sk_live_') => self::PRODUCTION_URL,
+            default => null,
+        };
+
+        $configured = rtrim(trim($configured), '/');
+
+        if ($configured === '') {
+            return $expected ?? self::PRODUCTION_URL;
+        }
+
+        if ($expected !== null && $configured !== $expected) {
+            Log::warning('CinetPay.base_url_mismatch', [
+                'configured' => $configured,
+                'expected_for_key' => $expected,
+            ]);
+        }
+
+        return $configured;
+    }
+
+    public function baseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
+    public function isSandbox(): bool
+    {
+        return $this->baseUrl === self::SANDBOX_URL;
+    }
+
+    /**
+     * Le jeton dépend du couple clé/URL : après un changement de clé ou
+     * d'environnement, l'ancien jeton ne doit pas être réutilisé.
+     */
+    private function tokenCacheKey(): string
+    {
+        return 'cinetpay_token_' . sha1($this->baseUrl . '|' . $this->apiKey . '|' . $this->country);
+    }
+
+    /** Teste l'authentification sans passer par le cache (diagnostic). */
+    public function checkCredentials(): string
+    {
+        Cache::forget($this->tokenCacheKey());
+
+        return $this->getAccessToken();
     }
 
     public function isConfigured(): bool
     {
         return filled($this->apiKey) && filled($this->apiPassword);
+    }
+
+    public function currency(): string
+    {
+        return $this->currency;
+    }
+
+    public function country(): string
+    {
+        return $this->country;
     }
 
     public function generateTransactionId(): string
@@ -58,7 +130,7 @@ class CinetPayService
         }
 
         $payload = array_merge([
-            'currency' => 'XOF',
+            'currency' => $this->currency,
             'lang' => 'fr',
             'channel' => 'PUSH',
         ], $params);
@@ -146,18 +218,25 @@ class CinetPayService
 
         $transaction = CinetpayTransaction::where('transaction_id', $merchantTransactionId)->first();
 
-        if (!$transaction) {
+        if (!$transaction && !Payment::where('transaction_id', $merchantTransactionId)->exists()) {
             return ['valid' => false, 'reason' => 'transaction inconnue'];
         }
 
-        if (!$notifyToken || !hash_equals((string) $transaction->notify_token, (string) $notifyToken)) {
-            return ['valid' => false, 'reason' => 'notify_token invalide'];
+        if ($transaction && filled($transaction->notify_token)) {
+            if (!$notifyToken || !hash_equals((string) $transaction->notify_token, (string) $notifyToken)) {
+                return ['valid' => false, 'reason' => 'notify_token invalide'];
+            }
+        } else {
+            // Transactions créées avant le rétablissement de la colonne notify_token :
+            // on ne peut pas authentifier la notification, mais elle ne déclenche
+            // qu'un appel à l'API de vérification, qui seul fait foi.
+            Log::warning('CinetPay.webhook_without_notify_token', ['transaction_id' => $merchantTransactionId]);
         }
 
         return [
             'valid' => true,
             'transaction' => $transaction,
-            'transaction_id' => $payload['transaction_id'] ?? $transaction->cpm_trans_id,
+            'transaction_id' => $payload['transaction_id'] ?? $transaction?->cpm_trans_id,
             'merchant_transaction_id' => $merchantTransactionId,
             'user' => $payload['user'] ?? [],
         ];
@@ -187,7 +266,7 @@ class CinetPayService
     private function getAccessToken(): string
     {
         return Cache::remember(
-            'cinetpay_token_' . strtolower($this->country),
+            $this->tokenCacheKey(),
             now()->addHours(23),
             fn () => $this->authenticate()
         );
@@ -250,7 +329,7 @@ class CinetPayService
             $code = (int) ($body['code'] ?? 0);
 
             if (in_array($code, self::TOKEN_ERROR_CODES, true)) {
-                Cache::forget('cinetpay_token_' . strtolower($this->country));
+                Cache::forget($this->tokenCacheKey());
                 $attempts++;
                 continue;
             }
@@ -278,38 +357,7 @@ class CinetPayService
 
     private function normalizePhone(string $phone): string
     {
-        $phone = trim($phone);
-
-        if ($phone === '') {
-            return '';
-        }
-
-        if (str_starts_with($phone, '+')) {
-            return preg_replace('/[^\d+]/', '', $phone) ?: '';
-        }
-
-        $intlCodes = [
-            'CI' => '225', 'BF' => '226', 'SN' => '221', 'ML' => '223',
-            'TG' => '228', 'GN' => '224', 'CM' => '237', 'BJ' => '229',
-            'CD' => '243', 'NE' => '227',
-        ];
-
-        $intlCode = $intlCodes[$this->country] ?? '225';
-        $digits = preg_replace('/[^\d]/', '', $phone);
-
-        if ($digits === '') {
-            return '';
-        }
-
-        if (str_starts_with($digits, $intlCode)) {
-            return '+' . $digits;
-        }
-
-        if (str_starts_with($digits, '0')) {
-            $digits = substr($digits, 1);
-        }
-
-        return '+' . $intlCode . $digits;
+        return PhoneNumber::toE164($phone, $this->country);
     }
 
     private function validatePayload(array $payload): void
@@ -348,7 +396,7 @@ class CinetPayService
                     'site_id' => config('services.cinetpay.site_id'),
                     'country' => $this->country,
                     'amount' => (int) ($request['amount'] ?? 0),
-                    'currency' => $request['currency'] ?? 'XOF',
+                    'currency' => $request['currency'] ?? $this->currency,
                     'status' => 'INITIATED',
                     'description' => $request['designation'] ?? null,
                     'customer_name' => trim(
@@ -364,10 +412,16 @@ class CinetPayService
                 ]
             );
         } catch (\Throwable $e) {
-            Log::warning('CinetPay.log_transaction_error', [
+            // Sans cette ligne, le notify_token est perdu et le webhook ne peut plus
+            // être authentifié : on bloque plutôt que d'envoyer le client payer.
+            Log::error('CinetPay.log_transaction_error', [
                 'transaction_id' => $transactionId,
                 'error' => $e->getMessage(),
             ]);
+            throw new CinetPayException(
+                'Impossible d\'enregistrer la transaction CinetPay (base de données). Lancez `php artisan migrate`.',
+                'DB_ERROR'
+            );
         }
     }
 

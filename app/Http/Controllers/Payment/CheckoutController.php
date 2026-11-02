@@ -7,9 +7,11 @@ use App\Models\Product;
 use App\Services\CinetPay\CinetPayService;
 use App\Services\Order\OrderService;
 use App\Services\Payment\PaymentManager;
+use App\Support\PhoneNumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class CheckoutController extends Controller
@@ -67,6 +69,12 @@ class CheckoutController extends Controller
             return $this->handleCodOrder(Auth::id(), $validated, $items);
         }
 
+        if (!app(CinetPayService::class)->isConfigured()) {
+            return back()->with('error', 'Le paiement en ligne est momentanément indisponible. Choisissez le paiement à la livraison.');
+        }
+
+        $this->ensureMobileMoneyNumber($validated['phone_number']);
+
         return $this->handleOnlinePayment(Auth::id(), $validated, $items);
     }
 
@@ -95,6 +103,12 @@ class CheckoutController extends Controller
         if ($channel === 'cod') {
             return $this->handleCodOrder(Auth::id(), $validated, $items);
         }
+
+        if (!app(CinetPayService::class)->isConfigured()) {
+            return back()->with('error', 'Le paiement en ligne est momentanément indisponible. Choisissez le paiement à la livraison.');
+        }
+
+        $this->ensureMobileMoneyNumber($validated['phone_number']);
 
         return $this->handleOnlinePayment(Auth::id(), $validated, $items);
     }
@@ -129,7 +143,7 @@ class CheckoutController extends Controller
                 returnUrl: route('payments.cinetpay.callback', ['transaction_id' => $transactionId]),
                 customer: [
                     'email' => Auth::user()->email,
-                    'phone' => $this->formatPhone($validated['phone_number']),
+                    'phone' => PhoneNumber::toE164($validated['phone_number']),
                     'first_name' => $validated['first_name'],
                     'last_name' => $validated['last_name'],
                 ],
@@ -143,24 +157,9 @@ class CheckoutController extends Controller
         }
     }
 
-    private function formatPhone(string $phone): string
-    {
-        $digits = preg_replace('/[^\d]/', '', $phone);
-
-        if (strlen($digits) >= 11 && str_starts_with($digits, '225')) {
-            return '+' . $digits;
-        }
-
-        if (str_starts_with($digits, '0')) {
-            $digits = substr($digits, 1);
-        }
-
-        return '+225' . $digits;
-    }
-
     private function paymentMethods(): array
     {
-        return [
+        $methods = [
             [
                 'key' => 'online',
                 'name' => 'Paiement en ligne',
@@ -176,6 +175,25 @@ class CheckoutController extends Controller
                 'image' => '/images/payments/cash-delivery.svg',
             ],
         ];
+
+        if (!app(CinetPayService::class)->isConfigured()) {
+            $methods = array_values(array_filter($methods, fn ($m) => $m['channel'] !== 'cinetpay'));
+        }
+
+        return $methods;
+    }
+
+    /**
+     * Le paiement mobile money envoie une demande de validation (PUSH) sur ce
+     * numéro : un numéro invalide fait échouer le paiement côté CinetPay.
+     */
+    private function ensureMobileMoneyNumber(string $phone): void
+    {
+        if (!PhoneNumber::isValidMobile(PhoneNumber::toE164($phone))) {
+            throw ValidationException::withMessages([
+                'phone_number' => 'Numéro mobile money invalide. Format attendu : 6XXXXXXXX (mobile camerounais).',
+            ]);
+        }
     }
 
     private function rules(): array

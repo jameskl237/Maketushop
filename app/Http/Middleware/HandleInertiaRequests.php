@@ -51,9 +51,12 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'currency' => config('payments.currency', 'XAF'),
             'features' => [
+                // Mêmes conditions que CinetPayService::isConfigured() : sans
+                // api_password, l'authentification OAuth v1 échoue toujours.
                 'pay_online_enabled' => filled(config('services.cinetpay.api_key'))
-                    && filled(config('services.cinetpay.site_id')),
+                    && filled(config('services.cinetpay.api_password')),
             ],
         ];
     }

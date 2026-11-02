@@ -48,11 +48,15 @@ return [
         'api_password' => env('CINETPAY_API_PASSWORD'),
         'site_id' => env('CINETPAY_SITE_ID'),
         'secret_key' => env('CINETPAY_SECRET_KEY'),
-        'country' => env('CINETPAY_COUNTRY', 'CI'),
+        // Pays du compte marchand CinetPay : détermine l'indicatif ajouté aux
+        // numéros locaux et la devise. Cameroun = CM / XAF (FCFA CEMAC).
+        'country' => env('CINETPAY_COUNTRY', 'CM'),
+        'currency' => env('CINETPAY_CURRENCY', 'XAF'),
 
-        // Production : https://api.cinetpay.co | Sandbox : https://api.cinetpay.net
-        // Sans /v1 : le suffixe est ajouté par le service.
-        'base_url' => env('CINETPAY_API_URL', env('CINETPAY_BASE_URL', 'https://api.cinetpay.co')),
+        // Production (clé sk_live_) : https://api.cinetpay.co
+        // Sandbox    (clé sk_test_) : https://api.cinetpay.net
+        // Laisser vide pour la déduire du préfixe de la clé. Sans /v1.
+        'base_url' => env('CINETPAY_API_URL', env('CINETPAY_BASE_URL')),
     ],
 
 ];

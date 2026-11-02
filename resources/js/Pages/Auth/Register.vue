@@ -265,30 +265,32 @@ const inputClass = 'h-11 w-full rounded-[14px] border border-border bg-shop-bg p
                 <!-- Phone (supplier only) -->
                 <div v-if="isPro" class="space-y-1">
                     <label for="phone" class="text-[11px] font-semibold text-foreground">{{ t('auth.phone') }}</label>
-                    <div class="grid grid-cols-[120px_1fr] gap-2">
-                        <div class="relative">
-                            <Phone class="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-shop-light" />
+                    <div class="flex gap-2">
+                        <div class="relative w-24 shrink-0 sm:w-32">
                             <select
                                 id="phone_country_code"
                                 v-model="form.phone_country_code"
                                 required
-                                class="h-11 w-full appearance-none rounded-[14px] border border-border bg-shop-bg pl-9 pr-3 text-[12px] text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:bg-white/5"
+                                class="h-11 w-full rounded-[14px] border border-border bg-shop-bg pl-3 pr-7 text-base text-foreground sm:text-[13px] focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:bg-white/5"
                             >
                                 <option v-for="item in phoneCountryCodes" :key="`${item.country}-${item.dialCode}`" :value="item.dialCode">
-                                    {{ item.name }} +{{ item.dialCode }}
+                                    +{{ item.dialCode }} {{ item.name }}
                                 </option>
                             </select>
                         </div>
-                        <input
-                            id="phone"
-                            v-model="form.phone_number"
-                            type="tel"
-                            required
-                            autocomplete="tel-national"
-                            inputmode="numeric"
-                            :placeholder="t('auth.examplePhone')"
-                            class="h-11 w-full rounded-[14px] border border-border bg-shop-bg px-4 text-[13px] text-foreground placeholder:text-shop-light focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:bg-white/5"
-                        />
+                        <div class="relative min-w-0 flex-1">
+                            <Phone class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-shop-light" />
+                            <input
+                                id="phone"
+                                v-model="form.phone_number"
+                                type="tel"
+                                required
+                                autocomplete="tel-national"
+                                inputmode="numeric"
+                                :placeholder="t('auth.examplePhone')"
+                                class="h-11 w-full rounded-[14px] border border-border bg-shop-bg pl-9 pr-3 text-base tracking-wider text-foreground placeholder:text-shop-light focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:bg-white/5"
+                            />
+                        </div>
                     </div>
                     <InputError :message="form.errors.phone_country_code" />
                     <InputError :message="form.errors.phone_number" />

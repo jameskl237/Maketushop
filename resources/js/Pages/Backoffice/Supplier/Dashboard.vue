@@ -257,13 +257,13 @@ const submitShopUpdate = () => {
                     <div class="flex gap-2">
                         <select
                             v-model="selectedCode"
-                            class="rounded-md border border-input bg-background text-foreground shadow-sm focus:border-ring focus:ring-ring"
+                            class="w-24 shrink-0 rounded-md border border-input bg-background pl-2 pr-7 text-base text-foreground shadow-sm focus:border-ring focus:ring-ring sm:w-36 sm:text-sm"
                         >
                             <option v-for="country in countries" :key="country.code" :value="country.code">
                                 {{ country.code }} ({{ country.name }})
                             </option>
                         </select>
-                        <Input id="shop-phone" v-model="phoneNumber" type="text" placeholder="6XXXXXXXX" required />
+                        <Input id="shop-phone" v-model="phoneNumber" type="tel" inputmode="tel" autocomplete="tel-national" class="h-10 min-w-0 flex-1 text-base tracking-wider sm:text-sm" placeholder="6XXXXXXXX" required />
                     </div>
                     <p v-if="form.errors.phone" class="text-sm text-destructive">{{ form.errors.phone }}</p>
                 </div>
@@ -337,13 +337,13 @@ const submitShopUpdate = () => {
                     <div class="flex gap-2">
                         <select
                             v-model="editSelectedCode"
-                            class="rounded-md border border-input bg-background text-foreground shadow-sm focus:border-ring focus:ring-ring"
+                            class="w-24 shrink-0 rounded-md border border-input bg-background pl-2 pr-7 text-base text-foreground shadow-sm focus:border-ring focus:ring-ring sm:w-36 sm:text-sm"
                         >
                             <option v-for="country in countries" :key="country.code" :value="country.code">
                                 {{ country.code }} ({{ country.name }})
                             </option>
                         </select>
-                        <Input id="edit-shop-phone" v-model="editPhoneNumber" type="text" placeholder="6XXXXXXXX" required />
+                        <Input id="edit-shop-phone" v-model="editPhoneNumber" type="tel" inputmode="tel" autocomplete="tel-national" class="h-10 min-w-0 flex-1 text-base tracking-wider sm:text-sm" placeholder="6XXXXXXXX" required />
                     </div>
                     <p v-if="editForm.errors.phone" class="text-sm text-destructive">{{ editForm.errors.phone }}</p>
                 </div>

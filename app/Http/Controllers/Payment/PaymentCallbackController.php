@@ -23,7 +23,7 @@ class PaymentCallbackController extends Controller
             return redirect()->route('home')->with('error', 'Référence de paiement manquante.');
         }
 
-        $payment = $this->paymentManager->handlePaymentReturn($transactionId, 'order');
+        $payment = $this->paymentManager->handlePaymentReturn($transactionId);
 
         if (!$payment) {
             return redirect()->route('home')->with('error', 'Transaction introuvable.');
@@ -36,6 +36,10 @@ class PaymentCallbackController extends Controller
                 return redirect()->route('user.dashboard')
                     ->with('success', 'Paiement réussi ! Votre commande est en cours de traitement.');
             }
+            if ($payment->isPending()) {
+                return redirect()->route('user.dashboard')
+                    ->with('message', 'Paiement en cours de confirmation. Validez la demande sur votre téléphone ; votre commande sera mise à jour automatiquement.');
+            }
             return redirect()->route('user.dashboard')
                 ->with('error', 'Le paiement n\'a pas abouti. Veuillez réessayer.');
         }
@@ -44,6 +48,10 @@ class PaymentCallbackController extends Controller
             if ($payment->isSuccess()) {
                 return redirect()->route('subscriptions.index')
                     ->with('success', 'Abonnement Standard activé avec succès !');
+            }
+            if ($payment->isPending()) {
+                return redirect()->route('subscriptions.index')
+                    ->with('message', 'Paiement en cours de confirmation. L\'abonnement sera activé dès réception de la confirmation CinetPay.');
             }
             return redirect()->route('subscriptions.index')
                 ->with('error', 'Le paiement de l\'abonnement a échoué.');

@@ -44,7 +44,7 @@ const form = ref({
 const formatPrice = (value) =>
     new Intl.NumberFormat('fr-FR', {
         style: 'currency',
-        currency: 'XOF',
+        currency: page.props.currency || 'XAF',
         maximumFractionDigits: 0,
     }).format(value);
 
@@ -213,7 +213,9 @@ const submitPayment = () => {
                                                 id="phone_number"
                                                 v-model="form.phone_number"
                                                 type="tel"
-                                                class="block w-full pl-10"
+                                                inputmode="tel"
+                                                autocomplete="tel-national"
+                                                class="block w-full pl-10 text-base tracking-wider"
                                                 required
                                                 placeholder="6XXXXXXXX"
                                             />

@@ -14,6 +14,7 @@ use App\Services\Subscription\SubscriptionManager;
 use App\Services\Wallet\VendorWalletService;
 use App\Services\Wallet\WithdrawalService;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,6 +33,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Derrière un proxy TLS (Cloudflare, nginx…), PHP voit du http : sans ça,
+        // route() génère des notify_url / success_url en http pour CinetPay.
+        if (str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
 
         Relation::morphMap([
             'order' => Order::class,

@@ -99,7 +99,7 @@ const submit = () => {
                 <div class="flex mt-1">
                     <select
                         v-model="selectedCode"
-                        class="rounded-l-md border border-input bg-background text-foreground shadow-sm focus:border-ring focus:ring-ring border-r-0"
+                        class="w-24 shrink-0 rounded-l-md border border-input bg-background pl-2 pr-7 text-base text-foreground shadow-sm focus:border-ring focus:ring-ring border-r-0 sm:w-36 sm:text-sm"
                     >
                         <option v-for="country in countries" :key="country.code" :value="country.code">
                             {{ country.code }} ({{ country.name }})
@@ -107,8 +107,10 @@ const submit = () => {
                     </select>
                     <TextInput
                         id="phone"
-                        type="text"
-                        class="block w-full rounded-l-none"
+                        type="tel"
+                        inputmode="tel"
+                        autocomplete="tel-national"
+                        class="block w-full min-w-0 flex-1 rounded-l-none text-base tracking-wider sm:text-sm"
                         v-model="phoneNumber"
                         placeholder="Ex: 6XXXXXXXX"
                     />
