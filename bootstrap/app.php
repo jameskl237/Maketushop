@@ -38,7 +38,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->respond(function (Response $response, \Throwable $exception, Request $request) {
             $status = $response->getStatusCode();
 
-            if (! $request->expectsJson() && in_array($status, [404, 403, 500, 503], true)) {
+            // En local (APP_DEBUG=true), on garde la page détaillée de Laravel pour les 500 :
+            // la page « Oups » générique masquait la vraie cause (ex. MySQL arrêté).
+            $hideDetails = ! config('app.debug') || in_array($status, [404, 403], true);
+
+            if ($hideDetails && ! $request->expectsJson() && in_array($status, [404, 403, 500, 503], true)) {
                 return Inertia::render('Error', ['status' => $status])
                     ->toResponse($request)
                     ->setStatusCode($status);

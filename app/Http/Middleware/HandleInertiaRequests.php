@@ -55,10 +55,16 @@ class HandleInertiaRequests extends Middleware
             ],
             'currency' => config('payments.currency', 'XAF'),
             // Menu catégories de l'en-tête boutique (desktop) ; mis en cache 10 min.
-            'nav_categories' => fn () => Cache::remember('nav_categories', 600, fn () => Category::query()
-                ->orderBy('name')
-                ->get(['id', 'name'])
-                ->toArray()),
+            'nav_categories' => function () {
+                try {
+                    return Cache::remember('nav_categories', 600, fn () => Category::query()
+                        ->orderBy('name')
+                        ->get(['id', 'name'])
+                        ->toArray());
+                } catch (\Throwable) {
+                    return []; // menu secondaire : la page doit s'afficher quand même
+                }
+            },
             'features' => [
                 // Visible dès qu'une clé est renseignée ; si le mot de passe API manque,
                 // le checkout affiche une erreur explicite (cf. CheckoutController).

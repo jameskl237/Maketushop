@@ -9,7 +9,7 @@ import PrimaryButton from '@/components/PrimaryButton.vue';
 import { countries } from '@/lib/countries';
 
 const page = usePage();
-const mustSetPhone = computed(() => page.props.auth.must_set_phone);
+const mustSetPhone = computed(() => Boolean(page.props.auth?.must_set_phone));
 
 const selectedCode = ref('+237');
 const phoneNumber = ref('');
