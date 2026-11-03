@@ -1,8 +1,7 @@
 <script setup>
+import ProductCard from '@/components/products/listing/ProductCard.vue';
 import BottomNav from '@/components/shop/BottomNav.vue';
 import TopBar from '@/components/shop/TopBar.vue';
-import StarRating from '@/components/StarRating.vue';
-import { useCart } from '@/composables/useCart';
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
     ArrowRight,
@@ -10,6 +9,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Flame,
+    MapPin,
     ShoppingBag,
     Sparkles,
     Store,
@@ -27,7 +27,6 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
-const { addToCart } = useCart();
 
 /* ── Hero slider ── */
 const heroIndex = ref(0);
@@ -79,16 +78,13 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
 <template>
     <Head title="Accueil" />
 
-    <div class="min-h-screen bg-background pb-24 text-foreground">
+    <div class="min-h-screen bg-background text-foreground">
         <TopBar />
 
-        <main class="animate-reveal-fade mx-auto max-w-2xl space-y-0 lg:max-w-none">
+        <main class="animate-reveal-fade">
 
-            <!-- ═══════════════════════════════════════════════
-                 HERO SLIDER
-            ═══════════════════════════════════════════════ -->
-            <section class="relative h-[58vw] max-h-[460px] min-h-[260px] overflow-hidden bg-[#0b0820]">
-                <!-- Slides -->
+            <!-- ═══════════ HERO SLIDER ═══════════ -->
+            <section class="relative h-[58vw] max-h-[460px] min-h-[260px] overflow-hidden bg-header lg:h-[440px] lg:max-h-none">
                 <TransitionGroup name="hero-slide" tag="div" class="relative h-full w-full">
                     <div
                         v-for="(slide, idx) in heroSlides"
@@ -96,292 +92,282 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
                         :key="slide.id"
                         class="absolute inset-0"
                     >
-                        <img
-                            :src="slide.main_image"
-                            :alt="slide.name"
-                            class="h-full w-full object-cover"
-                        />
-                        <!-- Dark gradient -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                        <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+                        <img :src="slide.main_image" :alt="slide.name" class="h-full w-full object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent lg:from-background lg:via-background/10" />
 
-                        <!-- Content -->
-                        <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
-                            <div class="max-w-sm">
-                                <p v-if="slide.category" class="mb-1 text-[10px] font-bold uppercase tracking-widest text-white/60">
-                                    {{ slide.category.name }}
-                                </p>
-                                <h2 class="font-display text-xl font-black leading-tight text-white sm:text-2xl line-clamp-2">
-                                    {{ slide.name }}
-                                </h2>
-                                <div class="mt-2 flex items-center gap-3">
-                                    <span class="text-lg font-black text-white">{{ fmt(slide.price) }}</span>
-                                    <Link
-                                        :href="route('products.show', { product: slide.id })"
-                                        class="flex items-center gap-1.5 rounded-2xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm active:scale-95 transition-transform"
-                                    >
-                                        Voir <ArrowRight class="h-3.5 w-3.5" />
-                                    </Link>
+                        <div class="absolute inset-x-0 bottom-0 p-4 sm:p-6 lg:bottom-auto lg:top-16">
+                            <div class="mx-auto max-w-[1500px] lg:px-10">
+                                <div class="max-w-md">
+                                    <p v-if="slide.category" class="mb-1.5 text-xs font-bold uppercase tracking-widest text-white/75">
+                                        {{ slide.category.name }}
+                                    </p>
+                                    <h2 class="line-clamp-2 font-display text-2xl font-black leading-tight text-white drop-shadow sm:text-3xl lg:text-5xl">
+                                        {{ slide.name }}
+                                    </h2>
+                                    <div class="mt-3 flex items-center gap-3 lg:mt-5">
+                                        <span class="text-xl font-black text-white lg:text-2xl">{{ fmt(slide.price) }}</span>
+                                        <Link
+                                            :href="route('products.show', { product: slide.id })"
+                                            class="flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-hover active:scale-95"
+                                        >
+                                            Voir <ArrowRight class="h-4 w-4" />
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </TransitionGroup>
 
-                <!-- Prev / Next -->
                 <button
-                    class="absolute left-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm active:scale-90 transition-transform"
+                    class="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/55 active:scale-90 lg:left-6 lg:top-[38%] lg:h-14 lg:w-10 lg:rounded-lg"
+                    aria-label="Précédent"
                     @click="prevHero"
                 >
-                    <ChevronLeft class="h-4 w-4" />
+                    <ChevronLeft class="h-5 w-5 lg:h-7 lg:w-7" />
                 </button>
                 <button
-                    class="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm active:scale-90 transition-transform"
+                    class="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/55 active:scale-90 lg:right-6 lg:top-[38%] lg:h-14 lg:w-10 lg:rounded-lg"
+                    aria-label="Suivant"
                     @click="nextHero"
                 >
-                    <ChevronRight class="h-4 w-4" />
+                    <ChevronRight class="h-5 w-5 lg:h-7 lg:w-7" />
                 </button>
 
-                <!-- Dots -->
-                <div class="absolute bottom-3 right-4 flex gap-1.5">
+                <div class="absolute bottom-3 right-4 flex gap-1.5 lg:hidden">
                     <button
                         v-for="(_, i) in heroSlides"
                         :key="i"
                         class="rounded-full transition-all duration-300"
-                        :class="i === heroIndex ? 'w-5 h-2 bg-white' : 'w-2 h-2 bg-white/40'"
+                        :class="i === heroIndex ? 'h-2 w-5 bg-card' : 'h-2 w-2 bg-white/50'"
+                        :aria-label="`Diapositive ${i + 1}`"
                         @click="heroIndex = i"
                     />
                 </div>
             </section>
 
-            <!-- ═══════════════════════════════════════════════
-                 ACCÈS PRINCIPAUX : Produits & Services mis en avant
-            ═══════════════════════════════════════════════ -->
-            <section class="px-4 pt-4">
-                <div class="grid grid-cols-2 gap-3">
-                    <Link
-                        :href="route('products.index')"
-                        class="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-primary to-primary-hover p-4 text-white shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform"
-                    >
-                        <ShoppingBag class="h-7 w-7" />
-                        <p class="mt-3 font-display text-[15px] font-extrabold">Produits</p>
-                        <p class="text-[11px] text-white/80">Achetez près de chez vous</p>
-                    </Link>
-                    <Link
-                        :href="route('services.index')"
-                        class="relative overflow-hidden rounded-[20px] bg-orange p-4 text-white shadow-lg shadow-orange/20 active:scale-[0.98] transition-transform"
-                    >
-                        <Briefcase class="h-7 w-7" />
-                        <p class="mt-3 font-display text-[15px] font-extrabold">Services</p>
-                        <p class="text-[11px] text-white/80">Trouvez un prestataire</p>
-                    </Link>
-                </div>
-            </section>
+            <div class="mx-auto max-w-[1500px] lg:px-6">
 
-            <!-- ═══════════════════════════════════════════════
-                 CATEGORIES HORIZONTAL SCROLL
-            ═══════════════════════════════════════════════ -->
-            <section v-if="categories.length" class="pt-5">
-                <div class="mb-3 flex items-center justify-between px-4">
-                    <div class="flex items-center gap-2">
-                        <Tag class="h-4 w-4 text-primary" />
-                        <h2 class="font-display text-[15px] font-black text-foreground">Catégories</h2>
+                <!-- ═══════════ DESKTOP : tuiles façon marketplace (chevauchent le hero) ═══════════ -->
+                <section class="relative z-10 hidden gap-5 lg:-mt-44 lg:grid lg:grid-cols-4">
+                    <div class="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
+                        <h3 class="mb-3 font-display text-lg font-extrabold">Explorez par catégorie</h3>
+                        <div class="grid flex-1 grid-cols-2 gap-3">
+                            <button
+                                v-for="cat in categories.slice(0, 4)"
+                                :key="cat.id"
+                                type="button"
+                                class="group text-left"
+                                @click="goCategory(cat.id)"
+                            >
+                                <div class="aspect-square overflow-hidden rounded-lg bg-muted">
+                                    <img :src="catImage(cat)" :alt="cat.name" class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+                                </div>
+                                <p class="mt-1.5 line-clamp-1 text-xs font-medium text-shop-muted group-hover:text-primary">{{ cat.name }}</p>
+                            </button>
+                        </div>
+                        <Link :href="route('products.index')" class="mt-3 text-sm font-semibold text-primary hover:underline">Voir toutes les catégories</Link>
                     </div>
-                    <Link :href="route('products.index')" class="text-[11px] font-bold text-primary">Tout voir</Link>
-                </div>
 
-                <div class="flex gap-2.5 overflow-x-auto px-4 pb-1 no-scrollbar">
-                    <button
-                        v-for="cat in categories"
-                        :key="cat.id"
-                        class="group relative flex-shrink-0 w-[88px] overflow-hidden rounded-2xl active:scale-95 transition-transform"
-                        @click="goCategory(cat.id)"
-                    >
-                        <div class="relative h-[88px] w-[88px]">
-                            <img
-                                :src="catImage(cat)"
-                                :alt="cat.name"
-                                class="h-full w-full object-cover"
-                                loading="lazy"
-                            />
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                            <p class="absolute bottom-2 left-0 right-0 text-center text-[9px] font-black leading-tight text-white px-1">
-                                {{ cat.name }}
+                    <div class="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
+                        <h3 class="mb-3 font-display text-lg font-extrabold">Nouveautés de la semaine</h3>
+                        <div class="grid flex-1 grid-cols-2 gap-3">
+                            <Link
+                                v-for="product in newArrivals.slice(0, 4)"
+                                :key="product.id"
+                                :href="route('products.show', { product: product.id })"
+                                class="group"
+                            >
+                                <div class="aspect-square overflow-hidden rounded-lg bg-muted">
+                                    <img :src="product.main_image || '/images/Maketu1.png'" :alt="product.name" class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+                                </div>
+                                <p class="mt-1.5 line-clamp-1 text-xs font-medium text-shop-muted group-hover:text-primary">{{ product.name }}</p>
+                            </Link>
+                        </div>
+                        <Link :href="route('products.index', { sort: 'newest' })" class="mt-3 text-sm font-semibold text-primary hover:underline">Découvrir les nouveautés</Link>
+                    </div>
+
+                    <div class="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
+                        <h3 class="mb-3 font-display text-lg font-extrabold">Boutiques à découvrir</h3>
+                        <ul class="flex-1 space-y-2.5">
+                            <li v-for="shop in shops.slice(0, 4)" :key="shop.id">
+                                <Link :href="route('shops.show', { shop: shop.id })" class="group flex items-center gap-3 rounded-lg p-1.5 hover:bg-muted">
+                                    <span class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10">
+                                        <img v-if="shop.logo" :src="shop.logo" :alt="shop.name" class="h-full w-full object-cover" />
+                                        <span v-else class="font-display text-base font-black text-primary">{{ shop.name?.[0] }}</span>
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block truncate text-sm font-semibold group-hover:text-primary">{{ shop.name }}</span>
+                                        <span class="block truncate text-xs text-shop-light">{{ shop.products_count }} produits<template v-if="shop.city"> · {{ shop.city }}</template></span>
+                                    </span>
+                                </Link>
+                            </li>
+                        </ul>
+                        <Link :href="route('shops.index')" class="mt-3 text-sm font-semibold text-primary hover:underline">Toutes les boutiques</Link>
+                    </div>
+
+                    <div class="flex flex-col justify-between rounded-xl bg-gradient-to-br from-primary to-orange p-6 text-white shadow-sm">
+                        <div>
+                            <Store class="h-9 w-9" />
+                            <h3 class="mt-4 font-display text-2xl font-extrabold leading-tight">Vendez sur MaketuShop</h3>
+                            <p class="mt-2 text-sm text-white/90">Ouvrez votre boutique en quelques minutes et touchez des milliers de clients au Cameroun. Paiement Mobile Money sécurisé.</p>
+                        </div>
+                        <div class="mt-5 flex flex-col gap-2">
+                            <Link :href="route('register')" class="rounded-full bg-card py-2.5 text-center text-sm font-bold text-primary transition hover:bg-white/90">Créer ma boutique</Link>
+                            <Link :href="route('services.index')" class="rounded-full border border-white/60 py-2.5 text-center text-sm font-bold text-white transition hover:bg-white/10">
+                                <Briefcase class="mr-1 inline h-4 w-4" /> Trouver un prestataire
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══════════ MOBILE : accès principaux ═══════════ -->
+                <section class="px-4 pt-4 lg:hidden">
+                    <div class="grid grid-cols-2 gap-3">
+                        <Link
+                            :href="route('products.index')"
+                            class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary-hover p-4 text-white shadow-lg shadow-primary/20 transition-transform active:scale-[0.98]"
+                        >
+                            <ShoppingBag class="h-7 w-7" />
+                            <p class="mt-3 font-display text-base font-extrabold">Produits</p>
+                            <p class="text-xs text-white/90">Achetez près de chez vous</p>
+                        </Link>
+                        <Link
+                            :href="route('services.index')"
+                            class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange to-amber-500 p-4 text-white shadow-lg shadow-orange/20 transition-transform active:scale-[0.98]"
+                        >
+                            <Briefcase class="h-7 w-7" />
+                            <p class="mt-3 font-display text-base font-extrabold">Services</p>
+                            <p class="text-xs text-white/90">Trouvez un prestataire</p>
+                        </Link>
+                    </div>
+                </section>
+
+                <!-- ═══════════ CATÉGORIES ═══════════ -->
+                <section v-if="categories.length" class="pt-6 lg:mt-6 lg:rounded-xl lg:border lg:border-border lg:bg-card lg:p-5">
+                    <SectionTitle :icon="Tag" title="Catégories" :href="route('products.index')" />
+                    <div class="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-1 lg:grid lg:grid-cols-8 lg:gap-4 lg:overflow-visible lg:px-0">
+                        <button
+                            v-for="cat in categories"
+                            :key="cat.id"
+                            class="group relative w-[92px] flex-shrink-0 overflow-hidden rounded-2xl transition-transform active:scale-95 lg:w-auto lg:rounded-xl"
+                            @click="goCategory(cat.id)"
+                        >
+                            <div class="relative aspect-square w-full">
+                                <img :src="catImage(cat)" :alt="cat.name" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                                <p class="absolute bottom-2 left-0 right-0 px-1.5 text-center text-[12px] font-bold leading-tight text-white lg:text-sm">
+                                    {{ cat.name }}
+                                </p>
+                            </div>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- ═══════════ NOUVEAUTÉS ═══════════ -->
+                <section v-if="newArrivals.length" class="pt-6 lg:mt-6 lg:rounded-xl lg:border lg:border-border lg:bg-card lg:p-5">
+                    <SectionTitle :icon="Sparkles" title="Nouveautés" :href="route('products.index', { sort: 'newest' })" />
+                    <div class="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-1 lg:gap-4 lg:px-0">
+                        <ProductMiniCard
+                            v-for="product in newArrivals"
+                            :key="product.id"
+                            :product="product"
+                        />
+                    </div>
+                </section>
+
+                <!-- ═══════════ TENDANCES ═══════════ -->
+                <section v-if="popular.length" class="px-4 pt-6 lg:mt-6 lg:px-0">
+                    <SectionTitle :icon="Flame" title="Tendances" :href="route('products.index', { sort: 'popular' })" flush />
+                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                        <ProductCard v-for="product in popular" :key="product.id" :product="product" />
+                    </div>
+                </section>
+
+                <!-- ═══════════ BOUTIQUES ═══════════ -->
+                <section v-if="shops.length" class="pb-4 pt-6 lg:mt-6 lg:rounded-xl lg:border lg:border-border lg:bg-card lg:p-5">
+                    <SectionTitle :icon="Store" title="Boutiques" :href="route('shops.index')" />
+                    <div class="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-1 lg:grid lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:px-0 xl:grid-cols-6">
+                        <Link
+                            v-for="shop in shops"
+                            :key="shop.id"
+                            :href="route('shops.show', { shop: shop.id })"
+                            class="w-48 flex-shrink-0 rounded-xl border border-border bg-card p-3 transition hover:border-primary/40 hover:shadow-md active:scale-95 lg:w-auto lg:bg-background"
+                        >
+                            <div class="flex items-center gap-2.5">
+                                <div class="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/10">
+                                    <img v-if="shop.logo" :src="shop.logo" :alt="shop.name" class="h-full w-full object-cover" />
+                                    <span v-else class="font-display text-base font-black text-primary">{{ shop.name?.[0] }}</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="truncate text-sm font-bold text-foreground">{{ shop.name }}</p>
+                                    <p class="text-xs text-shop-muted">{{ shop.products_count }} produits</p>
+                                </div>
+                            </div>
+                            <p v-if="shop.city" class="mt-2 flex items-center gap-1 truncate text-xs text-shop-muted">
+                                <MapPin class="h-3.5 w-3.5 shrink-0" /> {{ shop.city }}
                             </p>
-                        </div>
-                    </button>
-                </div>
-            </section>
-
-            <!-- ═══════════════════════════════════════════════
-                 NOUVEAUTÉS
-            ═══════════════════════════════════════════════ -->
-            <section v-if="newArrivals.length" class="pt-5">
-                <div class="mb-3 flex items-center justify-between px-4">
-                    <div class="flex items-center gap-2">
-                        <Sparkles class="h-4 w-4 text-primary" />
-                        <h2 class="font-display text-[15px] font-black text-foreground">Nouveautés</h2>
+                        </Link>
                     </div>
-                    <Link :href="route('products.index', { sort: 'newest' })" class="text-[11px] font-bold text-primary">Tout voir</Link>
-                </div>
-
-                <div class="flex gap-3 overflow-x-auto px-4 pb-1 no-scrollbar">
-                    <ProductMiniCard
-                        v-for="product in newArrivals"
-                        :key="product.id"
-                        :product="product"
-                        @add-cart="addToCart(product, 1)"
-                    />
-                </div>
-            </section>
-
-            <!-- ═══════════════════════════════════════════════
-                 TENDANCES / POPULAIRES — 2 colonnes
-            ═══════════════════════════════════════════════ -->
-            <section v-if="popular.length" class="pt-5">
-                <div class="mb-3 flex items-center justify-between px-4">
-                    <div class="flex items-center gap-2">
-                        <Flame class="h-4 w-4 text-orange" />
-                        <h2 class="font-display text-[15px] font-black text-foreground">Tendances</h2>
-                    </div>
-                    <Link :href="route('products.index', { sort: 'popular' })" class="text-[11px] font-bold text-primary">Tout voir</Link>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2.5 px-4 sm:grid-cols-3 lg:grid-cols-4">
-                    <ProductGridCard
-                        v-for="product in popular"
-                        :key="product.id"
-                        :product="product"
-                        @add-cart="addToCart(product, 1)"
-                    />
-                </div>
-            </section>
-
-            <!-- ═══════════════════════════════════════════════
-                 BOUTIQUES POPULAIRES
-            ═══════════════════════════════════════════════ -->
-            <section v-if="shops.length" class="pt-5 pb-4">
-                <div class="mb-3 flex items-center justify-between px-4">
-                    <div class="flex items-center gap-2">
-                        <Store class="h-4 w-4 text-orange" />
-                        <h2 class="font-display text-[15px] font-black text-foreground">Boutiques</h2>
-                    </div>
-                    <Link :href="route('shops.index')" class="text-[11px] font-bold text-primary">Tout voir</Link>
-                </div>
-
-                <div class="flex gap-3 overflow-x-auto px-4 pb-1 no-scrollbar">
-                    <Link
-                        v-for="shop in shops"
-                        :key="shop.id"
-                        :href="route('shops.show', { shop: shop.id })"
-                        class="glass-card flex-shrink-0 w-44 p-3 active:scale-95 transition-transform"
-                    >
-                        <div class="flex items-center gap-2.5">
-                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10 overflow-hidden">
-                                <img v-if="shop.logo" :src="shop.logo" :alt="shop.name" class="h-full w-full object-cover" />
-                                <span v-else class="font-display text-sm font-black text-primary">{{ shop.name?.[0] }}</span>
-                            </div>
-                            <div class="min-w-0">
-                                <p class="truncate text-[12px] font-bold text-foreground">{{ shop.name }}</p>
-                                <p class="text-[10px] text-muted-foreground">{{ shop.products_count }} produits</p>
-                            </div>
-                        </div>
-                        <p v-if="shop.city" class="mt-2 text-[10px] text-muted-foreground truncate">📍 {{ shop.city }}</p>
-                    </Link>
-                </div>
-            </section>
-
+                </section>
+            </div>
         </main>
 
         <BottomNav />
     </div>
 </template>
 
-<!-- ── Sub-components inline ── -->
+<!-- ── Sous-composants ── -->
 <script>
-import { defineComponent, computed, h } from 'vue';
+import { defineComponent, h } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { ShoppingBag } from 'lucide-vue-next';
-import StarRating from '@/components/StarRating.vue';
+
+const fmtPrice = (v) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(v ?? 0);
+
+const SectionTitle = defineComponent({
+    name: 'SectionTitle',
+    props: { icon: [Object, Function], title: String, href: String, flush: Boolean },
+    setup(props) {
+        return () => h('div', { class: ['mb-3 flex items-center justify-between lg:mb-4', props.flush ? '' : 'px-4 lg:px-0'] }, [
+            h('div', { class: 'flex items-center gap-2' }, [
+                props.icon && h(props.icon, { class: 'h-5 w-5 text-primary' }),
+                h('h2', { class: 'font-display text-lg font-extrabold text-foreground lg:text-xl' }, props.title),
+            ]),
+            props.href && h(Link, { href: props.href, class: 'text-sm font-semibold text-primary hover:underline' }, () => 'Tout voir'),
+        ]);
+    },
+});
 
 const ProductMiniCard = defineComponent({
     name: 'ProductMiniCard',
     props: { product: Object },
-    emits: ['add-cart'],
-    setup(props, { emit }) {
-        const fmt = (v) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(v ?? 0);
+    setup(props) {
         return () => h(
             Link,
-            { href: route('products.show', { product: props.product.id }), class: 'flex-shrink-0 w-[140px] block' },
+            { href: route('products.show', { product: props.product.id }), class: 'group block w-[150px] flex-shrink-0 lg:w-[200px]' },
             () => [
-                h('div', { class: 'relative aspect-square w-full overflow-hidden rounded-2xl bg-muted' }, [
+                h('div', { class: 'relative aspect-square w-full overflow-hidden rounded-xl bg-muted' }, [
                     h('img', {
                         src: props.product.main_image || '/images/Maketu1.png',
                         alt: props.product.name,
-                        class: 'h-full w-full object-cover',
+                        class: 'h-full w-full object-cover transition-transform duration-300 group-hover:scale-105',
                         loading: 'lazy',
                     }),
-                    props.product.is_new && h('span', { class: 'absolute left-2 top-2 rounded-xl bg-primary px-2 py-0.5 text-[9px] font-bold text-white' }, 'New'),
-                    h('div', { class: 'absolute bottom-2 right-2 rounded-xl border border-white/40 bg-white/70 px-2 py-1 backdrop-blur-md' }, [
-                        h('p', { class: 'font-display text-[11px] font-black text-primary leading-none' }, fmt(props.product.price)),
-                    ]),
+                    props.product.is_new && h('span', { class: 'absolute left-2 top-2 rounded-md bg-primary px-2 py-0.5 text-[12px] font-bold text-white' }, 'Nouveau'),
                 ]),
                 h('div', { class: 'mt-2 space-y-0.5 px-0.5' }, [
-                    h('p', { class: 'line-clamp-1 text-[12px] font-bold text-foreground' }, props.product.name),
-                    h('p', { class: 'text-[10px] text-muted-foreground' }, props.product.shop?.name),
+                    h('p', { class: 'line-clamp-1 text-sm font-semibold text-foreground group-hover:text-primary' }, props.product.name),
+                    h('p', { class: 'text-base font-extrabold text-foreground' }, fmtPrice(props.product.price)),
+                    h('p', { class: 'line-clamp-1 text-xs text-shop-muted' }, props.product.shop?.name),
                 ]),
             ]
         );
     },
 });
 
-const ProductGridCard = defineComponent({
-    name: 'ProductGridCard',
-    props: { product: Object },
-    emits: ['add-cart'],
-    setup(props, { emit }) {
-        const fmt = (v) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(v ?? 0);
-        return () => h('div', { class: 'group rounded-3xl overflow-hidden bg-card shadow-sm active:scale-[0.98] transition-transform' }, [
-            h(Link, { href: route('products.show', { product: props.product.id }), class: 'block' }, () => [
-                h('div', { class: 'relative aspect-square overflow-hidden bg-muted' }, [
-                    h('img', {
-                        src: props.product.main_image || '/images/Maketu1.png',
-                        alt: props.product.name,
-                        class: 'h-full w-full object-cover transition-transform duration-500 group-hover:scale-105',
-                        loading: 'lazy',
-                    }),
-                    props.product.is_new && h('span', { class: 'absolute left-2.5 top-2.5 rounded-xl bg-primary px-2 py-0.5 text-[9px] font-bold text-white' }, 'New'),
-                    h('div', { class: 'absolute bottom-2 right-2 rounded-xl border border-white/40 bg-white/70 px-2.5 py-1.5 backdrop-blur-md shadow-sm' }, [
-                        h('p', { class: 'font-display text-[12px] font-black text-primary leading-none' }, fmt(props.product.price)),
-                    ]),
-                ]),
-            ]),
-            h('div', { class: 'p-2.5 space-y-1' }, [
-                h(Link, { href: route('products.show', { product: props.product.id }), class: 'line-clamp-1 text-[12px] font-bold text-foreground' }, () => props.product.name),
-                h('div', { class: 'flex items-center justify-between' }, [
-                    h('p', { class: 'text-[10px] text-muted-foreground truncate' }, props.product.shop?.name),
-                    props.product.average_rating > 0 && h('div', { class: 'flex items-center gap-0.5 text-[10px] font-bold text-amber-400' }, [
-                        h('svg', { class: 'h-2.5 w-2.5 fill-current', viewBox: '0 0 20 20' },
-                            h('path', { d: 'M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z' })
-                        ),
-                        h('span', {}, props.product.average_rating.toFixed(1)),
-                    ]),
-                ]),
-                h('button', {
-                    class: 'mt-1.5 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-primary py-2 text-[11px] font-bold text-white active:scale-95 transition-transform disabled:opacity-50',
-                    disabled: props.product.stock <= 0,
-                    onClick: (e) => { e.preventDefault(); emit('add-cart'); },
-                }, [
-                    h(ShoppingBag, { class: 'h-3.5 w-3.5' }),
-                    props.product.stock > 0 ? 'Ajouter' : 'Rupture',
-                ]),
-            ]),
-        ]);
-    },
-});
-
 export default {
-    components: { ProductMiniCard, ProductGridCard },
+    components: { ProductMiniCard, SectionTitle },
 };
 </script>
 

@@ -121,7 +121,7 @@ const submit = () => {
                     <Textarea id="quote_message" v-model="form.message" rows="3" :placeholder="t('quoteDialog.messagePlaceholder')" />
                 </div>
 
-                <p v-if="!ownerPhone" class="text-[11px] text-destructive">
+                <p v-if="!ownerPhone" class="text-[12px] text-destructive">
                     {{ t('quoteDialog.phoneUnavailable') }}
                 </p>
             </div>

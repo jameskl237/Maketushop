@@ -5,7 +5,7 @@ import { Link } from '@inertiajs/vue3';
 </script>
 
 <template>
-    <div class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-shop-bg px-4 py-8 dark:bg-[#0D0820]">
+    <div class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 py-8">
         <!-- Background blobs -->
         <div class="pointer-events-none absolute inset-0 overflow-hidden">
             <div class="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl dark:bg-primary/10" />

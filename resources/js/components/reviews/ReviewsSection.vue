@@ -59,7 +59,7 @@ const submit = () => {
 </script>
 
 <template>
-    <section class="mt-2 bg-white px-4 py-4 dark:bg-card">
+    <section class="mt-2 bg-card px-4 py-4">
         <div class="flex items-center justify-between">
             <h2 class="font-display text-[16px] font-bold">{{ $t('rating.reviewsCount', { count: ratingsCount }) }}</h2>
             <div class="flex items-center gap-1 text-[13px] font-bold text-shop-amber">
@@ -70,7 +70,7 @@ const submit = () => {
 
         <!-- Formulaire d'avis (client connecté) -->
         <div v-if="isAuthenticated" class="mt-3 rounded-2xl border border-border p-3">
-            <p class="mb-2 text-[12px] font-semibold text-foreground">
+            <p class="mb-2 text-[13px] font-semibold text-foreground">
                 {{ userRating ? $t('rating.editYourRating') : $t('rating.giveYourReview') }}
             </p>
             <div class="mb-2 flex items-center gap-1">
@@ -95,7 +95,7 @@ const submit = () => {
             />
             <Button
                 :disabled="!score || submitting"
-                class="mt-2 h-9 w-full rounded-xl text-[12px] font-bold"
+                class="mt-2 h-9 w-full rounded-xl text-[13px] font-bold"
                 @click="submit"
             >
                 {{ submitting ? $t('rating.submitting') : $t('rating.submitReview') }}
@@ -104,9 +104,9 @@ const submit = () => {
 
         <!-- Invitation à se connecter -->
         <div v-else class="mt-3 rounded-2xl border border-dashed border-border p-3 text-center">
-            <p class="text-[12px] text-muted-foreground">{{ $t('rating.loginToReview') }}</p>
+            <p class="text-[13px] text-muted-foreground">{{ $t('rating.loginToReview') }}</p>
             <a :href="loginUrl" class="mt-2 inline-block">
-                <Button variant="outline" size="sm" class="rounded-xl text-[12px]">{{ $t('auth.login') }}</Button>
+                <Button variant="outline" size="sm" class="rounded-xl text-[13px]">{{ $t('auth.login') }}</Button>
             </a>
         </div>
 
@@ -117,11 +117,11 @@ const submit = () => {
                     <p class="text-[13px] font-semibold text-foreground">{{ review.author }}</p>
                     <StarRating :average-rating="review.score" :ratings-count="0" readonly size="sm" />
                 </div>
-                <p v-if="review.comment" class="mt-1 text-[12px] leading-5 text-shop-muted">{{ review.comment }}</p>
-                <p class="mt-1 text-[10px] text-shop-light">{{ formatDate(review.created_at) }}</p>
+                <p v-if="review.comment" class="mt-1 text-[13px] leading-5 text-shop-muted">{{ review.comment }}</p>
+                <p class="mt-1 text-[11px] text-shop-light">{{ formatDate(review.created_at) }}</p>
             </div>
         </div>
-        <p v-else class="mt-4 text-center text-[12px] text-muted-foreground">
+        <p v-else class="mt-4 text-center text-[13px] text-muted-foreground">
             {{ $t('rating.noReviewsYet') }}
         </p>
     </section>

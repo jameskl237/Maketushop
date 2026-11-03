@@ -54,7 +54,7 @@ const columns = computed(() => [
                         <img src="/images/Maketu1.png" alt="Logo MaketuShop" class="h-8 w-auto transition-transform duration-300 group-hover:scale-105" loading="lazy" />
                         <span class="font-display text-lg font-semibold text-foreground">MaketuShop</span>
                     </a>
-                    <p class="mt-4 text-[12px] leading-relaxed text-muted-foreground">
+                    <p class="mt-4 text-[13px] leading-relaxed text-muted-foreground">
                         {{ t('landing.footerTagline') }}
                     </p>
                 </div>
@@ -65,7 +65,7 @@ const columns = computed(() => [
                     :key="col.title"
                     class="space-y-4"
                 >
-                    <h3 class="text-[11px] font-semibold uppercase tracking-widest text-foreground">{{ col.title }}</h3>
+                    <h3 class="text-[12px] font-semibold uppercase tracking-widest text-foreground">{{ col.title }}</h3>
                     <ul class="space-y-2.5">
                         <li
                             v-for="item in col.links"
@@ -73,7 +73,7 @@ const columns = computed(() => [
                         >
                             <a
                                 :href="item.href"
-                                class="text-[12px] text-muted-foreground transition-colors duration-150 hover:text-foreground"
+                                class="text-[13px] text-muted-foreground transition-colors duration-150 hover:text-foreground"
                             >
                                 {{ item.label }}
                             </a>
@@ -84,7 +84,7 @@ const columns = computed(() => [
 
             <!-- Bottom bar -->
             <div class="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border/50 pt-6 sm:flex-row">
-                <p class="text-[11px] text-muted-foreground">
+                <p class="text-[12px] text-muted-foreground">
                     © {{ new Date().getFullYear() }} MaketuShop. {{ t('landing.footerRights') }}
                 </p>
                 <div class="flex items-center gap-1">

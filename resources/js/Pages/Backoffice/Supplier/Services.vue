@@ -125,7 +125,7 @@ const destroy = (service) => {
                                     <td class="px-4 py-3">{{ service.category?.name || '-' }}</td>
                                     <td class="px-4 py-3">
                                         <span v-if="service.quote_only" class="text-muted-foreground">Sur devis</span>
-                                        <span v-else>{{ service.price }} FCFA</span>
+                                        <span v-else>{{ $fcfa(service.price) }}</span>
                                     </td>
                                     <td class="px-4 py-3">
                                         <Badge :variant="service.is_active ? 'secondary' : 'outline'">

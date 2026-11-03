@@ -1,4 +1,5 @@
 <script setup>
+import StoreFooter from '@/components/shop/StoreFooter.vue';
 import InputError from '@/components/InputError.vue';
 import InputLabel from '@/components/InputLabel.vue';
 import TextInput from '@/components/TextInput.vue';
@@ -154,7 +155,7 @@ const submitPayment = () => {
                     <div v-if="currentStep === 1" class="space-y-4">
                         <div>
                             <h1 class="text-2xl font-bold">{{ t('payments.deliveryInfo') }}</h1>
-                            <p class="mt-1 text-sm text-muted-foreground">{{ t('auth.supplierRegisterHelp') }}</p>
+                            <p class="mt-1 text-sm text-muted-foreground">{{ t('payments.deliverySubtitle') }}</p>
                         </div>
 
                         <Card>
@@ -349,7 +350,7 @@ const submitPayment = () => {
                                 </template>
                             </Button>
 
-                            <p class="text-[10px] text-center text-muted-foreground px-2">
+                            <p class="text-[11px] text-center text-muted-foreground px-2">
                                 En cliquant sur continuer, vous acceptez nos conditions générales de vente et notre politique de confidentialité.
                             </p>
                         </CardContent>
@@ -362,5 +363,6 @@ const submitPayment = () => {
                 </aside>
             </div>
         </main>
+        <StoreFooter />
     </div>
 </template>

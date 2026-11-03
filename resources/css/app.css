@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  html { color-scheme: light; }
+  html.dark { color-scheme: dark; }
+  body { @apply bg-background text-foreground; }
+
   :root {
     --primary: #F43F5E;
     --primary-rgb: 244 63 94;
@@ -10,22 +14,27 @@
     --primary-hover-rgb: 225 29 72;
     --orange: #FB923C;
     --orange-rgb: 251 146 60;
-    --bg: #FFF7F8;
-    --bg-rgb: 255 247 248;
+    /* Fond neutre façon grandes marketplaces : cartes blanches sur gris très clair. */
+    --bg: #F4F4F6;
+    --bg-rgb: 244 244 246;
     --card: #FFFFFF;
     --card-rgb: 255 255 255;
+    --muted-rgb: 238 238 242;
     --text: #0F172A;
     --text-rgb: 15 23 42;
-    --text-muted: #64748B;
-    --text-muted-rgb: 100 116 139;
-    --text-light: #94A3B8;
-    --text-light-rgb: 148 163 184;
+    --text-muted: #475569;
+    --text-muted-rgb: 71 85 105;
+    --text-light: #64748B;
+    --text-light-rgb: 100 116 139;
+    /* En-tête de la boutique (sombre dans les deux thèmes, comme Amazon). */
+    --header-rgb: 19 17 23;
+    --header-2-rgb: 32 29 37;
     --green: #00C48C;
     --green-rgb: 0 196 140;
     --amber: #F59E0B;
     --amber-rgb: 245 158 11;
-    --border: rgba(244,63,94,0.1);
-    --radius: 1rem;
+    --border: rgba(15,23,42,0.10);
+    --radius: 0.75rem;
 
     /* Refined Liquid Glass */
     --glass-bg: rgba(255, 255, 255, 0.72);
@@ -43,30 +52,34 @@
     --primary-hover-rgb: 244 63 94;
     --orange: #FDBA74;
     --orange-rgb: 253 186 116;
-    --bg: #1A1014;
-    --bg-rgb: 26 16 20;
-    --card: #271820;
-    --card-rgb: 39 24 32;
-    --text: #FFF5F7;
-    --text-rgb: 255 245 247;
-    --text-muted: #D6C2C8;
-    --text-muted-rgb: 214 194 200;
-    --text-light: #A8909A;
-    --text-light-rgb: 168 144 154;
+    /* Une seule famille de gris neutres pour tout le site en sombre. */
+    --bg: #121115;
+    --bg-rgb: 18 17 21;
+    --card: #1C1B20;
+    --card-rgb: 28 27 32;
+    --muted-rgb: 39 37 44;
+    --text: #F4F4F5;
+    --text-rgb: 244 244 245;
+    --text-muted: #C4C2C9;
+    --text-muted-rgb: 196 194 201;
+    --text-light: #9C99A3;
+    --text-light-rgb: 156 153 163;
+    --header-rgb: 12 11 14;
+    --header-2-rgb: 24 23 28;
     --green: #00D99B;
     --green-rgb: 0 217 155;
     --amber: #FBBF24;
     --amber-rgb: 251 191 36;
-    --border: rgba(251,113,133,0.18);
+    --border: rgba(255,255,255,0.10);
 
     /* Refined Liquid Glass Dark */
-    --glass-bg: rgba(39, 24, 32, 0.75);
-    --glass-border: rgba(251, 113, 133, 0.25);
+    --glass-bg: rgba(28, 27, 32, 0.80);
+    --glass-border: rgba(255, 255, 255, 0.10);
     --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.06);
     --mesh-gradient: radial-gradient(at 0% 0%, #FB7185 0px, transparent 50%),
                     radial-gradient(at 100% 0%, #FDBA74 0px, transparent 50%),
                     radial-gradient(at 100% 100%, #F43F5E 0px, transparent 50%),
-                    radial-gradient(at 0% 100%, #1A1014 0px, transparent 50%);
+                    radial-gradient(at 0% 100%, #121115 0px, transparent 50%);
   }
 }
 

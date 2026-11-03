@@ -63,7 +63,7 @@ const formatDate = (value) => new Date(value).toLocaleDateString('fr-FR');
                                 {{ $t('supplier.customer') }}: {{ order.customer_name || $t('supplier.unknown') }} ({{ order.customer_email || $t('supplier.emailUnavailable') }})
                             </p>
                             <p class="text-sm text-muted-foreground">
-                                {{ $t('supplier.date') }}: {{ formatDate(order.created_at) }} - {{ $t('supplier.orderTotal') }}: {{ order.total_price }} FCFA
+                                {{ $t('supplier.date') }}: {{ formatDate(order.created_at) }} - {{ $t('supplier.orderTotal') }}: {{ $fcfa(order.total_price) }}
                             </p>
 
                             <div class="mt-3 space-y-1 text-sm">
@@ -81,7 +81,7 @@ const formatDate = (value) => new Date(value).toLocaleDateString('fr-FR');
                                             :shop-name="item.shop_name"
                                         />
                                     </div>
-                                    <span class="text-muted-foreground">{{ $t('supplier.quantity') }}: {{ item.quantity }} - {{ item.price }} FCFA</span>
+                                    <span class="text-muted-foreground">{{ $t('supplier.quantity') }}: {{ item.quantity }} - {{ $fcfa(item.price) }}</span>
                                 </div>
                             </div>
                         </div>

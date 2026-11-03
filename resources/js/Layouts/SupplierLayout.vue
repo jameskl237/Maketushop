@@ -44,7 +44,7 @@ const toggleMobileSidebar = () => {
         <template #content>...</template>
       </SupplierLayout>
     -->
-    <AuthenticatedLayout :show-logo="false">
+    <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between gap-4">
                 <div>

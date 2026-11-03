@@ -48,20 +48,24 @@ export default {
     				foreground: '#FFFFFF'
     			},
     			secondary: {
-    				DEFAULT: 'rgb(var(--bg-rgb) / <alpha-value>)',
+    				DEFAULT: 'rgb(var(--muted-rgb) / <alpha-value>)',
     				foreground: 'rgb(var(--text-rgb) / <alpha-value>)'
     			},
     			muted: {
-    				DEFAULT: 'rgb(var(--bg-rgb) / <alpha-value>)',
+    				DEFAULT: 'rgb(var(--muted-rgb) / <alpha-value>)',
     				foreground: 'rgb(var(--text-muted-rgb) / <alpha-value>)'
     			},
     			accent: {
-    				DEFAULT: 'rgb(var(--bg-rgb) / <alpha-value>)',
+    				DEFAULT: 'rgb(var(--muted-rgb) / <alpha-value>)',
     				foreground: 'rgb(var(--text-rgb) / <alpha-value>)'
     			},
     			destructive: {
     				DEFAULT: 'rgb(var(--orange-rgb) / <alpha-value>)',
     				foreground: '#FFFFFF'
+    			},
+    			header: {
+    				DEFAULT: 'rgb(var(--header-rgb) / <alpha-value>)',
+    				2: 'rgb(var(--header-2-rgb) / <alpha-value>)'
     			},
     			border: 'var(--border)',
     			input: 'var(--border)',

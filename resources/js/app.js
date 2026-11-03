@@ -15,6 +15,16 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 initTheme();
 initViewTransitions();
 
+// Image produit / boutique introuvable : on affiche le visuel MaketuShop plutôt
+// qu'une icône cassée et le texte alternatif (une seule tentative par image).
+document.addEventListener('error', (event) => {
+    const img = event.target;
+    if (!(img instanceof HTMLImageElement) || img.dataset.fallback) return;
+    img.dataset.fallback = '1';
+    img.src = '/images/Maketu1.png';
+    img.classList.add('object-contain', 'p-4', 'opacity-80');
+}, true);
+
 // Register PWA service worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -40,6 +50,9 @@ createInertiaApp({
 
         setI18nLocale(getI18nLocale());
         app.config.globalProperties.$setLocale = setI18nLocale;
+        // Montant lisible : « 2 250 FCFA » au lieu de « 2250.41 FCFA ».
+        app.config.globalProperties.$fcfa = (value) =>
+            `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(Number(value) || 0)} FCFA`;
 
         return app.mount(el);
     },

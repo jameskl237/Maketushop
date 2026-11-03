@@ -26,6 +26,41 @@
             "products": "Products",
             "cart": "Cart",
             "services": "Services"
+        },
+        "header": {
+            "searchPlaceholder": "Search products, brands, shops…",
+            "all": "All",
+            "allCategories": "All categories",
+            "search": "Search",
+            "deliverTo": "Deliver to",
+            "country": "Cameroon",
+            "hello": "Hello, {name}",
+            "helloGuest": "Hello, sign in",
+            "account": "Account & Lists",
+            "orders": "Orders",
+            "ordersSub": "Returns & tracking",
+            "cart": "Cart",
+            "products": "Products",
+            "shops": "Shops",
+            "services": "Services",
+            "sell": "Sell on MaketuShop",
+            "backoffice": "My space"
+        },
+        "footer": {
+            "backToTop": "Back to top",
+            "discover": "Discover",
+            "account": "Your account",
+            "sell": "Sell with us",
+            "help": "Help",
+            "aboutUs": "About us",
+            "contact": "Contact",
+            "myOrders": "My orders",
+            "myAccount": "My account",
+            "becomeSeller": "Become a seller",
+            "sellerSpace": "Seller space",
+            "securePayment": "Secure Mobile Money payment",
+            "delivery": "Local delivery",
+            "rights": "All rights reserved."
         }
     },
     "welcome": {
@@ -348,17 +383,38 @@
             "pageTitle": "Catalog Management",
             "pageSubtitle": "Manage users, shops, products and categories.",
             "tabsAriaLabel": "Tabs",
-            "tabs": { "users": "Users", "shops": "Shops", "products": "Products", "categories": "Categories", "orders": "Orders" },
+            "tabs": {
+                "users": "Users",
+                "shops": "Shops",
+                "products": "Products",
+                "categories": "Categories",
+                "orders": "Orders"
+            },
             "addUser": "Add a user",
             "addShop": "Add a shop",
             "addProduct": "Add a product",
             "addCategory": "Add a category",
             "table": {
-                "id": "ID", "user": "User", "contact": "Contact", "role": "Role", "actions": "Actions",
-                "shop": "Shop", "location": "Location", "seller": "Seller", "product": "Product",
-                "price": "Price", "stock": "Stock", "categoryShop": "Category / Shop", "name": "Name",
-                "slug": "Slug", "description": "Description", "number": "Number", "client": "Client",
-                "items": "Items", "total": "Total", "status": "Status"
+                "id": "ID",
+                "user": "User",
+                "contact": "Contact",
+                "role": "Role",
+                "actions": "Actions",
+                "shop": "Shop",
+                "location": "Location",
+                "seller": "Seller",
+                "product": "Product",
+                "price": "Price",
+                "stock": "Stock",
+                "categoryShop": "Category / Shop",
+                "name": "Name",
+                "slug": "Slug",
+                "description": "Description",
+                "number": "Number",
+                "client": "Client",
+                "items": "Items",
+                "total": "Total",
+                "status": "Status"
             },
             "noPhone": "No phone",
             "edit": "Edit",
@@ -611,6 +667,22 @@
         "favoriteButton": {
             "add": "Add to favorites",
             "remove": "Remove from favorites"
+        },
+        "filters": "Filters",
+        "reset": "Reset",
+        "category": "Category",
+        "price": "Price (FCFA)",
+        "min": "Min",
+        "max": "Max",
+        "inStockOnly": "In stock only",
+        "city": "City",
+        "for": "for",
+        "sortBy": "Sort by",
+        "sort": {
+            "newest": "Newest",
+            "popular": "Best sellers",
+            "priceAsc": "Price: low to high",
+            "priceDesc": "Price: high to low"
         }
     },
     "productShow": {
@@ -749,9 +821,9 @@
         "summary": "Summary",
         "total": "Total",
         "platformPay": "Pay on the platform",
-    "loginRequiredTitle": "Login required",
-    "loginRequiredMessage": "You must be logged in to continue payment on the platform.",
-    "loginToContinue": "Log in",
+        "loginRequiredTitle": "Login required",
+        "loginRequiredMessage": "You must be logged in to continue payment on the platform.",
+        "loginToContinue": "Log in",
         "waGreeting": "Hello {shop},",
         "waIntro": "I would like to order the following products:",
         "waQuantity": "Quantity",
@@ -778,7 +850,8 @@
         "next": "Next",
         "previous": "Previous",
         "step1": "Delivery",
-        "step2": "Payment"
+        "step2": "Payment",
+        "deliverySubtitle": "Tell us where to deliver your order and a phone number we can reach."
     },
     "aboutPage": {
         "headTitle": "About MaketuShop",
@@ -833,5 +906,12 @@
         "submitReview": "Post my review",
         "loginToReview": "Log in to leave a review.",
         "noReviewsYet": "No reviews yet. Be the first!"
+    },
+    "productCard": {
+        "new": "New",
+        "inStock": "In stock",
+        "outOfStock": "Out of stock",
+        "cart": "Cart",
+        "buy": "Buy"
     }
 }

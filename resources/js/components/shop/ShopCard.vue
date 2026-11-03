@@ -25,17 +25,17 @@ const initials = computed(() =>
 </script>
 
 <template>
-    <Card class="group overflow-hidden rounded-[24px] border-none bg-glass/40 backdrop-blur-md shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98]">
+    <Card class="group h-full overflow-hidden rounded-xl border border-border bg-card shadow-none transition-all duration-200 hover:border-primary/40 hover:shadow-lg hover:shadow-black/5 active:scale-[0.98] dark:hover:shadow-black/40">
         <CardContent class="flex gap-4 p-4">
             <div class="relative shrink-0">
-                <Avatar class="h-14 w-14 rounded-[18px] border-2 border-white/50 bg-mesh-gradient shadow-lg">
+                <Avatar class="h-14 w-14 rounded-[18px] border border-border bg-mesh-gradient">
                     <AvatarImage :src="shop.logo_url || shop.logo" :alt="`Logo ${shop.name}`" class="object-cover" />
                     <AvatarFallback class="rounded-[18px] bg-mesh-gradient font-display text-base font-black text-white">
                         {{ initials }}
                     </AvatarFallback>
                 </Avatar>
                 <!-- Online Indicator -->
-                <div class="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-shop-green shadow-sm"></div>
+                <div class="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-card bg-shop-green shadow-sm"></div>
             </div>
 
             <div class="min-w-0 flex-1">
@@ -47,27 +47,24 @@ const initials = computed(() =>
                                 ✓
                             </Badge>
                         </div>
-                        <p class="mt-1 flex items-center gap-1 text-[11px] font-medium text-shop-muted">
+                        <p class="mt-1 flex items-center gap-1 text-[12px] font-medium text-shop-muted">
                             <MapPin class="h-3 w-3 text-primary" />
                             {{ shop.city }}
                         </p>
                     </div>
                 </div>
 
-                <p class="mt-2 line-clamp-2 text-[12px] leading-relaxed text-shop-muted/90">
+                <p class="mt-2 line-clamp-2 text-[13px] leading-relaxed text-shop-muted">
                     {{ shop.description || t('shopsPage.noDescription') }}
                 </p>
 
                 <div class="mt-4 flex items-center justify-between gap-2">
                     <div class="flex items-center gap-1.5">
-                        <div class="flex -space-x-2">
-                            <div v-for="i in 3" :key="i" class="h-5 w-5 rounded-full border border-white bg-slate-200"></div>
-                        </div>
-                        <span class="text-[10px] font-bold text-shop-muted">+{{ shop.products_count || 0 }} products</span>
+                        <span class="text-xs font-bold text-shop-muted">{{ shop.products_count || 0 }} produits</span>
                     </div>
 
                     <Link :href="route('shops.show', { shop: shop.id })">
-                        <Button variant="glass" class="h-8 rounded-xl px-4 text-[11px] font-bold transition-all group-hover:bg-primary group-hover:text-white">
+                        <Button variant="outline" class="h-9 rounded-full border-border bg-muted px-4 text-sm font-bold text-foreground transition-all group-hover:border-primary group-hover:bg-primary group-hover:text-white">
                             Visiter
                             <ArrowRight class="h-3 w-3" />
                         </Button>

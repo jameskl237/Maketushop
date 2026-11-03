@@ -1,4 +1,5 @@
 <script setup>
+import StoreFooter from '@/components/shop/StoreFooter.vue';
 import ProductsNavbar from '@/components/products/layout/ProductsNavbar.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -279,5 +280,6 @@ onMounted(() => {
                 <a :href="route('login') + '?redirect=' + encodeURIComponent(route('payments.cart.method'))" class="btn btn-primary">{{ t('cartPage.loginToContinue') }}</a>
             </div>
         </div>
+        <StoreFooter />
     </div>
 </template>

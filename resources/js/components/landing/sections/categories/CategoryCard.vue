@@ -25,10 +25,10 @@ const { t, locale } = useI18n();
         <div class="absolute bottom-4 left-4 right-4 flex flex-col gap-1 rounded-[22px] border border-white/20 bg-white/20 p-4 backdrop-blur-xl transition-all duration-300 group-hover:bottom-6">
             <h3 class="font-display text-[17px] font-black tracking-tight text-white">{{ category.name }}</h3>
             <div class="flex items-center justify-between">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-white/60">
+                <p class="text-[11px] font-bold uppercase tracking-widest text-white/60">
                     {{ category.count.toLocaleString(locale === 'en' ? 'en-US' : 'fr-FR') }} items
                 </p>
-                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-white text-black shadow-lg">
+                <div class="flex h-6 w-6 items-center justify-center rounded-full bg-card text-black shadow-lg">
                     <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
                     </svg>

@@ -26,6 +26,41 @@
             "products": "Produits",
             "cart": "Panier",
             "services": "Services"
+        },
+        "header": {
+            "searchPlaceholder": "Rechercher un produit, une marque, une boutique…",
+            "all": "Toutes",
+            "allCategories": "Toutes les catégories",
+            "search": "Rechercher",
+            "deliverTo": "Livraison au",
+            "country": "Cameroun",
+            "hello": "Bonjour, {name}",
+            "helloGuest": "Bonjour, identifiez-vous",
+            "account": "Compte et listes",
+            "orders": "Commandes",
+            "ordersSub": "Retours et suivi",
+            "cart": "Panier",
+            "products": "Produits",
+            "shops": "Boutiques",
+            "services": "Services",
+            "sell": "Vendre sur MaketuShop",
+            "backoffice": "Mon espace"
+        },
+        "footer": {
+            "backToTop": "Retour en haut",
+            "discover": "Découvrir",
+            "account": "Votre compte",
+            "sell": "Vendre avec nous",
+            "help": "Aide",
+            "aboutUs": "À propos",
+            "contact": "Contact",
+            "myOrders": "Mes commandes",
+            "myAccount": "Mon compte",
+            "becomeSeller": "Devenir vendeur",
+            "sellerSpace": "Espace vendeur",
+            "securePayment": "Paiement sécurisé Mobile Money",
+            "delivery": "Livraison locale",
+            "rights": "Tous droits réservés."
         }
     },
     "welcome": {
@@ -348,17 +383,38 @@
             "pageTitle": "Gestion du Catalogue",
             "pageSubtitle": "Gérez les utilisateurs, boutiques, produits et catégories.",
             "tabsAriaLabel": "Tabs",
-            "tabs": { "users": "Utilisateurs", "shops": "Boutiques", "products": "Produits", "categories": "Catégories", "orders": "Commandes" },
+            "tabs": {
+                "users": "Utilisateurs",
+                "shops": "Boutiques",
+                "products": "Produits",
+                "categories": "Catégories",
+                "orders": "Commandes"
+            },
             "addUser": "Ajouter un utilisateur",
             "addShop": "Ajouter une boutique",
             "addProduct": "Ajouter un produit",
             "addCategory": "Ajouter une catégorie",
             "table": {
-                "id": "ID", "user": "Utilisateur", "contact": "Contact", "role": "Rôle", "actions": "Actions",
-                "shop": "Boutique", "location": "Localisation", "seller": "Vendeur", "product": "Produit",
-                "price": "Prix", "stock": "Stock", "categoryShop": "Catégorie / Boutique", "name": "Nom",
-                "slug": "Slug", "description": "Description", "number": "Numéro", "client": "Client",
-                "items": "Articles", "total": "Total", "status": "Statut"
+                "id": "ID",
+                "user": "Utilisateur",
+                "contact": "Contact",
+                "role": "Rôle",
+                "actions": "Actions",
+                "shop": "Boutique",
+                "location": "Localisation",
+                "seller": "Vendeur",
+                "product": "Produit",
+                "price": "Prix",
+                "stock": "Stock",
+                "categoryShop": "Catégorie / Boutique",
+                "name": "Nom",
+                "slug": "Slug",
+                "description": "Description",
+                "number": "Numéro",
+                "client": "Client",
+                "items": "Articles",
+                "total": "Total",
+                "status": "Statut"
             },
             "noPhone": "Pas de téléphone",
             "edit": "Éditer",
@@ -611,6 +667,22 @@
         "favoriteButton": {
             "add": "Ajouter aux favoris",
             "remove": "Retirer des favoris"
+        },
+        "filters": "Filtres",
+        "reset": "Réinitialiser",
+        "category": "Catégorie",
+        "price": "Prix (FCFA)",
+        "min": "Min",
+        "max": "Max",
+        "inStockOnly": "En stock uniquement",
+        "city": "Ville",
+        "for": "pour",
+        "sortBy": "Trier par",
+        "sort": {
+            "newest": "Nouveautés",
+            "popular": "Meilleures ventes",
+            "priceAsc": "Prix croissant",
+            "priceDesc": "Prix décroissant"
         }
     },
     "productShow": {
@@ -778,7 +850,8 @@
         "next": "Suivant",
         "previous": "Précédent",
         "step1": "Livraison",
-        "step2": "Paiement"
+        "step2": "Paiement",
+        "deliverySubtitle": "Indiquez où livrer votre commande et un numéro joignable."
     },
     "aboutPage": {
         "headTitle": "À propos de MaketuShop",
@@ -833,5 +906,12 @@
         "submitReview": "Publier mon avis",
         "loginToReview": "Connectez-vous pour laisser un avis.",
         "noReviewsYet": "Aucun avis pour le moment. Soyez le premier !"
+    },
+    "productCard": {
+        "new": "Nouveau",
+        "inStock": "En stock",
+        "outOfStock": "Rupture de stock",
+        "cart": "Panier",
+        "buy": "Acheter"
     }
 }

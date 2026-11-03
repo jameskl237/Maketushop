@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -52,11 +54,15 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
             ],
             'currency' => config('payments.currency', 'XAF'),
+            // Menu catégories de l'en-tête boutique (desktop) ; mis en cache 10 min.
+            'nav_categories' => fn () => Cache::remember('nav_categories', 600, fn () => Category::query()
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->toArray()),
             'features' => [
-                // Mêmes conditions que CinetPayService::isConfigured() : sans
-                // api_password, l'authentification OAuth v1 échoue toujours.
-                'pay_online_enabled' => filled(config('services.cinetpay.api_key'))
-                    && filled(config('services.cinetpay.api_password')),
+                // Visible dès qu'une clé est renseignée ; si le mot de passe API manque,
+                // le checkout affiche une erreur explicite (cf. CheckoutController).
+                'pay_online_enabled' => filled(config('services.cinetpay.api_key')),
             ],
         ];
     }

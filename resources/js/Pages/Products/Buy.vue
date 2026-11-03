@@ -1,4 +1,5 @@
 <script setup>
+import StoreFooter from '@/components/shop/StoreFooter.vue';
 import ProductsNavbar from '@/components/products/layout/ProductsNavbar.vue';
 import PriceDisplay from '@/components/products/shared/PriceDisplay.vue';
 import { Button } from '@/components/ui/button';
@@ -119,5 +120,6 @@ const whatsappUrl = computed(() => {
                 </CardContent>
             </Card>
         </div>
+        <StoreFooter />
     </div>
 </template>

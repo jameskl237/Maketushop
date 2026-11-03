@@ -74,7 +74,7 @@ const faqs = computed(() => [
 <template>
     <Head :title="t('landing.metaTitle')" />
 
-    <div id="top" class="relative min-h-screen overflow-hidden bg-[#F7F6FF] text-foreground pb-16 md:pb-0 dark:bg-[#0F0A1E]">
+    <div id="top" class="relative min-h-screen overflow-hidden bg-background text-foreground pb-16 md:pb-0">
         <!-- Global Background Elements -->
         <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
             <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] animate-blob"></div>

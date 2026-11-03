@@ -353,7 +353,7 @@ const submitForm = (type) => {
                                     <div class="text-xs text-muted-foreground">{{ $t('admin.management.code') }}: {{ product.code || $t('admin.management.notAvailable') }}</div>
                                 </td>
                                 <td class="p-4">
-                                    <div class="font-bold text-foreground">{{ product.price }} FCFA</div>
+                                    <div class="font-bold text-foreground">{{ $fcfa(product.price) }}</div>
                                     <div v-if="product.promotion_price" class="text-xs text-green-600">{{ $t('admin.management.promo') }}: {{ product.promotion_price }}</div>
                                 </td>
                                 <td class="p-4">
@@ -421,7 +421,7 @@ const submitForm = (type) => {
                                 <td class="p-4 font-bold text-foreground">{{ order.order_number }}</td>
                                 <td class="p-4 text-muted-foreground">{{ order.user?.name || $t('admin.management.unknownClient') }}</td>
                                 <td class="p-4 text-foreground">{{ order.total_products }}</td>
-                                <td class="p-4 font-bold text-primary">{{ order.total_price }} FCFA</td>
+                                <td class="p-4 font-bold text-primary">{{ $fcfa(order.total_price) }}</td>
                                 <td class="p-4">
                                     <span :class="['inline-flex rounded-full border px-2.5 py-1 text-xs font-medium', orderStatusClass(order.status)]">
                                         {{ orderStatusLabel(order.status) }}

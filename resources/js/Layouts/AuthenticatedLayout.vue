@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue';
-import ApplicationLogo from '@/components/ApplicationLogo.vue';
 import Dropdown from '@/components/Dropdown.vue';
 import NotificationBell from '@/Components/NotificationBell.vue';
 import DropdownLink from '@/components/DropdownLink.vue';
@@ -35,11 +34,10 @@ const showingNavigationDropdown = ref(false);
                     <div class="flex h-16 justify-between">
                         <div class="flex">
                             <!-- Logo -->
-                            <div v-if="showLogo" class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-8 w-auto fill-current text-primary sm:h-9"
-                                    />
+                            <div class="flex shrink-0 items-center">
+                                <Link href="/" class="flex items-center gap-2" title="MaketuShop">
+                                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary font-display text-base font-black text-white">M</span>
+                                    <span class="hidden font-display text-lg font-extrabold tracking-tight text-foreground sm:inline">Maketu<span class="text-primary">Shop</span></span>
                                 </Link>
                             </div>
 

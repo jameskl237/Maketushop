@@ -189,7 +189,7 @@ const favoriteLink = (fav) =>
                             :href="favoriteLink(fav)"
                             class="overflow-hidden rounded-2xl border border-border bg-card transition-transform active:scale-95"
                         >
-                            <div class="flex aspect-square items-center justify-center overflow-hidden bg-gradient-to-br from-[#FFE9EE] to-[#FFF1E6]">
+                            <div class="flex aspect-square items-center justify-center overflow-hidden bg-muted">
                                 <img v-if="fav.image" :src="fav.image" :alt="fav.name" class="h-full w-full object-cover" loading="lazy" />
                                 <component :is="fav.type === 'service' ? Sparkles : Package" v-else class="h-8 w-8 text-primary/30" />
                             </div>

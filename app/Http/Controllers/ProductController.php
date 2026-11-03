@@ -144,8 +144,9 @@ class ProductController extends Controller
                 break;
         }
 
+        // 20 = multiple de 4 et 5 colonnes : grille pleine sur desktop.
         $products = $query
-            ->paginate(15)
+            ->paginate(20)
             ->through(fn (Product $product) => $this->transformProduct($product))
             ->withQueryString();
 

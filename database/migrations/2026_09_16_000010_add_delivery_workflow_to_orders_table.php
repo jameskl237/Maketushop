@@ -18,7 +18,12 @@ return new class extends Migration
     public function up(): void
     {
         // enum() ->change() ne sait pas étendre proprement une énumération MySQL.
-        DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','in_progress','delivered','cancelled') NOT NULL DEFAULT 'pending'");
+        if (in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
+            DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','in_progress','delivered','cancelled') NOT NULL DEFAULT 'pending'");
+        } else {
+            // SQLite (tests) : l'enum est un CHECK ; on reconstruit la colonne sans contrainte.
+            Schema::table('orders', fn (Blueprint $table) => $table->string('status')->default('pending')->change());
+        }
 
         Schema::table('orders', function (Blueprint $table) {
             $table->timestamp('paid_at')->nullable()->after('is_paid');
@@ -51,6 +56,8 @@ return new class extends Migration
         });
 
         DB::table('orders')->whereNotIn('status', ['pending', 'delivered'])->update(['status' => 'pending']);
-        DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','delivered') NOT NULL DEFAULT 'pending'");
+        if (in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
+            DB::statement("ALTER TABLE orders MODIFY COLUMN status ENUM('pending','delivered') NOT NULL DEFAULT 'pending'");
+        }
     }
 };

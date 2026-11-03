@@ -70,7 +70,7 @@ class CheckoutController extends Controller
         }
 
         if (!app(CinetPayService::class)->isConfigured()) {
-            return back()->with('error', 'Le paiement en ligne est momentanément indisponible. Choisissez le paiement à la livraison.');
+            return back()->with('error', 'Paiement en ligne indisponible : CINETPAY_API_PASSWORD n\'est pas renseigné sur le serveur (back-office CinetPay > Intégration).');
         }
 
         $this->ensureMobileMoneyNumber($validated['phone_number']);
@@ -105,7 +105,7 @@ class CheckoutController extends Controller
         }
 
         if (!app(CinetPayService::class)->isConfigured()) {
-            return back()->with('error', 'Le paiement en ligne est momentanément indisponible. Choisissez le paiement à la livraison.');
+            return back()->with('error', 'Paiement en ligne indisponible : CINETPAY_API_PASSWORD n\'est pas renseigné sur le serveur (back-office CinetPay > Intégration).');
         }
 
         $this->ensureMobileMoneyNumber($validated['phone_number']);
@@ -176,7 +176,7 @@ class CheckoutController extends Controller
             ],
         ];
 
-        if (!app(CinetPayService::class)->isConfigured()) {
+        if (blank(config('services.cinetpay.api_key'))) {
             $methods = array_values(array_filter($methods, fn ($m) => $m['channel'] !== 'cinetpay'));
         }
 

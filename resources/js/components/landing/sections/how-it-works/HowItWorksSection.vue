@@ -20,7 +20,7 @@ const { t } = useI18n();
             <ScrollReveal>
                 <div class="flex flex-col items-center text-center">
                     <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-pink/10 bg-pink/5 px-4 py-1.5 backdrop-blur-sm">
-                        <span class="text-[11px] font-black uppercase tracking-[0.2em] text-pink-600">{{ t('landing.howTitle') }}</span>
+                        <span class="text-[12px] font-black uppercase tracking-[0.2em] text-pink-600">{{ t('landing.howTitle') }}</span>
                     </div>
                     <h2 class="max-w-2xl font-display text-[36px] font-black leading-[1.1] tracking-tighter text-foreground sm:text-6xl">
                         Un processus <span class="text-primary italic">simple</span> pour des résultats <span class="bg-gradient-to-r from-pink to-primary bg-clip-text text-transparent">exceptionnels</span>

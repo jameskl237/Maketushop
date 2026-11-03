@@ -89,26 +89,26 @@ const clearSearch = () => {
 <template>
     <Head :title="t('servicesPage.headTitle')" />
 
-    <div class="min-h-screen bg-shop-bg pb-16 text-foreground">
+    <div class="min-h-screen bg-background text-foreground">
         <ProductsNavbar />
 
         <Transition name="page-fade" mode="out-in">
-            <main class="mx-auto max-w-7xl space-y-4 py-3">
+            <main class="mx-auto max-w-[1500px] space-y-4 py-4 lg:px-3 lg:py-6">
                 <section class="space-y-3 px-3">
                     <div class="flex items-end justify-between gap-3">
                         <div>
-                            <p class="text-[10px] font-semibold uppercase tracking-wide text-shop-light">{{ t('servicesPage.subtitle') }}</p>
-                            <h1 class="font-display text-[22px] font-extrabold leading-tight">{{ t('servicesPage.title') }}</h1>
+                            <p class="text-[11px] font-semibold uppercase tracking-wide text-shop-light">{{ t('servicesPage.subtitle') }}</p>
+                            <h1 class="font-display text-2xl font-extrabold leading-tight lg:text-3xl">{{ t('servicesPage.title') }}</h1>
                         </div>
-                        <Link :href="route('products.index')" class="text-[11px] font-bold text-primary">{{ t('public.products') }}</Link>
+                        <Link :href="route('products.index')" class="text-[12px] font-bold text-primary">{{ t('public.products') }}</Link>
                     </div>
 
-                    <div class="relative">
+                    <div class="relative lg:max-w-xl">
                         <Search class="pointer-events-none absolute left-[11px] top-1/2 h-4 w-4 -translate-y-1/2 text-shop-light" />
                         <Input
                             v-model="state.search"
                             type="search"
-                            class="h-[38px] rounded-[12px] border-[1.5px] border-border bg-shop-bg pl-9 pr-9 text-[12px] shadow-none placeholder:text-shop-light"
+                            class="h-11 rounded-xl border-border bg-card pl-10 pr-10 text-base shadow-none placeholder:text-shop-light lg:text-sm"
                             :placeholder="t('servicesPage.searchPlaceholder')"
                         />
                         <Button
@@ -131,10 +131,10 @@ const clearSearch = () => {
                             :key="category.id"
                             type="button"
                             variant="outline"
-                            class="h-7 rounded-[20px] px-3 text-[11.5px] font-medium shadow-none"
+                            class="h-8 rounded-full px-3.5 text-[13px] font-medium shadow-none"
                             :class="(category.id === 'all' && !state.categories.length) || state.categories.includes(category.id)
                                 ? 'border-primary bg-primary text-white'
-                                : 'border-border bg-white text-shop-muted'"
+                                : 'border-border bg-card text-shop-muted'"
                             @click="toggleCategory(category.id)"
                         >
                             {{ category.name }}
@@ -149,10 +149,10 @@ const clearSearch = () => {
                             :key="chip.value"
                             type="button"
                             variant="outline"
-                            class="h-7 rounded-[20px] px-3 text-[11.5px] font-medium shadow-none"
+                            class="h-8 rounded-full px-3.5 text-[13px] font-medium shadow-none"
                             :class="state.rating_min === chip.value
                                 ? 'border-orange bg-orange text-white'
-                                : 'border-border bg-white text-shop-muted'"
+                                : 'border-border bg-card text-shop-muted'"
                             @click="state.rating_min = chip.value"
                         >
                             {{ chip.label }}
@@ -161,13 +161,13 @@ const clearSearch = () => {
                 </ScrollArea>
 
                 <section class="px-3">
-                    <div v-if="loading" class="grid grid-cols-2 gap-2.5">
-                        <div v-for="index in 6" :key="index" class="h-60 animate-pulse rounded-[16px] bg-white" />
+                    <div v-if="loading" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                        <div v-for="index in 6" :key="index" class="h-60 animate-pulse rounded-[16px] bg-card" />
                     </div>
-                    <div v-else-if="services.data?.length" class="grid grid-cols-2 gap-2.5">
+                    <div v-else-if="services.data?.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                         <ServiceCard v-for="service in services.data" :key="service.id" :service="service" />
                     </div>
-                    <div v-else class="rounded-[16px] border border-dashed border-border bg-white p-8 text-center text-sm text-shop-muted">
+                    <div v-else class="rounded-[16px] border border-dashed border-border bg-card p-8 text-center text-sm text-shop-muted">
                         {{ t('servicesPage.emptyDescription') }}
                     </div>
 
@@ -177,7 +177,7 @@ const clearSearch = () => {
                             :key="`${link.label}-${index}`"
                             :href="link.url || '#'"
                             class="rounded-[10px] border px-3 py-1.5 text-xs"
-                            :class="link.active ? 'border-primary bg-primary text-white' : 'border-border bg-white text-shop-muted'"
+                            :class="link.active ? 'border-primary bg-primary text-white' : 'border-border bg-card text-shop-muted'"
                             preserve-scroll
                             preserve-state
                         >

@@ -43,7 +43,7 @@ const goBack = () => {
 <template>
     <Head :title="content.title" />
 
-    <div class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#F0EEFF] to-[#EEF4FF] px-6 py-12 text-center text-foreground">
+    <div class="flex min-h-screen flex-col items-center justify-center bg-background px-6 py-12 text-center text-foreground">
         <img src="/images/Maketu_logo.png" alt="MaketuShop" class="h-20 w-20 rounded-2xl object-contain shadow-lg shadow-primary/10" />
 
         <p class="mt-6 font-display text-6xl font-extrabold text-primary">{{ status }}</p>

@@ -21,7 +21,7 @@ defineProps({
                 <p class="font-display text-3xl font-semibold text-foreground">
                     <AnimatedCounter :value="stat.value" :suffix="stat.suffix" />
                 </p>
-                <p class="mt-1.5 text-[12px] font-medium uppercase tracking-widest text-muted-foreground">
+                <p class="mt-1.5 text-[13px] font-medium uppercase tracking-widest text-muted-foreground">
                     {{ stat.label }}
                 </p>
             </div>

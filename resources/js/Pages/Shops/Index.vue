@@ -31,25 +31,25 @@ const hasShops = computed(() => Boolean(props.shops.data?.length));
 <template>
     <Head :title="t('shopsPage.headTitle')" />
 
-    <div class="min-h-screen bg-shop-bg pb-16 text-foreground">
+    <div class="min-h-screen bg-background text-foreground">
         <ProductsNavbar />
 
         <Transition name="page-fade" mode="out-in">
-            <main class="mx-auto max-w-3xl space-y-4 px-3 py-3">
+            <main class="mx-auto max-w-[1500px] space-y-4 px-3 py-4 sm:px-4 lg:px-6 lg:py-6">
                 <div class="flex items-end justify-between gap-3">
                     <div>
-                        <p class="text-[10px] font-semibold uppercase tracking-wide text-shop-light">{{ t('shopsPage.sellers') }}</p>
-                        <h1 class="font-display text-[22px] font-extrabold leading-tight">{{ t('shopsPage.title') }}</h1>
+                        <p class="text-[11px] font-semibold uppercase tracking-wide text-shop-light">{{ t('shopsPage.sellers') }}</p>
+                        <h1 class="font-display text-2xl font-extrabold leading-tight lg:text-3xl">{{ t('shopsPage.title') }}</h1>
                     </div>
-                    <Link :href="route('products.index')" class="text-[11px] font-bold text-primary">Produits</Link>
+                    <Link :href="route('products.index')" class="text-[12px] font-bold text-primary">Produits</Link>
                 </div>
 
-                <div class="relative">
+                <div class="relative lg:max-w-xl">
                     <Search class="pointer-events-none absolute left-[11px] top-1/2 h-4 w-4 -translate-y-1/2 text-shop-light" />
                     <Input
                         v-model="search"
                         type="search"
-                        class="h-[38px] rounded-[12px] border-[1.5px] border-border bg-shop-bg pl-9 pr-9 text-[12px] shadow-none placeholder:text-shop-light"
+                        class="h-11 rounded-xl border-border bg-card pl-10 pr-10 text-base shadow-none placeholder:text-shop-light lg:text-sm"
                         placeholder="Rechercher une boutique..."
                     />
                     <Button
@@ -64,11 +64,11 @@ const hasShops = computed(() => Boolean(props.shops.data?.length));
                     </Button>
                 </div>
 
-                <div v-if="!hasShops" class="rounded-[16px] border border-dashed border-border bg-white p-8 text-center text-sm text-shop-muted">
+                <div v-if="!hasShops" class="rounded-[16px] border border-dashed border-border bg-card p-8 text-center text-sm text-shop-muted">
                     {{ t('shopsPage.empty') }}
                 </div>
 
-                <div v-else class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                <div v-else class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     <ShopCard v-for="shop in shops.data" :key="shop.id" :shop="shop" />
                 </div>
             </main>

@@ -29,6 +29,20 @@
         <meta name="apple-mobile-web-app-title" content="MaketuShop">
         <link rel="apple-touch-icon" href="/images/Maketu_logo.png">
 
+        <!-- Thème appliqué avant le premier rendu : évite le flash blanc en mode sombre. -->
+        <script>
+            (function () {
+                try {
+                    var t = localStorage.getItem('maketushop-theme');
+                    if (t !== 'dark' && t !== 'light') {
+                        t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    }
+                    if (t === 'dark') document.documentElement.classList.add('dark');
+                } catch (e) {}
+            })();
+        </script>
+        <style>html{background:#F4F4F6}html.dark{background:#121115}</style>
+
         <!-- Scripts -->
         @routes
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])

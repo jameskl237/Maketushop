@@ -21,7 +21,7 @@ const goToProducts = () => {
 </script>
 
 <template>
-    <section id="hero" class="relative overflow-hidden bg-gradient-to-b from-[#0b1020] via-[#0f0529] to-[#0b1020] px-4 pb-16 pt-12 text-white">
+    <section id="hero" class="relative overflow-hidden bg-gradient-to-b from-header via-header-2 to-header px-4 pb-16 pt-12 text-white">
         <!-- Layered Gradient Shapes -->
         <div class="absolute -left-40 -top-24 h-96 w-96 rounded-full blur-3xl bg-gradient-to-tr from-[#7c3aed]/40 to-[#06b6d4]/30 animate-blob-slow"></div>
         <div class="absolute right-[-10%] top-12 h-72 w-72 rounded-full blur-2xl bg-gradient-to-bl from-[#fb7185]/30 to-[#f97316]/20 animate-blob-slow [animation-delay:2s]"></div>

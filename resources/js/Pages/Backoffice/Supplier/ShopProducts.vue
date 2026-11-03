@@ -277,7 +277,7 @@ const confirmDeleteProduct = () => {
                                             </div>
                                         </td>
                                         <td class="px-4 py-3">{{ product.category?.name || t('supplier.noCategory') }}</td>
-                                        <td class="px-4 py-3">{{ product.price }} FCFA</td>
+                                        <td class="px-4 py-3">{{ $fcfa(product.price) }}</td>
                                         <td class="px-4 py-3">
                                             <Badge :variant="product.in_stock ? 'secondary' : 'outline'">
                                                 {{ product.in_stock ? t('supplier.inStock') : t('supplier.outOfStock') }}

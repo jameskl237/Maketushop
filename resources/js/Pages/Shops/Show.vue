@@ -1,4 +1,5 @@
 <script setup>
+import ProductsNavbar from '@/components/products/layout/ProductsNavbar.vue';
 import ProductCard from '@/components/products/listing/ProductCard.vue';
 import ReviewsSection from '@/components/reviews/ReviewsSection.vue';
 import ServiceCard from '@/components/services/ServiceCard.vue';
@@ -103,10 +104,11 @@ const shareShop = async () => {
 <template>
     <Head :title="`${shop.name} - Boutique`" />
 
-    <div class="min-h-screen bg-shop-bg pb-16 text-foreground">
+    <div class="min-h-screen bg-background text-foreground">
+        <ProductsNavbar />
         <Transition name="page-fade" mode="out-in">
-            <main class="mx-auto max-w-3xl">
-                <section class="relative overflow-hidden bg-gradient-to-br from-primary to-orange px-4 pb-9 pt-4 text-white">
+            <main class="mx-auto max-w-[1500px] lg:px-6 lg:pt-5">
+                <section class="relative overflow-hidden bg-gradient-to-br from-primary to-orange px-4 pb-9 pt-4 text-white lg:rounded-xl lg:px-10 lg:pb-16 lg:pt-8">
                     <!-- Bannière de la boutique (si configurée) -->
                     <template v-if="shop.banner_image">
                         <img :src="shop.banner_image" :alt="shop.name" class="absolute inset-0 h-full w-full object-cover" />
@@ -124,9 +126,9 @@ const shareShop = async () => {
 
                     <div class="relative flex items-end gap-3">
                         <div class="relative">
-                            <Avatar class="h-14 w-14 rounded-[18px] bg-white">
+                            <Avatar class="h-14 w-14 rounded-[18px] bg-card lg:h-24 lg:w-24 lg:rounded-2xl">
                                 <AvatarImage :src="shop.logo_url || shop.logo" :alt="shop.name" />
-                                <AvatarFallback class="rounded-[18px] bg-white font-display text-lg font-extrabold text-primary">
+                                <AvatarFallback class="rounded-[18px] bg-card font-display text-lg font-extrabold text-primary">
                                     {{ initials }}
                                 </AvatarFallback>
                             </Avatar>
@@ -135,37 +137,37 @@ const shareShop = async () => {
                             </Badge>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <h1 class="line-clamp-1 font-display text-[22px] font-extrabold leading-tight">{{ shop.name }}</h1>
-                            <p class="mt-1 text-[12px] text-white/80">{{ shop.city }}<span v-if="shop.district">, {{ shop.district }}</span></p>
+                            <h1 class="line-clamp-1 font-display text-2xl font-extrabold leading-tight lg:text-4xl">{{ shop.name }}</h1>
+                            <p class="mt-1 text-[13px] text-white/80">{{ shop.city }}<span v-if="shop.district">, {{ shop.district }}</span></p>
                         </div>
                     </div>
-                    <p class="mt-3 line-clamp-2 text-[12px] leading-5 text-white/85">
+                    <p class="mt-3 line-clamp-2 text-[13px] leading-5 text-white/85">
                         {{ shop.description || t('shopShow.aboutFallback') }}
                     </p>
                 </section>
 
-                <section class="relative z-[1] mx-3 -mt-4 rounded-[16px] bg-white p-3 shadow-[0_8px_24px_rgba(15,10,30,0.08)]">
+                <section class="relative z-[1] mx-3 -mt-4 rounded-2xl border border-border bg-card p-3 shadow-lg shadow-black/5 lg:mx-10 lg:-mt-8 lg:p-5">
                     <div class="grid grid-cols-4 gap-1 text-center">
                         <div v-for="item in stats" :key="item.label">
                             <p class="line-clamp-1 font-display text-[14px] font-extrabold text-foreground">{{ item.value }}</p>
-                            <p class="mt-0.5 text-[9.5px] text-shop-light">{{ item.label }}</p>
+                            <p class="mt-0.5 text-[11px] text-shop-light">{{ item.label }}</p>
                         </div>
                     </div>
                 </section>
 
-                <section class="space-y-3 px-3 py-4">
-                    <a v-if="whatsappUrl" :href="whatsappUrl" target="_blank" rel="noopener noreferrer">
-                        <Button class="h-10 w-full rounded-[14px] bg-primary text-[12px] font-bold text-white shadow-none">
+                <section class="space-y-3 px-3 py-4 lg:px-0 lg:py-6">
+                    <a v-if="whatsappUrl" :href="whatsappUrl" target="_blank" rel="noopener noreferrer" class="block lg:max-w-xs">
+                        <Button class="h-10 w-full rounded-[14px] bg-primary text-[13px] font-bold text-white shadow-none">
                             <MessageCircle class="h-4 w-4" />
                             {{ t('shopShow.contact') }}
                         </Button>
                     </a>
 
                     <!-- Onglets Produits / Services -->
-                    <div class="flex gap-1 rounded-2xl border border-border bg-white p-1">
+                    <div class="flex gap-1 rounded-2xl border border-border bg-card p-1 lg:max-w-md">
                         <button
                             type="button"
-                            class="flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-bold transition-colors"
+                            class="flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[13px] font-bold transition-colors"
                             :class="activeTab === 'products' ? 'bg-primary text-white' : 'text-shop-muted'"
                             @click="activeTab = 'products'"
                         >
@@ -174,7 +176,7 @@ const shareShop = async () => {
                         </button>
                         <button
                             type="button"
-                            class="flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[12px] font-bold transition-colors"
+                            class="flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-[13px] font-bold transition-colors"
                             :class="activeTab === 'services' ? 'bg-orange text-white' : 'text-shop-muted'"
                             @click="activeTab = 'services'"
                         >
@@ -185,12 +187,12 @@ const shareShop = async () => {
 
                     <!-- Section PRODUITS -->
                     <template v-if="activeTab === 'products'">
-                        <div class="relative">
+                        <div class="relative lg:max-w-xl">
                             <Search class="pointer-events-none absolute left-[11px] top-1/2 h-4 w-4 -translate-y-1/2 text-shop-light" />
                             <Input
                                 v-model="state.search"
                                 type="search"
-                                class="h-[38px] rounded-[12px] border-[1.5px] border-border bg-white pl-9 text-[12px] shadow-none placeholder:text-shop-light"
+                                class="h-11 rounded-xl border-border bg-card pl-10 text-base shadow-none placeholder:text-shop-light lg:text-sm"
                                 :placeholder="t('shopShow.searchPlaceholder')"
                             />
                         </div>
@@ -202,10 +204,10 @@ const shareShop = async () => {
                                     :key="category.id"
                                     type="button"
                                     variant="outline"
-                                    class="h-7 rounded-[20px] px-3 text-[11.5px] font-medium shadow-none"
+                                    class="h-7 rounded-[20px] px-3 text-[13px] font-medium shadow-none"
                                     :class="(category.id === 'all' && !state.categories.length) || state.categories.includes(category.id)
                                         ? 'border-primary bg-primary text-white'
-                                        : 'border-border bg-white text-shop-muted'"
+                                        : 'border-border bg-card text-shop-muted'"
                                     @click="toggleCategory(category.id)"
                                 >
                                     {{ category.name }}
@@ -213,23 +215,23 @@ const shareShop = async () => {
                             </div>
                         </ScrollArea>
 
-                        <div v-if="loading" class="grid grid-cols-2 gap-2.5">
-                            <div v-for="index in 4" :key="index" class="h-60 animate-pulse rounded-[16px] bg-white" />
+                        <div v-if="loading" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                            <div v-for="index in 4" :key="index" class="h-60 animate-pulse rounded-[16px] bg-card" />
                         </div>
-                        <div v-else-if="products.data?.length" class="grid grid-cols-2 gap-2.5">
+                        <div v-else-if="products.data?.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                             <ProductCard v-for="product in products.data" :key="product.id" :product="product" />
                         </div>
-                        <div v-else class="rounded-[16px] border border-dashed border-border bg-white p-8 text-center text-sm text-shop-muted">
+                        <div v-else class="rounded-[16px] border border-dashed border-border bg-card p-8 text-center text-sm text-shop-muted">
                             {{ t('shopShow.emptyProducts') }}
                         </div>
                     </template>
 
                     <!-- Section SERVICES -->
                     <template v-else>
-                        <div v-if="services.length" class="grid grid-cols-2 gap-2.5">
+                        <div v-if="services.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                             <ServiceCard v-for="service in services" :key="service.id" :service="service" />
                         </div>
-                        <div v-else class="rounded-[16px] border border-dashed border-border bg-white p-8 text-center text-sm text-shop-muted">
+                        <div v-else class="rounded-[16px] border border-dashed border-border bg-card p-8 text-center text-sm text-shop-muted">
                             Cette boutique ne propose pas encore de services.
                         </div>
                     </template>
