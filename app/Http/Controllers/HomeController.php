@@ -56,6 +56,9 @@ class HomeController extends Controller
             ->latest()
             ->get(['id', 'name', 'description', 'city', 'logo'])
             ->filter(fn (Shop $s) => $s->products_count > 0)
+            // values() : après filter() les clés ont des trous, et Laravel enverrait
+            // un objet {"1": …} au lieu d'un tableau → l'accueil plantait côté Vue.
+            ->values()
             ->take(6)
             ->map(fn (Shop $s) => [
                 'id'             => $s->id,

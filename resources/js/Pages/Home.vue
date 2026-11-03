@@ -28,12 +28,20 @@ const props = defineProps({
 
 const { t } = useI18n();
 
+// Les listes peuvent arriver sous forme d'objet JSON ({"1": …}) si le serveur
+// filtre une collection sans la réindexer : on normalise toujours en tableau.
+const asList = (value) => (Array.isArray(value) ? value : Object.values(value ?? {}));
+const categoryList = computed(() => asList(props.categories));
+const newArrivalList = computed(() => asList(props.newArrivals));
+const popularList = computed(() => asList(props.popular));
+const shopList = computed(() => asList(props.shops));
+
 /* ── Hero slider ── */
 const heroIndex = ref(0);
 let heroTimer = null;
 
 const heroSlides = computed(() =>
-    props.heroProducts.length ? props.heroProducts : Array.from({ length: 3 }, (_, i) => ({
+    asList(props.heroProducts).length ? asList(props.heroProducts) : Array.from({ length: 3 }, (_, i) => ({
         id: i,
         name: 'Produit tendance',
         main_image: `/images/Maketu${i % 2 === 0 ? '1' : '_coeur'}.png`,
@@ -96,13 +104,13 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
                         <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent lg:from-background lg:via-background/10" />
 
-                        <div class="absolute inset-x-0 bottom-0 p-4 sm:p-6 lg:bottom-auto lg:top-16">
+                        <div class="absolute inset-x-0 bottom-0 p-4 sm:p-6 lg:bottom-auto lg:top-10">
                             <div class="mx-auto max-w-[1500px] lg:px-10">
                                 <div class="max-w-md">
                                     <p v-if="slide.category" class="mb-1.5 text-xs font-bold uppercase tracking-widest text-white/75">
                                         {{ slide.category.name }}
                                     </p>
-                                    <h2 class="line-clamp-2 font-display text-2xl font-black leading-tight text-white drop-shadow sm:text-3xl lg:text-5xl">
+                                    <h2 class="line-clamp-2 font-display text-2xl font-black leading-tight text-white drop-shadow sm:text-3xl lg:text-4xl xl:text-5xl">
                                         {{ slide.name }}
                                     </h2>
                                     <div class="mt-3 flex items-center gap-3 lg:mt-5">
@@ -155,7 +163,7 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
                         <h3 class="mb-3 font-display text-lg font-extrabold">Explorez par catégorie</h3>
                         <div class="grid flex-1 grid-cols-2 gap-3">
                             <button
-                                v-for="cat in categories.slice(0, 4)"
+                                v-for="cat in categoryList.slice(0, 4)"
                                 :key="cat.id"
                                 type="button"
                                 class="group text-left"
@@ -174,7 +182,7 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
                         <h3 class="mb-3 font-display text-lg font-extrabold">Nouveautés de la semaine</h3>
                         <div class="grid flex-1 grid-cols-2 gap-3">
                             <Link
-                                v-for="product in newArrivals.slice(0, 4)"
+                                v-for="product in newArrivalList.slice(0, 4)"
                                 :key="product.id"
                                 :href="route('products.show', { product: product.id })"
                                 class="group"
@@ -191,7 +199,7 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
                     <div class="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
                         <h3 class="mb-3 font-display text-lg font-extrabold">Boutiques à découvrir</h3>
                         <ul class="flex-1 space-y-2.5">
-                            <li v-for="shop in shops.slice(0, 4)" :key="shop.id">
+                            <li v-for="shop in shopList.slice(0, 4)" :key="shop.id">
                                 <Link :href="route('shops.show', { shop: shop.id })" class="group flex items-center gap-3 rounded-lg p-1.5 hover:bg-muted">
                                     <span class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10">
                                         <img v-if="shop.logo" :src="shop.logo" :alt="shop.name" class="h-full w-full object-cover" />
@@ -245,11 +253,11 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
                 </section>
 
                 <!-- ═══════════ CATÉGORIES ═══════════ -->
-                <section v-if="categories.length" class="pt-6 lg:mt-6 lg:rounded-xl lg:border lg:border-border lg:bg-card lg:p-5">
+                <section v-if="categoryList.length" class="pt-6 lg:mt-6 lg:rounded-xl lg:border lg:border-border lg:bg-card lg:p-5">
                     <SectionTitle :icon="Tag" title="Catégories" :href="route('products.index')" />
                     <div class="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-1 lg:grid lg:grid-cols-8 lg:gap-4 lg:overflow-visible lg:px-0">
                         <button
-                            v-for="cat in categories"
+                            v-for="cat in categoryList"
                             :key="cat.id"
                             class="group relative w-[92px] flex-shrink-0 overflow-hidden rounded-2xl transition-transform active:scale-95 lg:w-auto lg:rounded-xl"
                             @click="goCategory(cat.id)"
@@ -266,11 +274,11 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
                 </section>
 
                 <!-- ═══════════ NOUVEAUTÉS ═══════════ -->
-                <section v-if="newArrivals.length" class="pt-6 lg:mt-6 lg:rounded-xl lg:border lg:border-border lg:bg-card lg:p-5">
+                <section v-if="newArrivalList.length" class="pt-6 lg:mt-6 lg:rounded-xl lg:border lg:border-border lg:bg-card lg:p-5">
                     <SectionTitle :icon="Sparkles" title="Nouveautés" :href="route('products.index', { sort: 'newest' })" />
                     <div class="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-1 lg:gap-4 lg:px-0">
                         <ProductMiniCard
-                            v-for="product in newArrivals"
+                            v-for="product in newArrivalList"
                             :key="product.id"
                             :product="product"
                         />
@@ -278,19 +286,19 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
                 </section>
 
                 <!-- ═══════════ TENDANCES ═══════════ -->
-                <section v-if="popular.length" class="px-4 pt-6 lg:mt-6 lg:px-0">
+                <section v-if="popularList.length" class="px-4 pt-6 lg:mt-6 lg:px-0">
                     <SectionTitle :icon="Flame" title="Tendances" :href="route('products.index', { sort: 'popular' })" flush />
                     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                        <ProductCard v-for="product in popular" :key="product.id" :product="product" />
+                        <ProductCard v-for="product in popularList" :key="product.id" :product="product" />
                     </div>
                 </section>
 
                 <!-- ═══════════ BOUTIQUES ═══════════ -->
-                <section v-if="shops.length" class="pb-4 pt-6 lg:mt-6 lg:rounded-xl lg:border lg:border-border lg:bg-card lg:p-5">
+                <section v-if="shopList.length" class="pb-4 pt-6 lg:mt-6 lg:rounded-xl lg:border lg:border-border lg:bg-card lg:p-5">
                     <SectionTitle :icon="Store" title="Boutiques" :href="route('shops.index')" />
                     <div class="no-scrollbar flex gap-3 overflow-x-auto px-4 pb-1 lg:grid lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:px-0 xl:grid-cols-6">
                         <Link
-                            v-for="shop in shops"
+                            v-for="shop in shopList"
                             :key="shop.id"
                             :href="route('shops.show', { shop: shop.id })"
                             class="w-48 flex-shrink-0 rounded-xl border border-border bg-card p-3 transition hover:border-primary/40 hover:shadow-md active:scale-95 lg:w-auto lg:bg-background"
