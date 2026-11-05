@@ -32,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // donc pas de jeton CSRF. Elles sont authentifiées par le HMAC (header x-token).
         $middleware->validateCsrfTokens(except: [
             'webhooks/cinetpay',
+            'webhooks/botisimo/*', // authentifié par X-Botisimo-Signature
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

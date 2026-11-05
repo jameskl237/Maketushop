@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import SupplierSidebar from '@/components/supplier/SupplierSidebar.vue';
 import { Button } from '@/components/ui/button';
 import { Link, usePage } from '@inertiajs/vue3';
-import { Briefcase, ChevronDown, ChevronUp, ExternalLink, FileText, Menu, Package, ShoppingCart, Store } from 'lucide-vue-next';
+import { Bot, Briefcase, ChevronDown, ChevronUp, ExternalLink, FileText, Menu, Package, ShoppingCart, Store } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const page = usePage();
@@ -112,6 +112,17 @@ const toggleMobileSidebar = () => {
                             >
                                 <Store class="h-4 w-4" />
                                 {{ $t('supplier.shops') }}
+                            </Link>
+                            <Link
+                                :href="route('backoffice.supplier.assistant.index')"
+                                class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-300"
+                                :class="activeRoute === 'backoffice.supplier.assistant.index'
+                                    ? 'bg-primary/12 text-primary font-medium'
+                                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
+                                @click="mobileSidebarVisible = false"
+                            >
+                                <Bot class="h-4 w-4" />
+                                {{ $t('supplier.assistantNav') }}
                             </Link>
                             <Link
                                 :href="route('backoffice.supplier.orders.index')"

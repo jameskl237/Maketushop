@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BarChart3, Briefcase, FileText, Package, ShoppingCart, Sparkles, Store } from 'lucide-vue-next';
+import { BarChart3, Bot, Briefcase, FileText, Package, ShoppingCart, Sparkles, Store } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 defineProps({
@@ -30,6 +30,7 @@ const allItems = [
     { key: 'products', labelKey: 'supplier.products', icon: Package, route: 'backoffice.supplier.products.index', soon: false, cap: 'vendeur' },
     { key: 'services', labelKey: 'supplier.services', icon: Briefcase, route: 'backoffice.supplier.services.index', soon: false, cap: 'prestataire' },
     { key: 'quotes', labelKey: 'supplier.quoteRequests', icon: FileText, route: 'backoffice.supplier.quote-requests.index', soon: false, cap: 'prestataire' },
+    { key: 'assistant', labelKey: 'supplier.assistantNav', icon: Bot, route: 'backoffice.supplier.assistant.index', soon: false, cap: null },
     // Commandes en ligne : visibles mais marquées "bientôt" (paiement plateforme pas encore actif)
     { key: 'orders', labelKey: 'supplier.orders', icon: ShoppingCart, route: 'backoffice.supplier.orders.index', soon: true, cap: null },
 ];

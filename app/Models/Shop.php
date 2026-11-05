@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Storage;
 
@@ -46,6 +47,11 @@ class Shop extends Model
         return $this->hasMany(Product::class);
     }
 
+    public function services(): HasMany
+    {
+        return $this->hasMany(Service::class);
+    }
+
     public function subscriptions(): HasMany
     {
         return $this->hasMany(ShopSubscription::class);
@@ -57,6 +63,18 @@ class Shop extends Model
             ->where('status', ShopSubscription::STATUS_ACTIVE)
             ->where('ends_at', '>=', now())
             ->latestOfMany();
+    }
+
+    /** Les crédits sont payés par la plateforme : l'assistant est réservé au plan Standard. */
+    public function hasAssistantAccess(): bool
+    {
+        return (bool) $this->activeSubscription?->isStandard();
+    }
+
+    /** Assistant IA WhatsApp de la boutique. */
+    public function bot(): HasOne
+    {
+        return $this->hasOne(ShopBot::class)->where('channel', ShopBot::CHANNEL_WHATSAPP);
     }
 
     public function ratings(): MorphMany

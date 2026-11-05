@@ -18,6 +18,7 @@ use App\Http\Controllers\ShareController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SupplierServiceController;
 use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\Admin\AdminAssistantController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminWithdrawalController;
 use App\Http\Controllers\Admin\AdminVendorController;
@@ -26,9 +27,16 @@ use App\Http\Controllers\Payment\PaymentCallbackController;
 use App\Http\Controllers\Order\OrderTrackingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\AdminRefundController;
+use App\Http\Controllers\Vendor\AssistantCampaignController;
+use App\Http\Controllers\Vendor\AssistantClientController;
+use App\Http\Controllers\Vendor\AssistantController;
+use App\Http\Controllers\Vendor\AssistantInboxController;
+use App\Http\Controllers\Vendor\AssistantSettingsController;
+use App\Http\Controllers\Vendor\AssistantTemplateController;
 use App\Http\Controllers\Vendor\VendorOrderController;
 use App\Http\Controllers\Vendor\VendorWalletController;
 use App\Http\Controllers\Vendor\VendorSubscriptionController;
+use App\Http\Controllers\Webhook\BotisimoWebhookController;
 use App\Http\Controllers\Webhook\CinetPayWebhookController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -114,6 +122,8 @@ Route::middleware('auth')->group(function () {
 // === WEBHOOK CINETPAY ===
 // CSRF exclu dans bootstrap/app.php (validateCsrfTokens except).
 // GET = test de disponibilité de l'URL par CinetPay, POST = notification de paiement.
+Route::post('/webhooks/botisimo/{shopBot}', BotisimoWebhookController::class)->name('webhooks.botisimo');
+
 Route::match(['get', 'post'], '/webhooks/cinetpay', CinetPayWebhookController::class)
     ->name('cinetpay.webhook');
 
@@ -190,6 +200,13 @@ Route::middleware(['auth', 'role:admin,superadmin'])->prefix('backoffice/admin')
         Route::get('/webhooks', [AdminPaymentController::class, 'webhookLogs'])->name('backoffice.admin.payments.webhooks');
     });
 
+    // === ASSISTANT IA ===
+    Route::prefix('assistant')->group(function () {
+        Route::get('/', [AdminAssistantController::class, 'index'])->name('backoffice.admin.assistant.index');
+        Route::post('/recharge', [AdminAssistantController::class, 'recharge'])->name('backoffice.admin.assistant.recharge');
+        Route::patch('/{shopBot}/quota', [AdminAssistantController::class, 'updateQuota'])->name('backoffice.admin.assistant.quota');
+    });
+
     // === REMBOURSEMENTS ===
     Route::prefix('refunds')->group(function () {
         Route::get('/', [AdminRefundController::class, 'index'])->name('backoffice.admin.refunds.index');
@@ -258,6 +275,38 @@ Route::middleware(['auth', 'role:supplier'])->prefix('backoffice/supplier')->gro
     });
 
     // === ABONNEMENTS (nouveau) ===
+    Route::prefix('assistant')->group(function () {
+        Route::get('/', [AssistantController::class, 'index'])->name('backoffice.supplier.assistant.index');
+        Route::get('/callback/{shopBot}', [AssistantController::class, 'callback'])->name('backoffice.supplier.assistant.callback');
+        Route::get('/{shop}', [AssistantController::class, 'show'])->name('backoffice.supplier.assistant.show');
+        Route::post('/{shop}/activate', [AssistantController::class, 'activate'])->name('backoffice.supplier.assistant.activate');
+        Route::post('/{shop}/connect', [AssistantController::class, 'connect'])->name('backoffice.supplier.assistant.connect');
+        Route::post('/{shop}/finalize', [AssistantController::class, 'finalize'])->name('backoffice.supplier.assistant.finalize');
+        Route::get('/{shop}/inbox', [AssistantInboxController::class, 'index'])->name('backoffice.supplier.assistant.inbox.index');
+        Route::get('/{shop}/inbox/{conversation}', [AssistantInboxController::class, 'show'])->name('backoffice.supplier.assistant.inbox.show');
+        Route::put('/{shop}/inbox/{conversation}/ai', [AssistantInboxController::class, 'toggleAi'])->name('backoffice.supplier.assistant.inbox.ai');
+        Route::post('/{shop}/inbox/{conversation}/reply', [AssistantInboxController::class, 'reply'])->name('backoffice.supplier.assistant.inbox.reply');
+        Route::post('/{shop}/inbox/{conversation}/template', [AssistantInboxController::class, 'sendTemplate'])->name('backoffice.supplier.assistant.inbox.template');
+        Route::get('/{shop}/clients', [AssistantClientController::class, 'index'])->name('backoffice.supplier.assistant.clients.index');
+        Route::post('/{shop}/clients', [AssistantClientController::class, 'store'])->name('backoffice.supplier.assistant.clients.store');
+        Route::put('/{shop}/clients/{client}', [AssistantClientController::class, 'update'])->name('backoffice.supplier.assistant.clients.update');
+        Route::delete('/{shop}/clients/{client}', [AssistantClientController::class, 'destroy'])->name('backoffice.supplier.assistant.clients.destroy');
+        Route::get('/{shop}/templates', [AssistantTemplateController::class, 'index'])->name('backoffice.supplier.assistant.templates.index');
+        Route::post('/{shop}/templates', [AssistantTemplateController::class, 'store'])->name('backoffice.supplier.assistant.templates.store');
+        Route::delete('/{shop}/templates/{template}', [AssistantTemplateController::class, 'destroy'])->name('backoffice.supplier.assistant.templates.destroy');
+        Route::get('/{shop}/campaigns', [AssistantCampaignController::class, 'index'])->name('backoffice.supplier.assistant.campaigns.index');
+        Route::get('/{shop}/campaigns/estimate', [AssistantCampaignController::class, 'estimate'])->name('backoffice.supplier.assistant.campaigns.estimate');
+        Route::post('/{shop}/campaigns', [AssistantCampaignController::class, 'store'])->name('backoffice.supplier.assistant.campaigns.store');
+        Route::post('/{shop}/campaigns/{campaign}/cancel', [AssistantCampaignController::class, 'cancel'])->name('backoffice.supplier.assistant.campaigns.cancel');
+        Route::get('/{shop}/settings', [AssistantSettingsController::class, 'edit'])->name('backoffice.supplier.assistant.settings.edit');
+        Route::put('/{shop}/settings', [AssistantSettingsController::class, 'update'])->name('backoffice.supplier.assistant.settings.update');
+        Route::post('/{shop}/status', [AssistantSettingsController::class, 'setStatus'])->name('backoffice.supplier.assistant.status');
+        Route::delete('/{shop}/bot', [AssistantSettingsController::class, 'destroy'])->name('backoffice.supplier.assistant.destroy');
+        Route::get('/{shop}/stats', [AssistantSettingsController::class, 'stats'])->name('backoffice.supplier.assistant.stats');
+        Route::post('/{shop}/catalog/sync', [AssistantController::class, 'syncCatalog'])->name('backoffice.supplier.assistant.catalog.sync');
+        Route::patch('/{shop}/catalog/{catalogItem}', [AssistantController::class, 'updateCatalogItem'])->name('backoffice.supplier.assistant.catalog.update');
+    });
+
     Route::prefix('subscriptions')->group(function () {
         Route::get('/', [VendorSubscriptionController::class, 'index'])->name('backoffice.supplier.subscriptions.index');
         Route::post('/{shop}/free', [VendorSubscriptionController::class, 'subscribeFree'])->name('backoffice.supplier.subscriptions.free');

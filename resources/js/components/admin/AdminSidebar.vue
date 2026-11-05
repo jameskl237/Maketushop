@@ -9,7 +9,8 @@ import {
     CreditCard, 
     Settings,
     ShieldCheck,
-    BarChart3
+    BarChart3,
+    Bot
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -71,6 +72,11 @@ const isSuperAdmin = currentUser?.role === 'superadmin';
                         :class="activeRoute === 'backoffice.admin.management' ? 'bg-primary/12 text-primary font-medium' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'">
                         <Users class="h-4 w-4" />
                         {{ $t('admin.sidebar.globalManagement') }}
+                    </Link>
+                    <Link :href="route('backoffice.admin.assistant.index')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
+                        :class="activeRoute === 'backoffice.admin.assistant.index' ? 'bg-primary/12 text-primary font-medium' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'">
+                        <Bot class="h-4 w-4" />
+                        {{ $t('admin.sidebar.assistant') }}
                     </Link>
 
                     <Link :href="route('backoffice.admin.shops.index')" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm"
