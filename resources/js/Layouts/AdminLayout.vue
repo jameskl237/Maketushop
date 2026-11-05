@@ -77,7 +77,7 @@ const mobileSidebarVisible = ref(false);
                     </aside>
 
                     <main class="min-w-0 space-y-6 overflow-x-hidden">
-                        <slot name="content" />
+                        <slot name="content"><slot /></slot>
                     </main>
                 </div>
             </div>

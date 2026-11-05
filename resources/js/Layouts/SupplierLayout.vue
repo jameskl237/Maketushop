@@ -13,7 +13,7 @@ const isPrestataire = computed(() => !!page.props.auth?.is_prestataire);
 defineProps({
     title: {
         type: String,
-        required: true,
+        default: '',
     },
     subtitle: {
         type: String,
@@ -48,7 +48,7 @@ const toggleMobileSidebar = () => {
         <template #header>
             <div class="flex items-center justify-between gap-4">
                 <div>
-                    <h2 class="text-xl font-semibold leading-tight text-foreground sm:text-2xl">{{ title }}</h2>
+                    <h2 v-if="title" class="text-xl font-semibold leading-tight text-foreground sm:text-2xl">{{ title }}</h2>
                     <p v-if="subtitle" class="mt-1 text-sm text-muted-foreground">{{ subtitle }}</p>
                 </div>
                 <Link :href="route('home')">
@@ -186,7 +186,7 @@ const toggleMobileSidebar = () => {
                     </aside>
 
                     <main class="min-w-0 space-y-6 overflow-x-hidden">
-                        <slot name="content" />
+                        <slot name="content"><slot /></slot>
                     </main>
                 </div>
             </div>

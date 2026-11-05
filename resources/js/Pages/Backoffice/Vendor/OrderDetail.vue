@@ -35,7 +35,7 @@ const submit = () => {
 <template>
     <Head :title="`Commande ${order.order_number}`" />
 
-    <SupplierLayout>
+    <SupplierLayout active-route="backoffice.supplier.orders.index" :can-create-shop="false">
         <div class="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
             <div class="flex flex-wrap items-center gap-3">
                 <h1 class="text-xl font-semibold">Commande {{ order.order_number }}</h1>

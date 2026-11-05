@@ -38,7 +38,7 @@ const submit = () =>
 <template>
     <Head title="Mon portefeuille" />
 
-    <SupplierLayout>
+    <SupplierLayout active-route="backoffice.supplier.wallet.index" :can-create-shop="false">
         <div class="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
             <h1 class="text-xl font-semibold">Mon portefeuille</h1>
 

@@ -25,7 +25,7 @@ const awaitingProof = (order) => order.is_paid && !order.delivery_proof_path && 
 <template>
     <Head title="Commandes reçues" />
 
-    <SupplierLayout>
+    <SupplierLayout active-route="backoffice.supplier.orders.index" :can-create-shop="false">
         <div class="mx-auto max-w-6xl space-y-5 p-4 sm:p-6">
             <h1 class="text-xl font-semibold">Commandes reçues</h1>
 

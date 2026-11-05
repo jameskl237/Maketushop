@@ -28,7 +28,7 @@ const cancel = (shopId) =>
 <template>
     <Head title="Abonnements" />
 
-    <SupplierLayout>
+    <SupplierLayout active-route="backoffice.supplier.subscriptions.index" :can-create-shop="false">
         <div class="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
             <h1 class="text-xl font-semibold">Abonnements</h1>
 
