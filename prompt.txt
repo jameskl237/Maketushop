@@ -1,0 +1,107 @@
+Prompt d'intégration Botisimo dans Maketu Shop (Laravel + Vue.js)
+Copie tout ce qui suit et envoie-le à ton IA de développement. Ce prompt est basé sur la documentation officielle de l'API Botisimo que tu as fournie.
+Avertissement : ce que l'API permet réellement
+D'après la documentation, l'API REST de Botisimo couvre uniquement WhatsApp Business (via l'API Meta Cloud) : bots IA, catalogue, conversations, clients, templates, messages marketing, webhooks et crédits.
+L'API ne propose pas :
+• la connexion de Facebook Messenger, Instagram ou TikTok ;
+• la génération de contenu ou de vidéos IA ;
+• la publication automatique sur les réseaux sociaux.
+Ces fonctions existent peut-être dans l'interface web de Botisimo, mais pas dans l'API. Le prompt ci-dessous implémente donc tout ce que l'API permet, et prévoit une architecture extensible pour ajouter ces canaux plus tard. Avant de lancer le projet, demande au support Botisimo si une API pour les réseaux sociaux et la vidéo est prévue.
+Le prompt
+Rôle et contexte
+Tu es un développeur senior Laravel et Vue.js. Tu travailles sur Maketu Shop, une marketplace multi-vendeurs : chaque vendeur crée sa boutique et publie ses produits. Le backend est en Laravel, le frontend en Vue.js.
+Tu dois intégrer l'API REST de Botisimo pour que chaque vendeur puisse activer, en un clic, un assistant IA WhatsApp relié à sa boutique. L'assistant répond automatiquement à ses clients sur WhatsApp à partir de son catalogue, et le vendeur peut lancer des campagnes marketing WhatsApp.
+Commence par analyser mon code existant : modèles Shop/Boutique, Product, User/Vendor, système de rôles, queues, conventions de nommage, version de Laravel et de Vue (Options API ou Composition API, Inertia ou SPA, Pinia ou Vuex). Adapte-toi à ce qui existe, n'impose rien qui casse l'existant.
+Référence de l'API Botisimo
+• Base URL : https://xzbcnenulykdstlvbgly.supabase.co/functions/v1/api-gateway
+• Authentification : header x-api-key: bts_... sur chaque requête. Une seule clé, celle de Maketu Shop (plan Business ou Entreprise requis).
+• Rate limit : 60 requêtes par minute par clé. Réponses en JSON.
+• Erreurs : 400, 401, 403 (scope ou plan insuffisant), 404, 405, 409 (doublon), 422 (quota broadcast dépassé), 429 (rate limit), 500, 502 (erreur Meta).
+• Bots : GET /v1/bots, GET /v1/bots/:id, POST /v1/bots (name requis ; description, ai_model, ai_instructions), PUT /v1/bots/:id (ai_instructions, ai_temperature 0–2, ai_max_tokens 1–4000, welcome_message_enabled, welcome_message, away_message_enabled, away_message, status active/inactive, enable_context_memory, context_message_limit, enable_human_transfer, human_transfer_keywords, business_address, ai_share_location), DELETE /v1/bots/:id (irréversible), POST /v1/bots/:id/activate, POST /v1/bots/:id/deactivate. Un bot créé est au statut pending.
+• Connexion WhatsApp : POST /v1/bots/:id/connect avec {"callback_url": "..."} (mode Redirect). La réponse contient redirect_url (valide 600 s) à ouvrir dans le navigateur. Après le signup Meta, retour sur callback_url?success=true&bot_id=...&phone_number_id=...&phone_number=... ou callback_url?error=...&bot_id=....
+• Messages : POST /v1/messages/:botId/send avec to (E.164 sans +), message, type (text, image, document, template). 10 crédits par envoi. Message libre accepté seulement dans les 24 h après le dernier message du client ; sinon template obligatoire.
+• Marketing : POST /v1/marketing/send (bot_id, to, template_name, language, parameters[]), POST /v1/marketing/broadcast (bot_id, template_name, recipients[] max 1000, language, parameters[]), GET /v1/marketing/campaigns (bot_id, limit max 100, offset). 1 crédit par destinataire. Plafond selon le palier du numéro (TIER_250 à TIER_UNLIMITED sur 24 h glissantes), erreur 422 si dépassé.
+• Conversations : GET /v1/conversations (bot_id, status active/closed/archived, limit max 100, offset), GET /v1/conversations/:id, GET /v1/conversations/:id/messages, PUT /v1/conversations/:id/ai avec {"ai_enabled": bool} pour reprendre la main manuellement.
+• Templates : GET /v1/templates?bot_id=, POST /v1/templates (bot_id, name en minuscules et underscores, category MARKETING/UTILITY/AUTHENTICATION, language, components au format Meta), DELETE /v1/templates/:id. Statut PENDING puis APPROVED ou REJECTED ; seuls les APPROVED sont utilisables.
+• Catalogue : GET /v1/catalog?bot_id= (type, active, limit max 200, offset), POST /v1/catalog (bot_id, name requis ; price, currency défaut XAF, description, category, type product/service, in_stock, image_url, payment_link, is_ad, sort_order), PUT /v1/catalog/:productId, DELETE /v1/catalog/:productId, PUT /v1/catalog/:botId/ai avec {"enabled": true} pour que l'IA utilise le catalogue. Les produits is_ad: true sont mis en avant par l'IA.
+• Clients : GET /v1/clients (bot_id, search, tag, opted_out, limit max 200, offset), GET/PUT/DELETE /v1/clients/:id, POST /v1/clients (bot_id, phone, name, tags). Erreur 409 si le numéro existe déjà pour ce bot.
+• Webhooks : POST /v1/webhooks (bot_id, url HTTPS, events : message.received, message.status) renvoie un secret affiché une seule fois. Un seul webhook par bot. GET /v1/webhooks, DELETE /v1/webhooks/:botId. Header X-Botisimo-Signature: sha256=<hmac> calculé en HMAC-SHA256 sur le corps brut avec le secret. Répondre 200 en moins de 5 secondes. Aucun retry automatique.
+• Crédits : GET /v1/credits/balance, POST /v1/credits/recharge (amount min 500, operator mtn/orange/moov/wave, phone_number, country_code, currency, callback_url) via MbiyoPay.
+Contraintes d'architecture
+1. Multi-tenant : un bot Botisimo par boutique. Toutes les boutiques partagent la même clé API et le même solde de crédits Maketu Shop. Isolation stricte : un vendeur n'accède jamais au bot, aux conversations, aux clients ou aux statistiques d'un autre vendeur (Policies Laravel sur chaque route).
+2. Client API centralisé : une classe App\Services\Botisimo\BotisimoClient basée sur le client HTTP de Laravel, avec timeout, retry sur 429/500/502 avec backoff exponentiel, exceptions typées par code d'erreur, et journalisation sans jamais logger la clé API.
+3. Rate limit global : tous les appels sortants passent par des jobs en queue (Redis recommandé) avec un limiteur à moins de 60 requêtes par minute pour toute la plateforme (RateLimited middleware de job ou Redis::throttle).
+4. Configuration : config/botisimo.php + variables .env : BOTISIMO_API_KEY, BOTISIMO_BASE_URL, BOTISIMO_DEFAULT_MODEL=gpt-6-luna.
+5. Sécurité : clé API uniquement côté serveur. Secrets de webhook chiffrés en base (cast encrypted de Laravel). Jamais de mot de passe de réseau social demandé ou stocké. Validation de toutes les entrées.
+6. Gestion des crédits : chaque action coûteuse (message, broadcast) est tracée par boutique. Prévois un système de quotas ou de refacturation par vendeur, car le solde est commun. Bloque une action si le solde global ou le quota du vendeur est insuffisant.
+7. Extensibilité : prévois une interface ChannelProvider et un champ channel dans les tables, pour ajouter plus tard Messenger, Instagram et TikTok via d'autres API.
+Base de données (migrations)
+• shop_bots : shop_id (unique), botisimo_bot_id, status (pending, connecting, active, inactive, error), ai_model, ai_instructions, welcome_message, away_message, human_transfer_keywords (json), whatsapp_phone_number, phone_number_id, quality_rating, token_expires_at, webhook_secret (chiffré), catalog_ai_enabled, last_synced_at, timestamps.
+• shop_bot_products : shop_bot_id, product_id, botisimo_product_id, sync_hash, synced_at, sync_error.
+• shop_bot_conversations_cache (optionnel) : pour afficher l'historique rapidement.
+• shop_bot_campaigns : shop_bot_id, template_name, recipients_count, sent, failed, credits_used, status, payload (json), timestamps.
+• shop_bot_templates : shop_bot_id, botisimo_template_id, name, category, language, status, components (json).
+• shop_bot_credit_usages : shop_id, action, credits, reference, timestamps.
+• shop_bot_webhook_events : bot_id, event, payload (json), processed_at, pour idempotence et débogage.
+Fonctionnalités à implémenter
+1. Activation de l'assistant
+• Bouton « Activer mon assistant IA WhatsApp » dans le dashboard vendeur.
+• POST /v1/bots avec un nom basé sur la boutique et des ai_instructions générées automatiquement : nom de la boutique, description, politique de livraison et de retour, zone, ton, langue, règle de ne jamais inventer de prix ou de stock, transfert à un humain pour les réclamations.
+• PUT /v1/bots/:id pour le message d'accueil, d'absence, la mémoire contextuelle et le transfert humain.
+• Enregistrement du webhook (POST /v1/webhooks) vers une URL dédiée, par exemple /webhooks/botisimo/{shopBot} ; stocke le secret immédiatement, chiffré.
+2. Connexion WhatsApp du vendeur
+• Bouton « Connecter mon WhatsApp Business » : le backend appelle POST /v1/bots/:id/connect avec callback_url = une route signée Laravel (URL::temporarySignedRoute) contenant le shop_bot.
+• Le frontend ouvre redirect_url (nouvel onglet ou redirection). Gère l'expiration de 600 s.
+• La route de callback vérifie la signature, l'appartenance du bot à la boutique, puis enregistre phone_number, phone_number_id et le statut, ou affiche l'erreur.
+• Après succès : GET /v1/bots/:id pour récupérer quality_rating et token_expires_at, puis activation. Préviens le vendeur avant l'expiration du token (tâche planifiée quotidienne).
+• Explique au vendeur, dans l'interface, qu'il lui faut un compte Meta Business et un numéro non utilisé sur l'application WhatsApp classique.
+3. Synchronisation du catalogue
+• Observer sur le modèle Product : création, modification, suppression, changement de stock ou de statut → job SyncProductToBotisimo (POST, PUT ou DELETE).
+• Mapping : name, description (sans HTML), price, currency, category, image_url (URL publique absolue), in_stock, active, type, payment_link = lien vers la fiche produit ou le paiement sur Maketu Shop, is_ad = produit sponsorisé ou mis en avant par le vendeur.
+• sync_hash pour ne pas renvoyer un produit inchangé.
+• Commande artisan botisimo:sync-catalog {shop?} pour une synchronisation complète, et une réconciliation planifiée chaque nuit (pagination par 200).
+• Activer PUT /v1/catalog/:botId/ai avec enabled true.
+4. Webhooks et service client
+• Contrôleur exempté de CSRF, qui lit le corps brut ($request->getContent()), vérifie X-Botisimo-Signature avec hash_hmac('sha256', $raw, $secret) et hash_equals, enregistre l'événement, déclenche un job, et répond 200 immédiatement (moins de 5 s).
+• Idempotence via message_id ou meta_message_id.
+• message.received : mise à jour du client et des statistiques ; détection des mots-clés de transfert humain → notification au vendeur (email, notification in-app, éventuellement SMS).
+• message.status : mise à jour du statut des messages et des campagnes.
+• Pas de retry côté Botisimo : prévois une réconciliation périodique via GET /v1/conversations.
+5. Boîte de réception du vendeur
+• Liste des conversations, messages paginés, nom et numéro du client.
+• Bouton « Reprendre la main » (PUT /v1/conversations/:id/ai à false) et « Rendre la main à l'IA » (true).
+• Réponse manuelle via POST /v1/messages/:botId/send, avec contrôle de la fenêtre de 24 h ; hors fenêtre, proposer un template approuvé.
+6. Clients
+• Liste, recherche, tags (vip, acheteur, prospect), gestion du opt-out. Synchronise optionnellement les acheteurs Maketu Shop ayant consenti (POST /v1/clients, gérer le 409).
+7. Templates et marketing WhatsApp
+• Création de templates par le vendeur avec un formulaire guidé (nom auto en snake_case, catégorie, langue, corps avec variables {{1}}, {{2}}, pied de page, boutons), soumission via POST /v1/templates, suivi du statut.
+• Campagnes : choix d'un template APPROVED, sélection de destinataires (tags, clients non désinscrits), estimation des crédits (1 par destinataire), envoi via POST /v1/marketing/broadcast par lots de 1000, gestion du 422 (quota du palier), historique via GET /v1/marketing/campaigns.
+• Planification des campagnes avec le scheduler Laravel.
+• Exclure systématiquement les clients opted_out.
+8. Paramètres et statistiques
+• Page de configuration : modèle IA, instructions supplémentaires, température, messages d'accueil et d'absence, mots-clés de transfert, adresse, partage de localisation, activer ou désactiver le bot.
+• Statistiques : conversations, messages traités, clients, campagnes, crédits consommés par boutique.
+• Désactivation et suppression : deactivate, puis DELETE avec double confirmation (action irréversible).
+9. Administration Maketu Shop
+• Tableau admin : liste des bots par boutique, statuts, erreurs de synchronisation, solde global (GET /v1/credits/balance) avec alerte de seuil bas, consommation par vendeur.
+• Recharge via POST /v1/credits/recharge (Mobile Money), réservée à l'admin.
+Frontend Vue.js
+• Un module « Assistant IA » dans le dashboard vendeur, avec des onglets : Activation et connexion, Boîte de réception, Clients, Templates, Campagnes, Paramètres, Statistiques.
+• Un assistant pas à pas (stepper) pour l'activation : créer le bot, connecter WhatsApp, synchroniser le catalogue, tester.
+• États de chargement, messages d'erreur clairs en français, rafraîchissement de la boîte de réception par polling ou par broadcasting Laravel (Reverb ou Pusher) déclenché par le webhook.
+• Composants réutilisables, appels uniquement vers les routes API Laravel, jamais directement vers Botisimo.
+Qualité
+• Form Requests pour la validation, Policies pour les autorisations, Resources pour les réponses JSON.
+• Tests Pest ou PHPUnit avec Http::fake() pour chaque endpoint Botisimo, tests de vérification de signature du webhook, tests d'isolation entre vendeurs.
+• README : configuration .env, URL de webhook publique en HTTPS, lancement des workers de queue et du scheduler, prérequis Meta Business pour les vendeurs.
+Méthode de travail
+Avance dans cet ordre et montre-moi le résultat de chaque étape avant de passer à la suivante :
+1. Analyse de mon code et plan d'intégration adapté.
+2. Configuration, client API, migrations et modèles.
+3. Activation du bot et connexion WhatsApp.
+4. Synchronisation du catalogue.
+5. Webhooks et boîte de réception.
+6. Clients, templates et campagnes.
+7. Paramètres, statistiques et administration.
+8. Tests et README.
+N'utilise aucun endpoint absent de la référence ci-dessus. Si une fonctionnalité ne peut pas être réalisée avec l'API, dis-le clairement et propose une alternative.

@@ -15,11 +15,40 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 initTheme();
 initViewTransitions();
 
-// Image produit / boutique introuvable : on affiche le visuel MaketuShop plutôt
-// qu'une icône cassée et le texte alternatif (une seule tentative par image).
+// Image en échec : on tente d'abord de réparer l'URL avant d'afficher le visuel
+// MaketuShop. Cas couverts : URL absolue construite avec un autre APP_URL
+// (http://localhost/storage/…, http au lieu de https, ancien domaine — ex. panier
+// mémorisé dans le navigateur) et chemin brut du disque (« products/x.jpg »).
+const repairImageUrl = (img) => {
+    const raw = img.getAttribute('src') || '';
+    if (!raw || raw.startsWith('data:')) return null;
+    if (!/^(https?:)?\/\//i.test(raw) && !raw.startsWith('/')) {
+        return `/storage/${raw.replace(/^(public|storage)\//, '')}`;
+    }
+    try {
+        const url = new URL(raw, window.location.origin);
+        const index = url.pathname.indexOf('/storage/');
+        if (index === -1) return null;
+        const fixed = `${window.location.origin}${url.pathname.slice(index)}`;
+        return fixed !== url.href ? fixed : null;
+    } catch {
+        return null;
+    }
+};
+
 document.addEventListener('error', (event) => {
     const img = event.target;
     if (!(img instanceof HTMLImageElement) || img.dataset.fallback) return;
+
+    if (!img.dataset.repaired) {
+        img.dataset.repaired = '1';
+        const fixed = repairImageUrl(img);
+        if (fixed) {
+            img.src = fixed;
+            return;
+        }
+    }
+
     img.dataset.fallback = '1';
     img.src = '/images/Maketu1.png';
     img.classList.add('object-contain', 'p-4', 'opacity-80');

@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Support\CategoryImage;
+use App\Support\MediaUrl;
 use Illuminate\Support\Facades\Cache;
 
 class Category extends Model
@@ -15,6 +17,16 @@ class Category extends Model
         'image',
         'description'
     ];
+
+    protected $appends = ['image_url'];
+
+    /** URL d'affichage : image enregistrée, sinon fichier/visuel thématique de public/images. */
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image
+            ? MediaUrl::from($this->image)
+            : CategoryImage::for($this->slug ?? null, $this->name ?? null);
+    }
 
     protected static function booted(): void
     {

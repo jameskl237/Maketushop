@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\Storage;
+use App\Support\MediaUrl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -18,10 +18,7 @@ class Media extends Model
     {
         if (!$this->url) return null;
         // External URLs (Picsum, etc.) returned as-is
-        if (str_starts_with($this->url, 'http://') || str_starts_with($this->url, 'https://')) {
-            return $this->url;
-        }
-        return asset(Storage::url($this->url));
+        return MediaUrl::from($this->url);
     }
     
     protected $fillable = [

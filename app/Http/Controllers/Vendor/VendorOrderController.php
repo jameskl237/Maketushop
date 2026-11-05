@@ -47,7 +47,7 @@ class VendorOrderController extends Controller
             'delivery' => [
                 'has_proof' => $order->hasDeliveryProof(),
                 'proof_url' => $order->delivery_proof_path
-                    ? \Illuminate\Support\Facades\Storage::disk('public')->url($order->delivery_proof_path)
+                    ? \App\Support\MediaUrl::from($order->delivery_proof_path)
                     : null,
                 'proof_at' => $order->delivery_proof_at,
                 'client_confirmed_at' => $order->client_confirmed_at,

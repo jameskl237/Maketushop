@@ -270,6 +270,25 @@ class AssistantActivationTest extends TestCase
         $this->assertNull($bot->token_expiry_notified_at);
     }
 
+    public function test_real_bot_response_format_is_understood(): void
+    {
+        Http::fake([
+            'botisimo.test/v1/bots/bot-1' => Http::response(['data' => [
+                'id' => 'bot-1', 'phone_number' => '237699000000', 'meta_phone_number_id' => 'meta-1',
+            ]]),
+            'botisimo.test/v1/bots/bot-1/activate' => Http::response([]),
+        ]);
+        $vendor = $this->vendor();
+        $bot = $this->provisionedBot($this->shop($vendor), ['status' => ShopBot::STATUS_CONNECTING]);
+
+        $this->actingAs($vendor)
+            ->get($this->callbackUrl($bot, ['success' => 'true', 'bot_id' => 'bot-1']))
+            ->assertSessionHas('success');
+
+        $this->assertSame('meta-1', $bot->fresh()->phone_number_id);
+        $this->assertSame('237699000000', $bot->fresh()->whatsapp_phone_number);
+    }
+
     public function test_callback_error_is_recorded_without_calling_the_api(): void
     {
         Http::fake();

@@ -164,7 +164,7 @@ class AssistantProvisioner
 
             $bot->fill(array_filter([
                 'whatsapp_phone_number' => BotisimoPayload::get($remote, 'phone_number', 'whatsapp_phone_number'),
-                'phone_number_id' => BotisimoPayload::get($remote, 'phone_number_id'),
+                'phone_number_id' => BotisimoPayload::get($remote, 'meta_phone_number_id', 'phone_number_id'),
                 'quality_rating' => BotisimoPayload::get($remote, 'quality_rating'),
                 'token_expires_at' => BotisimoPayload::date(BotisimoPayload::get($remote, 'token_expires_at')),
             ]))->save();

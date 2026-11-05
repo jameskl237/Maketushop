@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use App\Support\MediaUrl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\Storage;
 
 class Shop extends Model
 {
@@ -28,12 +28,12 @@ class Shop extends Model
 
     public function getLogoUrlAttribute(): ?string
     {
-        return $this->logo ? asset(Storage::url($this->logo)) : null;
+        return MediaUrl::from($this->logo);
     }
 
     public function getBannerUrlAttribute(): ?string
     {
-        return $this->banner ? asset(Storage::url($this->banner)) : null;
+        return MediaUrl::from($this->banner);
     }
 
     // Une boutique appartient à un utilisateur (supplier)

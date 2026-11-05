@@ -12,7 +12,7 @@ const { t, locale } = useI18n();
     <div class="group relative aspect-[4/5] overflow-hidden rounded-[28px] border-none bg-slate-100 shadow-sm transition-all duration-500 hover:shadow-2xl active:scale-95">
         <!-- Background Image -->
         <img
-            :src="category.image"
+            :src="category.image_url || category.image || '/images/Maketu1.png'"
             :alt="category.name"
             loading="lazy"
             class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"

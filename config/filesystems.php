@@ -33,7 +33,9 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // false : sinon Laravel sert le disque PRIVÉ sous /storage/{path} et, si le
+            // lien public/storage manque en prod, toutes les images publiques renvoient 403.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

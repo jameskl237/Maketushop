@@ -17,7 +17,7 @@ const props = defineProps({
     <div class="flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar">
       <button v-for="cat in props.categories" :key="cat.id" class="group relative flex-shrink-0 w-[88px] overflow-hidden rounded-2xl active:scale-95 transition-transform">
         <div class="relative h-[88px] w-[88px]">
-          <img :src="cat.image || '/images/Maketu1.png'" :alt="cat.name" class="h-full w-full object-cover" loading="lazy" />
+          <img :src="cat.image_url || cat.image || '/images/Maketu1.png'" :alt="cat.name" class="h-full w-full object-cover" loading="lazy" />
           <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
           <p class="absolute bottom-2 left-0 right-0 text-center text-[11px] font-black leading-tight text-white px-1">{{ cat.name }}</p>
         </div>

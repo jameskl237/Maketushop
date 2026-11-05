@@ -57,25 +57,8 @@ const prevHero = () => { heroIndex.value = (heroIndex.value - 1 + heroSlides.val
 onMounted(() => { heroTimer = setInterval(nextHero, 4000); });
 onUnmounted(() => clearInterval(heroTimer));
 
-/* ── Category image fallback map ── */
-const CAT_IMAGES = {
-    artisanat: '/images/artisanat.png',
-    maison: '/images/maison.png',
-    mode: '/images/mode.png',
-    beauté: '/images/beaute.png',
-    beaute: '/images/beaute.png',
-    électronique: '/images/electronique.png',
-    electronique: '/images/electronique.png',
-    alimentation: '/images/alimentation.png',
-    sport: '/images/sport.png',
-    accessoires: '/images/accessoire.png',
-};
-
-const catImage = (cat) => {
-    if (cat.image) return cat.image;
-    const k = (cat.name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-    return CAT_IMAGES[k] || CAT_IMAGES[(cat.name || '').toLowerCase()] || '/images/Maketu1.png';
-};
+/* ── Image de catégorie : résolue côté serveur (Category::image_url) ── */
+const catImage = (cat) => cat.image_url || cat.image || '/images/Maketu1.png';
 
 /* ── Price formatter ── */
 const fmt = (v) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(v ?? 0);
@@ -222,7 +205,7 @@ const goCategory = (id) => router.visit(route('products.index', { categories: [i
                             <p class="mt-2 text-sm text-white/90">Ouvrez votre boutique en quelques minutes et touchez des milliers de clients au Cameroun. Paiement Mobile Money sécurisé.</p>
                         </div>
                         <div class="mt-5 flex flex-col gap-2">
-                            <Link :href="route('register')" class="rounded-full bg-card py-2.5 text-center text-sm font-bold text-primary transition hover:bg-white/90">Créer ma boutique</Link>
+                            <Link :href="route('register')" class="rounded-full bg-white py-2.5 text-center text-sm font-bold text-primary transition hover:bg-white/90">Créer ma boutique</Link>
                             <Link :href="route('services.index')" class="rounded-full border border-white/60 py-2.5 text-center text-sm font-bold text-white transition hover:bg-white/10">
                                 <Briefcase class="mr-1 inline h-4 w-4" /> Trouver un prestataire
                             </Link>

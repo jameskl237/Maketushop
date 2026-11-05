@@ -9,7 +9,6 @@ use App\Services\Receipt\ReceiptService;
 use App\Services\Refund\RefundService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 /**
@@ -55,7 +54,7 @@ class OrderTrackingController extends Controller
                     'price' => (float) $p->pivot->price,
                 ]),
                 'delivery_proof_url' => $order->delivery_proof_path
-                    ? Storage::disk('public')->url($order->delivery_proof_path)
+                    ? \App\Support\MediaUrl::from($order->delivery_proof_path)
                     : null,
                 'refund' => $order->refundRequest ? [
                     'status' => $order->refundRequest->status,
