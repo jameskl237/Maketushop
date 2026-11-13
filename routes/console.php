@@ -45,12 +45,6 @@ Schedule::command('botisimo:dispatch-campaigns')
     ->withoutOverlapping()
     ->onOneServer();
 
-// L'assistant est réservé au plan Standard : un abonnement fini arrête la dépense de crédits.
-Schedule::command('botisimo:enforce-subscriptions')
-    ->hourly()
-    ->withoutOverlapping()
-    ->onOneServer();
-
 Schedule::command('botisimo:check-balance')
     ->hourly()
     ->withoutOverlapping()

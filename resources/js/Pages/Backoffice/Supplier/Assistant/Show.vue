@@ -72,17 +72,7 @@ const finalize = () => action.post(route('backoffice.supplier.assistant.finalize
 
                 <AssistantTabs v-if="provisioned" :shop-id="shop.id" :connected="connected" active="activation" />
 
-                <Card v-if="!hasAccess && !bot">
-                    <CardContent class="space-y-3 p-6">
-                        <h3 class="font-semibold">{{ $t('supplier.assistant.upgradeTitle') }}</h3>
-                        <p class="text-sm text-muted-foreground">{{ $t('supplier.assistant.upgradeText') }}</p>
-                        <Link :href="route('backoffice.supplier.subscriptions.index')">
-                            <Button size="sm">{{ $t('supplier.assistant.upgradeCta') }}</Button>
-                        </Link>
-                    </CardContent>
-                </Card>
-
-                <template v-else>
+                <template>
                     <div v-if="bot?.last_error" class="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
                         <AlertCircle class="mt-0.5 h-4 w-4 shrink-0" />
                         <span>{{ bot.last_error }}</span>

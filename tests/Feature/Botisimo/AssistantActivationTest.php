@@ -160,29 +160,46 @@ class AssistantActivationTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_activation_requires_a_standard_subscription(): void
+    public function test_activation_is_free_without_any_subscription(): void
     {
-        Http::fake();
         $vendor = $this->vendor();
+        $created = 0;
+
+        Http::fake(function (Request $request) use (&$created) {
+            if ($request->method() === 'POST' && str_ends_with($request->url(), '/v1/bots')) {
+                $created++;
+
+                return Http::response(['id' => 'bot-'.$created], 201);
+            }
+
+            if (str_ends_with($request->url(), '/v1/webhooks')) {
+                return Http::response(['secret' => 'whsec_'.$created], 201);
+            }
+
+            return Http::response(['ok' => true]);
+        });
 
         foreach ([ShopSubscription::PLAN_FREE, null] as $plan) {
             $shop = $this->shop($vendor, $plan);
 
             $this->actingAs($vendor)
                 ->post(route('backoffice.supplier.assistant.activate', $shop), self::SETTINGS)
-                ->assertForbidden();
+                ->assertSessionHas('success');
+
+            $this->assertTrue($shop->fresh()->hasAssistantAccess());
+            $this->assertTrue($shop->bot->isProvisioned());
         }
 
-        Http::assertNothingSent();
+        $this->assertSame(2, $created);
     }
 
-    public function test_expired_subscription_does_not_grant_access(): void
+    public function test_expired_subscription_still_grants_access(): void
     {
         $vendor = $this->vendor();
         $shop = $this->shop($vendor, null);
         $shop->subscriptions()->create(['plan' => 'standard', 'status' => 'active', 'ends_at' => now()->subDay()]);
 
-        $this->assertFalse($shop->fresh()->hasAssistantAccess());
+        $this->assertTrue($shop->fresh()->hasAssistantAccess());
     }
 
     public function test_a_vendor_cannot_reach_another_vendors_assistant(): void

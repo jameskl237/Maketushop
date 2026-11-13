@@ -9,7 +9,7 @@
 
 ## Assistant IA WhatsApp (Botisimo)
 
-Chaque boutique au plan Standard peut activer un assistant WhatsApp qui répond à ses clients à partir de son catalogue, et lancer des campagnes marketing. Toutes les boutiques partagent la clé API et le solde de crédits de Maketu Shop.
+Chaque boutique peut activer gratuitement un assistant WhatsApp qui répond à ses clients à partir de son catalogue, et lancer des campagnes marketing. Toutes les boutiques partagent la clé API et le solde de crédits de Maketu Shop.
 
 L'API Botisimo couvre uniquement WhatsApp Business : ni Messenger, ni Instagram, ni TikTok, ni la génération de contenu. L'interface `App\Services\Channels\ChannelProvider` et la colonne `channel` permettront d'ajouter ces canaux via d'autres API.
 
@@ -49,7 +49,6 @@ php artisan queue:work   # synchronisation, webhooks, campagnes
 |---|---|---|
 | `botisimo:dispatch-campaigns` | chaque minute | Lance les campagnes arrivées à leur date |
 | `botisimo:sync-conversations {shop?}` | chaque heure | Rattrape les webhooks perdus, jamais rejoués par Botisimo |
-| `botisimo:enforce-subscriptions` | chaque heure | Désactive les bots dont l'abonnement Standard a pris fin |
 | `botisimo:check-balance` | chaque heure | Alerte les administrateurs si le solde est bas |
 | `botisimo:sync-catalog {shop?} {--prune}` | chaque nuit à 2 h | Réconcilie le catalogue ; `--prune` supprime les entrées inconnues localement |
 | `botisimo:check-token-expiry` | chaque jour | Prévient 7 jours avant l'expiration de la connexion WhatsApp |

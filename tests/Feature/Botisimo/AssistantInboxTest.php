@@ -301,7 +301,7 @@ class AssistantInboxTest extends TestCase
         $this->assertTrue($conversation->fresh()->ai_enabled);
     }
 
-    public function test_expired_subscription_can_read_but_not_act(): void
+    public function test_without_subscription_the_inbox_stays_fully_usable(): void
     {
         Http::fake();
         [$vendor, $shop, $bot] = $this->vendorSetup('bot-3', standard: false);
@@ -309,8 +309,12 @@ class AssistantInboxTest extends TestCase
         $this->actingAs($vendor);
 
         $this->get(route('backoffice.supplier.assistant.inbox.index', $shop))->assertOk();
-        $this->post(route('backoffice.supplier.assistant.inbox.reply', [$shop, $conversation]), ['message' => 'x'])->assertForbidden();
-        $this->put(route('backoffice.supplier.assistant.inbox.ai', [$shop, $conversation]), ['ai_enabled' => false])->assertForbidden();
+        $this->post(route('backoffice.supplier.assistant.inbox.reply', [$shop, $conversation]), ['message' => 'x'])
+            ->assertRedirect()->assertSessionMissing('error');
+        $this->put(route('backoffice.supplier.assistant.inbox.ai', [$shop, $conversation]), ['ai_enabled' => false])
+            ->assertRedirect()->assertSessionMissing('error');
+
+        $this->assertFalse($conversation->fresh()->ai_enabled);
     }
 
     public function test_reconciliation_recovers_missed_conversations(): void

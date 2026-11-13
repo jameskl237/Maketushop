@@ -65,10 +65,10 @@ class Shop extends Model
             ->latestOfMany();
     }
 
-    /** Les crédits sont payés par la plateforme : l'assistant est réservé au plan Standard. */
+    /** L'assistant IA WhatsApp est gratuit : configurable et utilisable sans abonnement. */
     public function hasAssistantAccess(): bool
     {
-        return (bool) $this->activeSubscription?->isStandard();
+        return true;
     }
 
     /** Assistant IA WhatsApp de la boutique. */

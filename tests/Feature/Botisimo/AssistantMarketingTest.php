@@ -455,7 +455,6 @@ class AssistantMarketingTest extends TestCase
         return [
             'modèle révoqué' => [fn ($test, $template) => $template->update(['status' => 'REJECTED']), 'modèle'],
             'bot désactivé' => [fn ($test, $template) => $template->bot->update(['status' => ShopBot::STATUS_INACTIVE]), 'assistant'],
-            'abonnement expiré' => [fn ($test, $template) => $template->bot->shop->subscriptions()->update(['ends_at' => now()->subDay()]), 'assistant'],
         ];
     }
 

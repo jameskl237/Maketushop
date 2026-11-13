@@ -181,7 +181,7 @@ class AssistantManagementTest extends TestCase
         $this->assertSame(ShopBot::STATUS_ACTIVE, $this->bot->fresh()->status);
     }
 
-    public function test_without_subscription_a_vendor_can_stop_but_not_restart(): void
+    public function test_without_subscription_a_vendor_can_stop_and_restart(): void
     {
         Http::fake(['*' => Http::response([])]);
         [$vendor, $shop, $bot] = $this->vendorSetup('bot-2', standard: false);
@@ -189,9 +189,9 @@ class AssistantManagementTest extends TestCase
         $url = route('backoffice.supplier.assistant.status', $shop);
 
         $this->post($url, ['active' => false])->assertSessionHas('success');
-        $this->post($url, ['active' => true])->assertForbidden();
+        $this->post($url, ['active' => true])->assertSessionHas('success');
 
-        $this->assertSame(ShopBot::STATUS_INACTIVE, $bot->fresh()->status);
+        $this->assertSame(ShopBot::STATUS_ACTIVE, $bot->fresh()->status);
     }
 
     public function test_deletion_needs_the_exact_shop_name(): void
@@ -292,35 +292,20 @@ class AssistantManagementTest extends TestCase
         $this->assertModelExists($this->bot);
     }
 
-    // --- Abonnement expiré ---
+    // --- Accès gratuit ---
 
-    public function test_expired_subscription_deactivates_the_bot_once(): void
+    public function test_enforcement_never_suspends_the_free_bot(): void
     {
         Http::fake(['*' => Http::response([])]);
         Notification::fake();
         $this->shop->subscriptions()->update(['ends_at' => now()->subDay()]);
-        [, , $paying] = $this->vendorSetup('bot-2');
 
         $this->artisan('botisimo:enforce-subscriptions')->assertSuccessful();
         $this->artisan('botisimo:enforce-subscriptions')->assertSuccessful();
 
-        $this->assertSame(ShopBot::STATUS_INACTIVE, $this->bot->fresh()->status);
-        $this->assertSame(ShopBot::STATUS_ACTIVE, $paying->fresh()->status);
-        Http::assertSentCount(1);
-        Notification::assertSentToTimes($this->vendor, AssistantSuspendedNotification::class, 1);
-    }
-
-    public function test_failed_deactivation_is_retried_next_run(): void
-    {
-        Http::fakeSequence()->push([], 500)->push([]);
-        Notification::fake();
-        $this->shop->subscriptions()->update(['ends_at' => now()->subDay()]);
-
-        $this->artisan('botisimo:enforce-subscriptions')->assertSuccessful();
         $this->assertSame(ShopBot::STATUS_ACTIVE, $this->bot->fresh()->status);
-
-        $this->artisan('botisimo:enforce-subscriptions')->assertSuccessful();
-        $this->assertSame(ShopBot::STATUS_INACTIVE, $this->bot->fresh()->status);
+        Http::assertNothingSent();
+        Notification::assertNotSentTo($this->vendor, AssistantSuspendedNotification::class);
     }
 
     // --- Statistiques ---
